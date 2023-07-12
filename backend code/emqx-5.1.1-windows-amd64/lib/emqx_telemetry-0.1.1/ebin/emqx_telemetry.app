@@ -1,0 +1,12 @@
+{application,emqx_telemetry,
+             [{description,"Report telemetry data for EMQX Opensource edition"},
+              {vsn,"0.1.1"},
+              {registered,[emqx_telemetry_sup,emqx_telemetry]},
+              {mod,{emqx_telemetry_app,[]}},
+              {applications,[kernel,stdlib]},
+              {env,[]},
+              {modules,[emqx_telemetry,emqx_telemetry_api,emqx_telemetry_app,
+                        emqx_telemetry_config,emqx_telemetry_proto_v1,
+                        emqx_telemetry_schema,emqx_telemetry_sup]},
+              {licenses,["Apache-2.0"]},
+              {links,[]}]}.

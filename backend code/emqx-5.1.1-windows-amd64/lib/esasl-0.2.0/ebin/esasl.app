@@ -1,0 +1,11 @@
+{application,esasl,
+             [{description,"Simple Authentication and Security Layer"},
+              {vsn,"0.2.0"},
+              {modules,[esasl_scram]},
+              {registered,[]},
+              {applications,[kernel,stdlib,pbkdf2]},
+              {env,[]},
+              {licenses,["Apache-2.0"]},
+              {maintainers,["EMQ X Team <contact@emqx.io>"]},
+              {links,[{"Homepage","https://emqx.io/"},
+                      {"Github","https://github.com/emqx/esasl"}]}]}.

@@ -1,0 +1,13 @@
+{application,emqx_slow_subs,
+             [{description,"EMQX Slow Subscribers Statistics"},
+              {vsn,"1.0.7"},
+              {modules,[emqx_slow_subs,emqx_slow_subs_api,emqx_slow_subs_app,
+                        emqx_slow_subs_proto_v1,emqx_slow_subs_schema,
+                        emqx_slow_subs_sup]},
+              {registered,[emqx_slow_subs_sup]},
+              {applications,[kernel,stdlib,emqx]},
+              {mod,{emqx_slow_subs_app,[]}},
+              {env,[]},
+              {licenses,["Apache-2.0"]},
+              {maintainers,["EMQX Team <contact@emqx.io>"]},
+              {links,[]}]}.

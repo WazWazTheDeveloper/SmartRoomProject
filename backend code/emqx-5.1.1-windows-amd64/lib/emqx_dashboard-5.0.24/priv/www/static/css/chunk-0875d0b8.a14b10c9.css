@@ -1,0 +1,1 @@
+.not-found{display:flex;height:calc(100vh - 60px);align-items:center}.not-found .el-icon{color:var(--color-text-secondary)}.not-found .icon-container{width:100%;text-align:center}.not-found .title-404{font-size:28px;font-weight:700;letter-spacing:2px}.not-found .desc{font-size:16px;color:var(--color-text-secondary)}

@@ -1,0 +1,5 @@
+{
+    "sketch": "code\\sketch_may29a\\sketch_may29a.ino",
+    "configuration": "cpu=8MHzatmega32U4",
+    "board": "SparkFun:avr:promicro"
+}

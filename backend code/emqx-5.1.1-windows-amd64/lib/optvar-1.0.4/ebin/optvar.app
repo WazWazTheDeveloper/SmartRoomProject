@@ -1,0 +1,10 @@
+{application,optvar,
+             [{description,"An OTP application"},
+              {vsn,"1.0.4"},
+              {registered,[]},
+              {mod,{optvar_app,[]}},
+              {applications,[kernel,stdlib]},
+              {env,[]},
+              {modules,[optvar,optvar_app,optvar_sup]},
+              {licenses,["Apache-2.0"]},
+              {links,[]}]}.

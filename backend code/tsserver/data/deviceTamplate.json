@@ -1,0 +1,15 @@
+{
+    "id":"UUID",
+    "listenTo":[{
+        "topic":"topic",
+        "event":"event"
+    }],
+    "publishTo":[{
+        "topic":"topic",
+        "event":"event"
+    }],
+    "lastData":{
+        
+    },
+    "isAccepted":false
+}

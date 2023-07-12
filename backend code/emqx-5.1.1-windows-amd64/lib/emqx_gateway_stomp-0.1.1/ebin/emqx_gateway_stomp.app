@@ -1,0 +1,11 @@
+{application,emqx_gateway_stomp,
+             [{description,"Stomp Gateway"},
+              {vsn,"0.1.1"},
+              {registered,[]},
+              {applications,[kernel,stdlib,emqx,emqx_gateway]},
+              {env,[]},
+              {modules,[emqx_gateway_stomp,emqx_stomp_channel,
+                        emqx_stomp_frame,emqx_stomp_heartbeat,
+                        emqx_stomp_schema]},
+              {licenses,["Apache 2.0"]},
+              {links,[]}]}.

@@ -1,0 +1,12 @@
+{application,emqx_gateway_mqttsn,
+             [{description,"MQTT-SN Gateway"},
+              {vsn,"0.1.2"},
+              {registered,[]},
+              {applications,[kernel,stdlib,emqx,emqx_gateway]},
+              {env,[]},
+              {modules,[emqx_gateway_mqttsn,emqx_mqttsn_broadcast,
+                        emqx_mqttsn_channel,emqx_mqttsn_frame,
+                        emqx_mqttsn_registry,emqx_mqttsn_schema,
+                        emqx_mqttsn_session]},
+              {licenses,["Apache 2.0"]},
+              {links,[]}]}.

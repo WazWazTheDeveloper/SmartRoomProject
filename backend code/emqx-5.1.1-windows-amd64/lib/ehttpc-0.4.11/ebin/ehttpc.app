@@ -1,0 +1,12 @@
+{application,ehttpc,
+             [{description,"HTTP Client for Erlang/OTP"},
+              {vsn,"0.4.11"},
+              {registered,[]},
+              {applications,[kernel,stdlib,gproc,gun]},
+              {mod,{ehttpc_app,[]}},
+              {env,[]},
+              {licenses,["Apache-2.0"]},
+              {maintainers,["EMQX Team <contact@emqx.io>"]},
+              {links,[{"Github","https://github.com/emqx/ehttpc"}]},
+              {modules,[ehttpc,ehttpc_app,ehttpc_pool,ehttpc_pool_sup,
+                        ehttpc_sup,ehttpc_worker_sup]}]}.

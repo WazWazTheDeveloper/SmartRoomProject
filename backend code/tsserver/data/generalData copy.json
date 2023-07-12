@@ -1,0 +1,17 @@
+{
+    "topics": [
+        {
+            "topicName": "example",
+            "topicPath": "example",
+            "dataType" : "example",
+            "event" : "expmple"
+        }
+    ],
+    "deviceList" : [{
+        "UUID": "01b68220-abdf-441b-9ae7-fefaf4ba9342",
+        "name": "ac",
+        "deviceTpye": "airconditioner"
+    }]
+
+
+}
