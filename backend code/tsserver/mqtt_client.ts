@@ -1,11 +1,10 @@
+import { TopicData } from "./devies/typeClasses/device";
 import { MqttHandler } from "./utility/mqtt_handler";
-import { TopicData } from "./devies/typeClasses/generalData";
 
 const HOST = '10.0.0.12';
 const PORT = '1883';
 
 //TODO: place this somewhere alse
-//TODO: add a way to recocnice which is which so you can remove then later
 interface subType {
     topicData: TopicData
     callbackFunction: Function
@@ -82,47 +81,23 @@ class MqttClient {
         return this;
     }
 
+    public emptySubscribeList(){
+        for (let index = 0; index < this.subscribeList.length; index++) {
+            const element = this.subscribeList[index];
+            this.mqttClient.unsubscribe(element.topicData.topicPath)
+        }
+        this.subscribeList=[];
+    }
+
     public sendMassage(topic: string, message: string) {
         this.mqttClient.sendMessage(topic, message)
         return this;
     }
 
+    // IMPLEMENT setNewSubscribeList(newSubscribeList :Array<subType>)
+    setNewSubscribeList(newSubscribeList :Array<subType>) {
+        
+    }
 }
-
-// const mqttClient = new MqttHandler(HOST, PORT);
-
-// function initMqtt() {
-//     mqttClient.connect();
-
-
-//     mqttClient.subscribe("isAliveRes", 0)
-
-//     //DEL: this
-//     mqttClient.onMessage("isAliveRes", temp)
-// }
-
-// function sendMessage(topic: string, message: string) {
-//     mqttClient.sendMessage(topic, message)
-// }
-
-// //DEL: later
-
-// interface deviceInterface {
-//     uuid: string
-//     isAlive: boolean
-// }
-
-// function temp(topic: string, message: string) {
-
-//     console.log(`recived message in topic ${topic}`)
-//     console.log(`message`)
-//     console.log(message.toString());
-
-//     //TODO:add a check to check if message is UUID in list of UUIDs
-//     data.readFile<deviceInterface>("devices/01b68220-abdf-441b-9ae7-fefaf4ba9341").then(device => {
-//         device.isAlive = true;
-//         data.writeFile("devices/01b68220-abdf-441b-9ae7-fefaf4ba9341", device)
-//     }).catch(err => console.log(err))
-// }
 
 export { MqttClient, SubType };

@@ -1,26 +1,7 @@
 {
     "uuid": "01b68220-abdf-441b-9ae7-fefaf4ba9342",
     "deviceType": "airconditioner",
-    "listenTo": [
-        {
-            "topicName": "isAlive",
-            "topicPath": "isAlive",
-            "dataType": "airconditioner",
-            "event": "data0",
-            "functionData": {
-                "functionType": "default"
-            }
-        },
-        {
-            "topicName": "isAlive2",
-            "topicPath": "isAlive",
-            "dataType": "airconditioner",
-            "event": "data0",
-            "functionData": {
-                "functionType": "default"
-            }
-        }
-    ],
+    "listenTo": [],
     "publishTo": [],
     "isConnected": false,
     "deviceData": [

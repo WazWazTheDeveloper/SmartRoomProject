@@ -19,4 +19,8 @@ function writeFile<T>(fileName:string,json:T) {
     fs.writeFileSync(`./data/${fileName}.json`, data);
 };
 
-export {readFile , writeFile}
+function removeFile(filePath:string) {
+    fs.unlink(`./data/${filePath}.json`, () => {})
+}
+
+export {readFile , writeFile,removeFile}

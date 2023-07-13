@@ -1,6 +1,21 @@
-import { device, topicData} from '../types'
+import { device, eventFunctionData, generalTopic, topicData} from '../types'
 import data = require('../../utility/file_handler')
-import { TopicData } from './generalData';
+
+class TopicData implements topicData {
+    topicName:string
+    topicPath: string
+    dataType: string
+    event : string
+    functionData: eventFunctionData
+
+    constructor(_generalTopic:generalTopic, dataType: string,event : string,functionData: eventFunctionData) {
+        this.topicName = _generalTopic.topicName;
+        this.topicPath = _generalTopic.topicPath
+        this.dataType = dataType
+        this.event = event
+        this.functionData = functionData
+    }
+}
 
 class Device implements device{
     static readonly AIRCONDITIONER_TYPE = "airconditioner";
@@ -97,6 +112,7 @@ class Device implements device{
         }
 
         functionToCall(topic, message);
+        //TODO: add call function when done
     }
 
     private callDefaultFunction(_topicData: topicData,dataNumber:number) {
@@ -111,8 +127,12 @@ class Device implements device{
 
     //TODO: add a way to select what kind of data is going to be send, like a diffrence between data0 and data1
     //IMPLEMENT addListenTopic()
-    addListenTopic() {
+    addListenTopic(_generalTopic: generalTopic, dataType: string,event : string,functionData: eventFunctionData) {
+        let newTopicData = new TopicData(_generalTopic,dataType,event,functionData)
+        this.listenTo.push(newTopicData)
 
+        this.saveData();
+        console.log("added new ListenTopic")
     }
 
     //IMPLEMENT addPublishTopic()
@@ -142,4 +162,4 @@ class Device implements device{
 }
 
 
-export { Device }
+export { Device ,TopicData}

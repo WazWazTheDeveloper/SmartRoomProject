@@ -3,6 +3,10 @@
         {
             "topicName": "isAlive",
             "topicPath": "isAlive"
+        },
+        {
+            "topicName": "test",
+            "topicPath": "test"
         }
     ],
     "deviceList": [

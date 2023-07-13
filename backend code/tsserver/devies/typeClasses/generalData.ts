@@ -1,20 +1,16 @@
-import { deviceListItem, eventFunctionData, generalData, topicData } from "../types";
+import { deviceListItem, generalData,generalTopic} from "../types";
 import * as data from '../../utility/file_handler'
+import { log } from "console";
 var GeneralDataInstance: GeneralData;
 
-class TopicData implements topicData {
-    name:string
+class GeneralTopic implements generalTopic {
+    topicName:string
     topicPath: string
-    dataType: string
-    event : string
-    functionData: eventFunctionData
 
-    constructor(name:string,topicPath: string, dataType: string,event : string,functionData: eventFunctionData) {
-        this.name = name;
+    constructor(topicName:string,topicPath: string) {
+        this.topicName = topicName;
         this.topicPath = topicPath
-        this.dataType = dataType
-        this.event = event
-        this.functionData = functionData
+
     }
 }
 
@@ -35,10 +31,10 @@ class GeneralData implements generalData {
     // TODO: move this to general data.json of to ENV veriable or somting
     static readonly GENERAL_DATA_FILE_NAME = 'generalData';
 
-    topicList: Array<TopicData>;
+    topicList: Array<GeneralTopic>;
     deviceList: Array<DeviceListItem>;
 
-    constructor(deviceList: Array<deviceListItem>, topics: Array<TopicData>) {
+    constructor(deviceList: Array<deviceListItem>, topics: Array<generalTopic>) {
         this.deviceList = deviceList;
         this.topicList = topics;
     }
@@ -67,16 +63,50 @@ class GeneralData implements generalData {
         data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
     }
 
-    public addTopic(newTopic: TopicData) {
+    public addTopic(topicName: string,topicPath:string) {
+        for (let index = 0; index < this.topicList.length; index++) {
+            const element = this.topicList[index];
+            if(element.topicName == topicName) {
+                throw new Error("topic with same name already exist")
+            }
+            
+        }
+        let newTopic = new GeneralTopic(topicName,topicPath)
         this.topicList.push(newTopic)
-        this.saveData();
-        return this
+        this.saveData(); 
+
+    }
+
+    public removeTopic(topicName: string){
+        for (let i = this.topicList.length-1; i >= 0 ; i--) {
+            const element = this.topicList[i];
+            if (topicName == element.topicName) {
+                this.topicList.splice(i,1)
+            }
+        }
+
+        this.saveData(); 
     }
 
     public addDevice(newDevice: DeviceListItem) {
         this.deviceList.push(newDevice)
         this.saveData();
         return this
+
+        //TODO: add console.log
+    }
+
+    public removeDevice(uuid:string) {
+        for (let i = this.deviceList.length-1; i >= 0 ; i--) {
+            const element = this.deviceList[i];
+            if (uuid == element.UUID) {
+                this.deviceList.splice(i,1)
+            }
+            
+        }
+        this.saveData();
+
+        //TODO: add console.log
     }
 
     public getTopics() {
@@ -98,4 +128,4 @@ async function getGeneralDataInstance() {
     }
 }
 
-export { GeneralData, TopicData, DeviceListItem, getGeneralDataInstance }
+export { GeneralData, GeneralTopic, DeviceListItem, getGeneralDataInstance }

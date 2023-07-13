@@ -1,4 +1,4 @@
-import { topicData } from "./generalData"
+import {eventFunctionData} from '../types'
 
 interface device {
     uuid: string
@@ -9,10 +9,12 @@ interface device {
     deviceData: Array<any>
 }
 
-interface topicEvent {
-    topicName: string
-    topic: string
-    // event: string
+interface topicData {
+    topicName : string
+    topicPath : string
+    dataType : string //a string to represent the type of data send such as "data0" or "data1"
+    event : string
+    functionData: eventFunctionData
 }
 
-export {device}
+export {device,topicData}

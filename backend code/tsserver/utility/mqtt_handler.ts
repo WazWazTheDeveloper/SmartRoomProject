@@ -38,17 +38,6 @@ class MqttHandler {
         });
     }
 
-    // DEL later 
-    //add fuctiong as callback when reciving message
-    // onMessage(topic: string, callback: Function) {
-    //     let newTopicCallback: topicCallbackInterface = {
-    //         topic: topic,
-    //         callback: callback
-    //     };
-    //     this.topicsCallback.push(newTopicCallback);
-    //     return this;
-    // }
-
     //TODO: add option to remove on Message with id or somting
     sendMessage(topic: string, message: string) {
         console.log(`published "${message}" to "${topic}"`);
@@ -58,6 +47,11 @@ class MqttHandler {
 
     subscribe(topic: string, qos = 0) {
         this.mqttClient?.subscribe(topic, { qos: qos } as mqtt.IClientSubscribeOptions);
+        return this;
+    }
+
+    unsubscribe(topic: string) {
+        this.mqttClient?.unsubscribe(topic);
         return this;
     }
 }

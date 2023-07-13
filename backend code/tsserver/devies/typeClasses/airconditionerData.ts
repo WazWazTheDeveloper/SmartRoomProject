@@ -1,4 +1,4 @@
-import { airconditionerData, topicEvent } from '../types'
+import { airconditionerData} from '../types'
 import data = require('../../utility/file_handler')
 
 class AirconditionerData {
