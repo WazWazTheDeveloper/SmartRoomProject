@@ -1,36 +1,20 @@
-import { TopicData } from "./devies/typeClasses/device";
+import { SubType } from "./devies/typeClasses/subType";
 import { MqttHandler } from "./utility/mqtt_handler";
 
 const HOST = '10.0.0.12';
 const PORT = '1883';
 
-//TODO: place this somewhere alse
-interface subType {
-    topicData: TopicData
-    callbackFunction: Function
-}
-
-class SubType implements subType {
-    topicData: TopicData;
-    callbackFunction: Function;
-
-    constructor(topicData: TopicData, callbackFunction: Function) {
-        this.topicData = topicData;
-        this.callbackFunction = callbackFunction;
-    }
-}
-
 var mqttClientInstance: MqttClient;
 class MqttClient {
     mqttClient: MqttHandler;
-    subscribeList: Array<subType>;
+    subscribeList: Array<SubType>;
 
-    private constructor(host: string, port: string, subscribeList: Array<subType>) {
+    private constructor(host: string, port: string, subscribeList: Array<SubType>) {
         this.mqttClient = new MqttHandler(host, port, this.onMassage);
         this.subscribeList = subscribeList;
     }
 
-    public static async initMqtt(host: string, port: string, subscribeList: Array<subType>) {
+    public static async initMqtt(host: string, port: string, subscribeList: Array<SubType>) {
         let newMqttClient = new MqttClient(host, port, subscribeList)
         await newMqttClient.mqttClient.connect()
         mqttClientInstance = newMqttClient;
@@ -63,13 +47,13 @@ class MqttClient {
     }
 
 
-    public subscribe(subObject: subType, qos: number) {
+    public subscribe(subObject: SubType, qos: number) {
         this.subscribeList.push(subObject)
         this.mqttClient.subscribe(subObject.topicData.topicPath, qos);
         return this;
     }
 
-    public unsubscribe(subObject: subType) {
+    public unsubscribe(subObject: SubType) {
         let arrLength = this.subscribeList.length
         for (let index = arrLength-1; index >= 0; index--) {
             const element = this.subscribeList[index];
@@ -81,7 +65,7 @@ class MqttClient {
         return this;
     }
 
-    public emptySubscribeList(){
+    private emptySubscribeList():void{
         for (let index = 0; index < this.subscribeList.length; index++) {
             const element = this.subscribeList[index];
             this.mqttClient.unsubscribe(element.topicData.topicPath)
@@ -94,14 +78,16 @@ class MqttClient {
         return this;
     }
 
-    setNewSubscribeList(newSubscribeList :Array<subType>) {
-        for (let index = 0; index < this.subscribeList.length; index++) {
-            const element = this.subscribeList[index];
-            this.mqttClient.unsubscribe(element.topicData.topicPath)
+    setNewSubscribeList(newSubscribeList :Array<SubType>) {
+        if(this.subscribeList.length > 0) {
+            for (let index = 0; index < this.subscribeList.length; index++) {
+                const element = this.subscribeList[index];
+                this.mqttClient.unsubscribe(element.topicData.topicPath)
+            }
         }
 
         this.subscribeList = newSubscribeList;
-
+        
         for (let index = 0; index < this.subscribeList.length; index++) {
             const element = this.subscribeList[index];
             this.mqttClient.subscribe(element.topicData.topicPath)

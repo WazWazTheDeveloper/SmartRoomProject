@@ -1,9 +1,10 @@
 import { log } from "console";
 import { eventFunctionData, generalTopic, topicData } from './devies/types'
 import { AirconditionerData } from "./devies/typeClasses/airconditionerData";
-import { Device } from "./devies/typeClasses/device";
+import { Device, TopicData } from "./devies/typeClasses/device";
 import { DeviceListItem, GeneralData, getGeneralDataInstance } from "./devies/typeClasses/generalData";
 import { removeFile } from "./utility/file_handler";
+import { SubType } from "./mqtt_client";
 
 
 var appDataInstance: AppData;
@@ -162,7 +163,7 @@ class AppData {
         console.log(`removed generalTopic {TopicName: ${topicName}}`)
     }
 
-    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
         //implement this first
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
@@ -175,7 +176,7 @@ class AppData {
         this.onDeviceTopicChange();
     }
 
-    async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async removePublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
@@ -188,20 +189,29 @@ class AppData {
     }
 
     // IMPLEMENT addPublishToTopicToDevice()
-    addPublishToTopicToDevice(uuid: string) {
+    addListenToTopicToDevice(uuid: string) {
 
     }
 
     // IMPLEMENT addPublishToTopicToDevice()
-    removePublishToTopicToDevice(uuid: string) {
+    removeListenToTopicToDevice(uuid: string) {
 
     }
 
     private onDeviceTopicChange(): void {
+        let topicDataList: Array<TopicData> = [];
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const device = this.deviceList[index];
+            for (let index = 0; index < device.publishTo.length; index++) {
+                const topic = device.publishTo[index];
+                topicDataList.push(topic);
+            }
+        }
+
         for (let index = 0; index < this.onDeviceTopicChangeFunctions.length; index++) {
             const callbackFunction = this.onDeviceTopicChangeFunctions[index];
             // TODO: add proper variables to this
-            callbackFunction();
+            callbackFunction(topicDataList);
         }
     }
 
@@ -219,6 +229,20 @@ class AppData {
             }
         }
     }
-}
 
+    //HACK: probably want to find a better way to do it
+    public getSubTypeList(): Array<SubType> {
+        let subTypeList: Array<SubType> = []
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const device = this.deviceList[index];
+            for (let index = 0; index < device.publishTo.length; index++) {
+                const topic = device.publishTo[index];
+                let newSub = new SubType(topic, device.onUpdateData.bind(device))
+                subTypeList.push(newSub)
+            }
+        }
+
+        return(subTypeList)
+    }
+}
 export { AppData }

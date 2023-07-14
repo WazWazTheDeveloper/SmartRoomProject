@@ -1,8 +1,6 @@
 import { device, eventFunctionData, generalTopic, topicData } from '../types'
 import data = require('../../utility/file_handler')
 import { GeneralTopic } from './generalData'
-import { promises } from 'dns'
-import { log } from 'console'
 import { AirconditionerData } from './airconditionerData'
 
 class TopicData implements topicData {
@@ -116,7 +114,7 @@ class Device implements device {
     }
 
 
-    onUpdateData(topic: string, message: string, topicData: TopicData) {
+    onUpdateData(topic: string, message: string, topicData: TopicData):void {
         // TODO: add more types and cases
         // MAYBE DANIEL FIND ME AND KILL ME 
         // TODO: change the order of checking, first check for type then look for specific function
@@ -165,25 +163,43 @@ class Device implements device {
     }
 
     //TODO: add a way to select what kind of data is going to be send, like a diffrence between data0 and data1
-    //IMPLEMENT addListenTopic()
-    addListenTopic(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData) {
+    async addListenTopic(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
+        let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
+        this.listenTo.push(newTopicData)
 
+        await this.saveData();
+        console.log("added new ListenTopic");
     }
 
-    async addPublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
+    async removeListenTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
+        for (let i = this.listenTo.length-1; i >= 0; i--) {
+            const element = this.publishTo[i];
+            if (
+                element.topicName == _generalTopic.topicName,
+                element.topicPath == _generalTopic.topicPath,
+                element.dataType == dataType,
+                element.event == event,
+                element.functionData.functionType == functionData.functionType
+            ) {
+                this.publishTo.splice(i, 1)
+                console.log("removed ListenTopic");
+            }
+        }
+
+        await this.saveData();
+    }
+
+    async addPublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
         let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
         this.publishTo.push(newTopicData)
 
         await this.saveData();
-        console.log("added new ListenTopic")
+        console.log("added new ListenTopic");
     }
 
     //IMPLEMENT removeListenTopic()
-    removeListenTopic() {
 
-    }
-
-    async removePublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
+    async removePublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
         for (let i = this.publishTo.length-1; i >= 0; i--) {
             const element = this.publishTo[i];
             if (
@@ -202,9 +218,15 @@ class Device implements device {
 
     }
 
-    //IMPLEMENT sendData()
-    sendData(): void {
+    setVar(varName: string,dataId:number, newContent:any) {
+        let event = this.deviceData[dataId].setVar(varName,newContent)
 
+        this.dataChanged(event);
+        this.dataChanged("data"+dataId);
+    }
+
+    //IMPLEMENT sendData()
+    dataChanged(event:string): void {
     }
 }
 

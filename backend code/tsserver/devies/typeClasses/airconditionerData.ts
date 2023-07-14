@@ -1,7 +1,7 @@
-import { airconditionerData, device} from '../types'
+import { airconditionerData, device, deviceType } from '../types'
 import data = require('../../utility/file_handler')
 
-class AirconditionerData {
+class AirconditionerData implements deviceType {
     // modes
     readonly MODE_AUTO = 0;
     readonly MODE_COOL = 1;
@@ -42,7 +42,8 @@ class AirconditionerData {
         isFeeling?: Boolean,
         isSleep?: Boolean,
         isScreen?: Boolean,
-        isHealth?: Boolean) {
+        isHealth?: Boolean,
+        callbackOnchange?: Function) {
 
         if (isOn) {
             this.isOn = isOn
@@ -132,8 +133,8 @@ class AirconditionerData {
         }
     }
 
-    getAsJson():airconditionerData {
-        let json:airconditionerData = {
+    getAsJson(): airconditionerData {
+        let json: airconditionerData = {
             "isOn": this.isOn,
             "temp": this.temp,
             "mode": this.mode,
@@ -152,7 +153,7 @@ class AirconditionerData {
         return json;
     }
 
-    static loadFromFile(uuid:string,dataPlace:number):Promise<AirconditionerData> {
+    static loadFromFile(uuid: string, dataPlace: number): Promise<AirconditionerData> {
         return new Promise<AirconditionerData>((resolve, reject) => {
             data.readFile<device>(`devices/${uuid}`).then(acData => {
                 let data = acData.deviceData[dataPlace]
@@ -169,8 +170,8 @@ class AirconditionerData {
                     data.isSleep,
                     data.isScreen,
                     data.isHealth
-                    )
-    
+                )
+
                 resolve(newAirconditionerDevice)
             }).catch(err => {
                 console.log("File read failed:", err);
@@ -180,10 +181,20 @@ class AirconditionerData {
         });
     }
 
-    defaultUpdateFunction(topic: string, message: string) {
+    defaultUpdateFunction(topic: string, message: string): void {
         //TODO: add a check to check if data is of tape airconditioner and then update the file
         console.log(message);
     }
+
+    //IMPLEMENT This
+    setVar(varName: string, newContent: any): string {
+        switch (varName) {
+            // WARN: not implemented
+        }
+
+        //TODO : event type
+        return "varName"
+    }
 }
 
-export {AirconditionerData}
+export { AirconditionerData }

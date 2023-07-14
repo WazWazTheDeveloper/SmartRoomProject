@@ -1,3 +1,4 @@
+import { log } from "console";
 import { connect } from "http2";
 import * as mqtt from "mqtt"
 
@@ -30,6 +31,7 @@ class MqttHandler {
         });
 
         this.mqttClient.on('message', (topic, message) => {
+            log(topic)
             this.onMassageCallback(topic, message.toString())
         });
 

@@ -18,4 +18,9 @@ interface topicData {
     functionData: eventFunctionData
 }
 
-export {device,topicData}
+interface deviceType {
+    setVar:Function
+    defaultUpdateFunction:Function
+}
+
+export {device,topicData,deviceType}
