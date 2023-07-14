@@ -235,8 +235,8 @@ class AppData {
         let subTypeList: Array<SubType> = []
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
-            for (let index = 0; index < device.publishTo.length; index++) {
-                const topic = device.publishTo[index];
+            for (let index = 0; index < device.listenTo.length; index++) {
+                const topic = device.listenTo[index];
                 let newSub = new SubType(topic, device.onUpdateData.bind(device))
                 subTypeList.push(newSub)
             }

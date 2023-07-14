@@ -163,33 +163,7 @@ class Device implements device {
     }
 
     //TODO: add a way to select what kind of data is going to be send, like a diffrence between data0 and data1
-    async addListenTopic(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
-        let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
-        this.listenTo.push(newTopicData)
-
-        await this.saveData();
-        console.log("added new ListenTopic");
-    }
-
-    async removeListenTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
-        for (let i = this.listenTo.length-1; i >= 0; i--) {
-            const element = this.publishTo[i];
-            if (
-                element.topicName == _generalTopic.topicName,
-                element.topicPath == _generalTopic.topicPath,
-                element.dataType == dataType,
-                element.event == event,
-                element.functionData.functionType == functionData.functionType
-            ) {
-                this.publishTo.splice(i, 1)
-                console.log("removed ListenTopic");
-            }
-        }
-
-        await this.saveData();
-    }
-
-    async addPublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
+    async addPublishTopic(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
         let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
         this.publishTo.push(newTopicData)
 
@@ -197,9 +171,7 @@ class Device implements device {
         console.log("added new ListenTopic");
     }
 
-    //IMPLEMENT removeListenTopic()
-
-    async removePublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
+    async removePublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
         for (let i = this.publishTo.length-1; i >= 0; i--) {
             const element = this.publishTo[i];
             if (
@@ -215,6 +187,32 @@ class Device implements device {
         }
 
         await this.saveData();
+    }
+
+    async addListenTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
+        let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
+        this.listenTo.push(newTopicData)
+
+        await this.saveData();
+        console.log("added new ListenTopic");
+    }
+
+    async removeListenTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
+        for (let i = this.listenTo.length-1; i >= 0; i--) {
+            const element = this.listenTo[i];
+            if (
+                element.topicName == _generalTopic.topicName,
+                element.topicPath == _generalTopic.topicPath,
+                element.dataType == dataType,
+                element.event == event,
+                element.functionData.functionType == functionData.functionType
+            ) {
+                this.listenTo.splice(i, 1)
+                console.log("removed ListenTopic");
+            }
+        }
+
+        await this.saveData();
 
     }
 
@@ -225,8 +223,19 @@ class Device implements device {
         this.dataChanged("data"+dataId);
     }
 
-    //IMPLEMENT sendData()
     dataChanged(event:string): void {
+        for (let index = 0; index < this.publishTo.length; index++) {
+            const topicData = this.publishTo[index];
+            if(topicData.event == event){
+                //probably need to add also typeof data to send
+                this.sendData(topicData, index)
+            }
+        }
+    }
+
+    //IMPLEMENT sendData()
+    sendData(topicData:TopicData,indexOfDevice:number,){
+        
     }
 }
 

@@ -186,14 +186,70 @@ class AirconditionerData implements deviceType {
         console.log(message);
     }
 
-    //IMPLEMENT This
-    setVar(varName: string, newContent: any): string {
-        switch (varName) {
-            // WARN: not implemented
+    //TODO: fix this shit
+    setVar(varChanged: string, newValue: any): string {
+        switch (varChanged) {
+            // TODO: add checks to add types when setting variables
+            case ("isOn"): {
+                this.isOn = newValue;
+                return "isOn"
+            }
+            case ("temp"): {
+                this.temp = newValue;
+                return "temp"
+            }
+            case ("speed"): {
+                this.speed = newValue;
+                return "speed"
+            }
+            case ("swing1"): {
+                this.swing1 = newValue;
+                return "swing1"
+            }
+            case ("swing2"): {
+                this.swing2 = newValue;
+                return "swing2"
+            }
+            case ("timer"): {
+                //WARN: need to add a check here to check for full hours and halfs
+                this.timer = newValue;
+                return "timer"
+            }
+            case ("fullhours"): {
+                //WARN delete this later
+                this.fullhours = newValue;
+                return "fullhours"
+            }
+            case ("isHalfHour"): {
+                //WARN delete this later
+                this.isHalfHour = newValue;
+                return "isHalfHour"
+            }
+            case ("isStrong"): {
+                this.isStrong = newValue;
+                return "isStrong"
+            }
+            case ("isFeeling"): {
+                this.isFeeling = newValue;
+                return "isFeeling"
+            }
+            case ("isSleep"): {
+                this.isSleep = newValue;
+                return "isSleep"
+            }
+            case ("isScreen"): {
+                this.isScreen = newValue;
+                return "isScreen"
+            }
+            case ("isHealth"): {
+                this.isHealth = newValue;
+                return "isHealth"
+            }
+            default: {
+                throw new Error("variable not found")
+            }
         }
 
-        //TODO : event type
-        return "varName"
     }
 }
 
