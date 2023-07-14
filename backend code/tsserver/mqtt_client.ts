@@ -94,9 +94,18 @@ class MqttClient {
         return this;
     }
 
-    // IMPLEMENT setNewSubscribeList(newSubscribeList :Array<subType>)
     setNewSubscribeList(newSubscribeList :Array<subType>) {
-        
+        for (let index = 0; index < this.subscribeList.length; index++) {
+            const element = this.subscribeList[index];
+            this.mqttClient.unsubscribe(element.topicData.topicPath)
+        }
+
+        this.subscribeList = newSubscribeList;
+
+        for (let index = 0; index < this.subscribeList.length; index++) {
+            const element = this.subscribeList[index];
+            this.mqttClient.subscribe(element.topicData.topicPath)
+        }
     }
 }
 

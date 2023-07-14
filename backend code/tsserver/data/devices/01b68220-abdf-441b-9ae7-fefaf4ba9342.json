@@ -1,6 +1,7 @@
 {
+    "deviceName":"roomAc",
     "uuid": "01b68220-abdf-441b-9ae7-fefaf4ba9342",
-    "deviceType": "airconditioner",
+    "deviceType": ["airconditioner"],
     "listenTo": [
         {
             "topicName": "isAlive",
@@ -25,15 +26,6 @@
     "isConnected": false,
     "deviceData": [
         {
-            "MODE_AUTO": 0,
-            "MODE_COOL": 1,
-            "MODE_DRY": 2,
-            "MODE_HEAT": 3,
-            "MODE_FAN": 4,
-            "SPEED_LOW": 0,
-            "SPEED_MED": 1,
-            "SPEED_HIGH": 2,
-            "SPEED_AUTO": 3,
             "isOn": false,
             "temp": 24,
             "mode": 0,

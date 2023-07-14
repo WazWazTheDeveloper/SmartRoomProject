@@ -1,13 +1,13 @@
-import { deviceListItem, generalData,generalTopic} from "../types";
+import { deviceListItem, generalData, generalTopic } from "../types";
 import * as data from '../../utility/file_handler'
 import { log } from "console";
 var GeneralDataInstance: GeneralData;
 
 class GeneralTopic implements generalTopic {
-    topicName:string
+    topicName: string
     topicPath: string
 
-    constructor(topicName:string,topicPath: string) {
+    constructor(topicName: string, topicPath: string) {
         this.topicName = topicName;
         this.topicPath = topicPath
 
@@ -34,7 +34,7 @@ class GeneralData implements generalData {
     topicList: Array<GeneralTopic>;
     deviceList: Array<DeviceListItem>;
 
-    constructor(deviceList: Array<deviceListItem>, topics: Array<generalTopic>) {
+    constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>) {
         this.deviceList = deviceList;
         this.topicList = topics;
     }
@@ -42,10 +42,16 @@ class GeneralData implements generalData {
     static async loadFromFile(): Promise<GeneralData> {
         let generalData = await data.readFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`);
 
-        try{
-            let generalDataObj = new GeneralData(generalData.deviceList, generalData.topicList);
+        try {
+            let _topicList = []
+            for (let index = 0; index < generalData.topicList.length; index++) {
+                const element = generalData.topicList[index];
+                let newTopic = new GeneralTopic(element.topicName,element.topicPath)
+                _topicList.push(newTopic)
+            }
+            let generalDataObj = new GeneralData(generalData.deviceList, _topicList);
             return generalDataObj
-        }catch(err) {
+        } catch (err) {
             console.log("File read failed:", err);
             let generalDataObj = new GeneralData([], []);
             generalDataObj.saveData();
@@ -53,60 +59,59 @@ class GeneralData implements generalData {
         }
     }
 
-    public saveData() {
+    public async saveData() {
         console.log("saveing GeneralData object")
         let dataJson: generalData = {
             topicList: this.topicList,
             deviceList: this.deviceList,
         }
 
-        data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
+        await data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
     }
 
-    public addTopic(topicName: string,topicPath:string) {
+    public async addTopic(topicName: string, topicPath: string) {
         for (let index = 0; index < this.topicList.length; index++) {
             const element = this.topicList[index];
-            if(element.topicName == topicName) {
+            if (element.topicName == topicName) {
                 throw new Error("topic with same name already exist")
             }
-            
+
         }
-        let newTopic = new GeneralTopic(topicName,topicPath)
+        let newTopic = new GeneralTopic(topicName, topicPath)
         this.topicList.push(newTopic)
-        this.saveData(); 
+        await this.saveData();
 
     }
 
-    public removeTopic(topicName: string){
-        for (let i = this.topicList.length-1; i >= 0 ; i--) {
+    public removeTopic(topicName: string) {
+        for (let i = this.topicList.length - 1; i >= 0; i--) {
             const element = this.topicList[i];
             if (topicName == element.topicName) {
-                this.topicList.splice(i,1)
+                this.topicList.splice(i, 1)
+                log("removed")
             }
         }
 
-        this.saveData(); 
-    }
-
-    public addDevice(newDevice: DeviceListItem) {
-        this.deviceList.push(newDevice)
         this.saveData();
-        return this
-
-        //TODO: add console.log
     }
 
-    public removeDevice(uuid:string) {
-        for (let i = this.deviceList.length-1; i >= 0 ; i--) {
+    public async addDevice(newDevice: DeviceListItem):Promise<void> {
+        this.deviceList.push(newDevice)
+        await this.saveData();
+
+        console.log("new device added to general data")
+    }
+
+    public async removeDevice(uuid: string):Promise<void> {
+        for (let i = this.deviceList.length - 1; i >= 0; i--) {
             const element = this.deviceList[i];
             if (uuid == element.UUID) {
-                this.deviceList.splice(i,1)
+                this.deviceList.splice(i, 1)
             }
-            
-        }
-        this.saveData();
 
-        //TODO: add console.log
+        }
+        await this.saveData();
+        console.log("new device added to general data")
     }
 
     public getTopics() {

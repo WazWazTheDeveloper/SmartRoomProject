@@ -1,6 +1,7 @@
 import {eventFunctionData} from '../types'
 
 interface device {
+    deviceName:string
     uuid: string
     deviceType: Array<string>
     listenTo: Array<topicData>

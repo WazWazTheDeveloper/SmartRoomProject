@@ -1,4 +1,5 @@
 import fs from "fs";
+import fsPromises = require("fs/promises")
 
 function readFile<T>(fileName:string):Promise<T> {
     return new Promise<T>((resolve, reject) => {
@@ -14,9 +15,9 @@ function readFile<T>(fileName:string):Promise<T> {
     });
 };
 
-function writeFile<T>(fileName:string,json:T) {
+async function writeFile<T>(fileName:string,json:T): Promise<void> {
     let data = JSON.stringify(json);
-    fs.writeFileSync(`./data/${fileName}.json`, data);
+    await fsPromises.writeFile(`./data/${fileName}.json`, data);
 };
 
 function removeFile(filePath:string) {

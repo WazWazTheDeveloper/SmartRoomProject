@@ -1,4 +1,4 @@
-import { airconditionerData} from '../types'
+import { airconditionerData, device} from '../types'
 import data = require('../../utility/file_handler')
 
 class AirconditionerData {
@@ -152,22 +152,23 @@ class AirconditionerData {
         return json;
     }
 
-    static loadFromFile(uuid:string):Promise<AirconditionerData> {
+    static loadFromFile(uuid:string,dataPlace:number):Promise<AirconditionerData> {
         return new Promise<AirconditionerData>((resolve, reject) => {
-            data.readFile<airconditionerData>(`devices/${uuid}`).then(acData => {
+            data.readFile<device>(`devices/${uuid}`).then(acData => {
+                let data = acData.deviceData[dataPlace]
                 let newAirconditionerDevice = new AirconditionerData(
-                    acData.isOn,
-                    acData.temp,
-                    acData.mode,
-                    acData.speed,
-                    acData.swing1,
-                    acData.swing2,
-                    acData.timer,
-                    acData.isStrong,
-                    acData.isFeeling,
-                    acData.isSleep,
-                    acData.isScreen,
-                    acData.isHealth
+                    data.isOn,
+                    data.temp,
+                    data.mode,
+                    data.speed,
+                    data.swing1,
+                    data.swing2,
+                    data.timer,
+                    data.isStrong,
+                    data.isFeeling,
+                    data.isSleep,
+                    data.isScreen,
+                    data.isHealth
                     )
     
                 resolve(newAirconditionerDevice)

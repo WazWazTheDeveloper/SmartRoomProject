@@ -9,9 +9,10 @@ const app: express.Application = express();
 import {router} from './router';
 import {AppData} from './AppData';
 import { GeneralData} from './devies/typeClasses/generalData';
-import { TopicData } from './devies/typeClasses/device';
+import { Device, TopicData } from './devies/typeClasses/device';
 import { log } from 'console';
 app.use('/', router)
+
 
 // TODO: on load add all SubTypes to mqtt client
 
@@ -33,8 +34,13 @@ AppData.getAppDataInstance().then(data => {
 
 async function x(generalData:GeneralData,data:AppData){
   // let y = []
-  // let x = data.getGeneralData().topicList[0];
-  // data.addListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
+  let x = data.getGeneralData().topicList[0];
+  // setInterval(async() => {
+    // await data.addListenToTopicToDevice("01b68220-abdf-4zz41b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
+    await data.removeDevice("test23")
+    // await  data.removeListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
+  // },1000)
+  // data.re("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
   // TODO: add this incliding the bind (very impotent as the object isnt the one calling the function)
   // let topic = data.getDeviceList()[0].listenTo[0]
   // log(topic)

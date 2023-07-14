@@ -14,8 +14,9 @@ router.get('/getUUID', (req: Request, res: Response) => {
     res.send(uuid)
 })
 
-// IMPLEMENT: router.get('/registerNewDevice'
+// IMPLEMENT: router.get('/registerNewDevice')
 // probably better to take care with handler that is driven from an mqtt massage
+// do it anyway as a fail safe or somting if unable to do it automaticly
 router.get('/registerNewDevice', (req: Request, res: Response) => {
 
 })

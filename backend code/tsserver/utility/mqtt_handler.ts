@@ -38,7 +38,6 @@ class MqttHandler {
         });
     }
 
-    //TODO: add option to remove on Message with id or somting
     sendMessage(topic: string, message: string) {
         console.log(`published "${message}" to "${topic}"`);
         this.mqttClient?.publish(topic, message);

@@ -10,10 +10,12 @@ var appDataInstance: AppData;
 class AppData {
     private generalData: GeneralData;
     private deviceList: Array<Device>;
+    private onDeviceTopicChangeFunctions: Array<Function>
 
     private constructor(generalData: GeneralData, devices: Array<Device>) {
         this.generalData = generalData;
         this.deviceList = devices;
+        this.onDeviceTopicChangeFunctions = []
     }
 
     public static async getAppDataInstance(): Promise<AppData> {
@@ -47,20 +49,20 @@ class AppData {
     }
 
     private static async readDeviceFromFile(uuid: string, deviceType: Array<string>) {
-        let deviceData = [];
+        let deviceData: Array<any> = [];
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
             try {
                 // WARN: missing types
                 switch (element) {
                     case (Device.AIRCONDITIONER_TYPE): {
-                        deviceData.push(await AirconditionerData.loadFromFile(uuid));
+                        deviceData.push(await AirconditionerData.loadFromFile(uuid, i));
                     }
                 }
 
                 return deviceData;
             } catch (err) {
-                //TODO: add error massage when unableto get file
+                throw new Error("unable to read deviceData")
             }
         }
 
@@ -77,7 +79,7 @@ class AppData {
         return this.deviceList;
     }
 
-    public addDevice(uuid: string, name: string, deviceType: Array<string>, listenTo?: Array<topicData>, publishTo?: Array<topicData>): void {
+    public addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo?: Array<topicData>, publishTo?: Array<topicData>): void {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
             throw new Error("deviceTypeList should not be empty");
         }
@@ -89,7 +91,7 @@ class AppData {
             }
         }
 
-        let newDeviceGeneralData = new DeviceListItem(uuid, name, deviceType);
+        let newDeviceGeneralData = new DeviceListItem(uuid, deviceName, deviceType);
 
         let deviceDataList: Array<any> = [];
         for (let i = 0; i < deviceType.length; i++) {
@@ -109,7 +111,7 @@ class AppData {
         }
 
 
-        let newDevice = new Device(uuid, deviceType, _listenTo, _publishTo, false, deviceDataList);
+        let newDevice = new Device(deviceName, uuid, deviceType, _listenTo, _publishTo, false, deviceDataList);
 
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
@@ -119,15 +121,14 @@ class AppData {
     removeDevice(uuid: string): void {
         this.generalData.removeDevice(uuid);
 
-        for (let i = this.deviceList.length-1; i >= 0 ; i--) {
+        for (let i = this.deviceList.length - 1; i >= 0; i--) {
             const element = this.deviceList[i];
             if (uuid == element.uuid) {
-                this.deviceList.splice(i,1)
+                this.deviceList.splice(i, 1)
             }
         }
 
         removeFile(`devices/${uuid}`)
-        // TODO remove file
     }
 
     private getDefaultDeviceData(deviceType: string): AirconditionerData {
@@ -151,8 +152,8 @@ class AppData {
         this.generalData.saveData();
     }
 
-    addGeneralTopic(topicName: string,topicPath:string): void {
-        this.generalData.addTopic(topicName,topicPath)
+    addGeneralTopic(topicName: string, topicPath: string): void {
+        this.generalData.addTopic(topicName, topicPath)
         console.log(`added new generalTopic {TopicName: ${topicName}, TopicPath: ${topicPath}}`)
     }
 
@@ -161,22 +162,62 @@ class AppData {
         console.log(`removed generalTopic {TopicName: ${topicName}}`)
     }
 
-    addListenToTopicToDevice(uuid:string, _generalTopic: generalTopic, dataType: string,event : string,functionData: eventFunctionData){
+    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
         //implement this first
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
-            if(element.uuid == uuid){
-                element.addListenTopic(_generalTopic, dataType,event,functionData);
+            if (element.uuid == uuid) {
+                await element.addPublishTopic(_generalTopic, dataType, event, functionData);
             }
-            
+
         }
 
         this.onDeviceTopicChange();
     }
 
-    // IMPLEMENT onDeviceTopicChange()
-    onDeviceTopicChange() {
-        log("ya yeet")
+    async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const element = this.deviceList[index];
+            if (element.uuid == uuid) {
+                await element.removePublishTopic(_generalTopic, dataType, event, functionData);
+            }
+
+        }
+
+        this.onDeviceTopicChange();
+    }
+
+    // IMPLEMENT addPublishToTopicToDevice()
+    addPublishToTopicToDevice(uuid: string) {
+
+    }
+
+    // IMPLEMENT addPublishToTopicToDevice()
+    removePublishToTopicToDevice(uuid: string) {
+
+    }
+
+    private onDeviceTopicChange(): void {
+        for (let index = 0; index < this.onDeviceTopicChangeFunctions.length; index++) {
+            const callbackFunction = this.onDeviceTopicChangeFunctions[index];
+            // TODO: add proper variables to this
+            callbackFunction();
+        }
+    }
+
+    public addOnDeviceTopicChangeListener(_function: Function): void {
+        this.onDeviceTopicChangeFunctions.push(_function)
+        console.log("added on device topic change listener")
+    }
+
+    public removeOnDeviceTopicChangeListener(_function: Function): void {
+        for (let index = 0; index < this.onDeviceTopicChangeFunctions.length; index++) {
+            const element = this.onDeviceTopicChangeFunctions[index];
+            if (element == _function) {
+                this.onDeviceTopicChangeFunctions.splice(index, 1)
+                console.log("removed on device topic change listener")
+            }
+        }
     }
 }
 
