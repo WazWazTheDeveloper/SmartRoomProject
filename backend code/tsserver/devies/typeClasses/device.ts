@@ -2,6 +2,8 @@ import { device, eventFunctionData, generalTopic, topicData } from '../types'
 import data = require('../../utility/file_handler')
 import { GeneralTopic } from './generalData'
 import { AirconditionerData } from './airconditionerData'
+import { MqttClient } from '../../mqtt_client'
+import { log } from 'console'
 
 class TopicData implements topicData {
     topicName: string
@@ -94,7 +96,6 @@ class Device implements device {
                 deviceDataFromJson.isConnected,
                 deviceData
             )
-
             return newDevice
         } catch (err) {
             console.log("File read failed:", err);
@@ -114,15 +115,14 @@ class Device implements device {
     }
 
 
-    onUpdateData(topic: string, message: string, topicData: TopicData):void {
-        // TODO: add more types and cases
-        // MAYBE DANIEL FIND ME AND KILL ME 
-        // TODO: change the order of checking, first check for type then look for specific function
+    async onUpdateData(topic: string, message: JSON, topicData: TopicData):Promise<void> {
         let functionToCall: Function = (topic: string, message: string) => { };
         let eventString = topicData.event
+        let dataNumber = 0;
         if (eventString.substring(0, 4).includes("data")) {
-            let dataNumber = Number(eventString.substring(4));
+            dataNumber = parseInt(eventString.substring(4));
             if (this.deviceData[dataNumber] && this.deviceType[dataNumber]) {
+                // TODO: add types
                 switch (topicData.functionData.functionType) {
                     case ("default"): {
                         functionToCall = this.callDefaultFunction(topicData, dataNumber);
@@ -130,20 +130,20 @@ class Device implements device {
                     }
                     default: {
                         throw new Error(`function type ${topicData.functionData.functionType} does not exist`)
-                        throw new ErrorEvent("dead inside")
                     }
                 }
             }
         }
 
-        functionToCall(topic, message);
+        functionToCall(topic, message,dataNumber);
+        await this.saveData()
     }
 
     private callDefaultFunction(_topicData: topicData, dataNumber: number) {
-        // WARN: missing types
+        // TODO: add types
         switch (_topicData.dataType) {
             case (Device.AIRCONDITIONER_TYPE): {
-                return this.deviceData[dataNumber]?.defaultUpdateFunction
+                return this.deviceData[dataNumber]?.defaultUpdateFunction.bind(this.deviceData[dataNumber])
             }
             default: {
                 throw new Error("device type not found")
@@ -162,7 +162,6 @@ class Device implements device {
         }
     }
 
-    //TODO: add a way to select what kind of data is going to be send, like a diffrence between data0 and data1
     async addPublishTopic(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData):Promise<void> {
         let newTopicData = new TopicData(_generalTopic, dataType, event, functionData)
         this.publishTo.push(newTopicData)
@@ -216,7 +215,7 @@ class Device implements device {
 
     }
 
-    setVar(varName: string,dataId:number, newContent:any) {
+    setVar(dataId:number, varName: string, newContent:any) {
         let event = this.deviceData[dataId].setVar(varName,newContent)
 
         this.dataChanged(event);
@@ -228,14 +227,22 @@ class Device implements device {
             const topicData = this.publishTo[index];
             if(topicData.event == event){
                 //probably need to add also typeof data to send
-                this.sendData(topicData, index)
+                this.sendUpdadedData(topicData, index)
             }
         }
     }
 
-    //IMPLEMENT sendData()
-    sendData(topicData:TopicData,indexOfDevice:number,){
-        
+    sendUpdadedData(topicData:TopicData,indexOfData:number):void{
+        let client = MqttClient.getMqttClientInstance();
+        let data:JSON  = this.deviceData[indexOfData].getData(topicData.event)
+        //TODO add this as a type for massages (interface)
+        let dataSend = {
+            "sender":"server",
+            "dataType": topicData.dataType,
+            "event":topicData.event,
+            "data":data,
+        }
+        client.sendMassage(topicData.topicPath,JSON.stringify(dataSend))
     }
 }
 

@@ -35,7 +35,7 @@ class MqttClient {
 
     }
 
-    private onMassage(topic: string, message: string) {
+    private onMassage(topic: string, message: JSON) {
         for (let index = 0; index < mqttClientInstance.subscribeList.length; index++) {
             const element = mqttClientInstance.subscribeList[index];
 

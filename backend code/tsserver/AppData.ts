@@ -1,22 +1,39 @@
-import { log } from "console";
+
 import { eventFunctionData, generalTopic, topicData } from './devies/types'
 import { AirconditionerData } from "./devies/typeClasses/airconditionerData";
 import { Device, TopicData } from "./devies/typeClasses/device";
 import { DeviceListItem, GeneralData, getGeneralDataInstance } from "./devies/typeClasses/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
+import { log } from 'console';
 
+interface callbackData {
+    event : string
+    callback:Function
+}
 
 var appDataInstance: AppData;
 class AppData {
+    public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
+
     private generalData: GeneralData;
     private deviceList: Array<Device>;
-    private onDeviceTopicChangeFunctions: Array<Function>
+    private callbacks : Array<callbackData>
 
     private constructor(generalData: GeneralData, devices: Array<Device>) {
         this.generalData = generalData;
         this.deviceList = devices;
-        this.onDeviceTopicChangeFunctions = []
+        this.callbacks = []
+    }
+
+    public static async init():Promise<void> {
+        if (!appDataInstance) {
+            let generalData = await getGeneralDataInstance();
+            let devices = await AppData.readDeviceListFromFiles(generalData);
+
+            let newAppDataInstance = new AppData(generalData, devices);
+            appDataInstance = newAppDataInstance;
+        }
     }
 
     public static async getAppDataInstance(): Promise<AppData> {
@@ -31,11 +48,9 @@ class AppData {
         else {
             return appDataInstance;
         }
-
-
     }
 
-    private static async readDeviceListFromFiles(generalData: GeneralData) {
+    private static async readDeviceListFromFiles(generalData: GeneralData):Promise<Array<Device>> {
         let deviceList = generalData.getDeviceList();
         let newDeviceList: Array<Device> = [];
         for (let i = 0; i < deviceList.length; i++) {
@@ -49,34 +64,30 @@ class AppData {
 
     }
 
-    private static async readDeviceFromFile(uuid: string, deviceType: Array<string>) {
+    private static async readDeviceFromFile(uuid: string, deviceType: Array<string>):Promise<Array<any>> {
         let deviceData: Array<any> = [];
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
             try {
-                // WARN: missing types
+                //TODO : add types
                 switch (element) {
                     case (Device.AIRCONDITIONER_TYPE): {
                         deviceData.push(await AirconditionerData.loadFromFile(uuid, i));
                     }
                 }
 
-                return deviceData;
             } catch (err) {
                 throw new Error("unable to read deviceData")
             }
         }
-
-
-
         return deviceData;
     }
 
-    public getGeneralData() {
+    public getGeneralData():GeneralData {
         return this.generalData;
     }
 
-    public getDeviceList() {
+    public getDeviceList():Array<Device> {
         return this.deviceList;
     }
 
@@ -98,7 +109,7 @@ class AppData {
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
             let newDeviceData = this.getDefaultDeviceData(element);
-            log(newDeviceData)
+            console.log(newDeviceData)
             deviceDataList.push(newDeviceData);
         }
 
@@ -133,7 +144,7 @@ class AppData {
     }
 
     private getDefaultDeviceData(deviceType: string): AirconditionerData {
-        // WARN: missing types
+        //TODO : add types
         switch (deviceType) {
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
@@ -164,7 +175,6 @@ class AppData {
     }
 
     async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
-        //implement this first
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
@@ -173,7 +183,7 @@ class AppData {
 
         }
 
-        this.onDeviceTopicChange();
+        this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
     async removePublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
@@ -185,20 +195,34 @@ class AppData {
 
         }
 
-        this.onDeviceTopicChange();
+        this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    // IMPLEMENT addPublishToTopicToDevice()
-    addListenToTopicToDevice(uuid: string) {
+    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const element = this.deviceList[index];
+            if (element.uuid == uuid) {
+                await element.addListenTopic(_generalTopic, dataType, event, functionData);
+            }
 
+        }
+
+        this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    // IMPLEMENT addPublishToTopicToDevice()
-    removeListenToTopicToDevice(uuid: string) {
+    async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const element = this.deviceList[index];
+            if (element.uuid == uuid) {
+                await element.removeListenTopic(_generalTopic, dataType, event, functionData);
+            }
 
+        }
+
+        this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    private onDeviceTopicChange(): void {
+    private onDeviceTopicChange(callback:Function): void {
         let topicDataList: Array<TopicData> = [];
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
@@ -208,26 +232,7 @@ class AppData {
             }
         }
 
-        for (let index = 0; index < this.onDeviceTopicChangeFunctions.length; index++) {
-            const callbackFunction = this.onDeviceTopicChangeFunctions[index];
-            // TODO: add proper variables to this
-            callbackFunction(topicDataList);
-        }
-    }
-
-    public addOnDeviceTopicChangeListener(_function: Function): void {
-        this.onDeviceTopicChangeFunctions.push(_function)
-        console.log("added on device topic change listener")
-    }
-
-    public removeOnDeviceTopicChangeListener(_function: Function): void {
-        for (let index = 0; index < this.onDeviceTopicChangeFunctions.length; index++) {
-            const element = this.onDeviceTopicChangeFunctions[index];
-            if (element == _function) {
-                this.onDeviceTopicChangeFunctions.splice(index, 1)
-                console.log("removed on device topic change listener")
-            }
-        }
+        callback(topicDataList);
     }
 
     //HACK: probably want to find a better way to do it
@@ -243,6 +248,35 @@ class AppData {
         }
 
         return(subTypeList)
+    }
+
+    private triggerCallbacks(event:string):void {
+        for (let index = 0; index < this.callbacks.length; index++) {
+            const element = this.callbacks[index];
+            switch(event) {
+                case(AppData.ON_DEVICE_TOPIC_CHANGE) : {
+                    this.onDeviceTopicChange(element.callback);
+                }
+            }
+        }
+    }
+
+    on(event: string, callback: Function):void {
+        let newCallback = {
+            "event":event,
+            "callback":callback
+        }
+        this.callbacks.push(newCallback)
+    }
+
+    off(event: string, callback: Function):void {
+        for (let index = this.callbacks.length-1 ; index >= 0; index--) {
+            const _callback = this.callbacks[index];
+            if(_callback.event == event && _callback.callback == callback) {
+                this.callbacks.splice(index, 1)
+            }
+            
+        }
     }
 }
 export { AppData }

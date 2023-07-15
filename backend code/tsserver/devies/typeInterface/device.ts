@@ -21,6 +21,8 @@ interface topicData {
 interface deviceType {
     setVar:Function
     defaultUpdateFunction:Function
+    getData:Function
+    getAsJson:Function
 }
 
 export {device,topicData,deviceType}

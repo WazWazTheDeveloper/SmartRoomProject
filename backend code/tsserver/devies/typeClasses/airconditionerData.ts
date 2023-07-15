@@ -1,5 +1,6 @@
 import { airconditionerData, device, deviceType } from '../types'
 import data = require('../../utility/file_handler')
+import { log } from 'console';
 
 class AirconditionerData implements deviceType {
     // modes
@@ -181,68 +182,149 @@ class AirconditionerData implements deviceType {
         });
     }
 
-    defaultUpdateFunction(topic: string, message: string): void {
-        //TODO: add a check to check if data is of tape airconditioner and then update the file
-        console.log(message);
+    defaultUpdateFunction(topic: string, message: JSON,dataIndex:number): void {
+        let keys: Array<string> = Object.keys(message)
+        keys.forEach(key => {
+            let newVal = JSON.parse(JSON.stringify(message))[key]
+            try {
+                this.setVar(key, newVal,dataIndex)
+            } catch (err) {
+                //its fine :)
+            }
+        });
     }
 
-    //TODO: fix this shit
-    setVar(varChanged: string, newValue: any): string {
-        switch (varChanged) {
-            // TODO: add checks to add types when setting variables
+    getData(event: string) {
+        if (event.substring(0, 4).includes("data")) {
+            return this.getAsJson()
+        }
+        switch (event) {
             case ("isOn"): {
-                this.isOn = newValue;
+                return { "isOn": this.isOn };
+            }
+            case ("temp"): {
+                return { "temp": this.temp };
+            }
+            case ("speed"): {
+                return { "speed": this.speed };
+            }
+            case ("swing1"): {
+                return { "swing1": this.swing1 };
+            }
+            case ("swing2"): {
+                return { "swing2": this.swing2 };
+            }
+            case ("timer"): {
+                return { "timer": this.timer };
+            }
+            case ("fullhours"): {
+                return { "fullhours": this.fullhours };
+            }
+            case ("isHalfHour"): {
+                return { "isHalfHour": this.isHalfHour };
+            }
+            case ("isStrong"): {
+                return { "isStrong": this.isStrong };
+            }
+            case ("isFeeling"): {
+                return { "isFeeling": this.isFeeling };
+            }
+            case ("isSleep"): {
+                return { "isSleep": this.isSleep };
+            }
+            case ("isScreen"): {
+                return { "isScreen": this.isScreen };
+            }
+            case ("isHealth"): {
+                return { "isHealth": this.isHealth };
+            }
+        }
+    }
+
+    setVar(varChanged: string, newValue: any,dataIndex = 0): string {
+        if(varChanged.substring(0, 4).includes("data")) {
+            if( dataIndex == parseInt(varChanged.substring(4))){
+                this.defaultUpdateFunction("non",newValue,dataIndex)
+            }
+        }
+        switch (varChanged) {
+            case ("isOn"): {
+                this.isOn = newValue == 1 ? true : false;
                 return "isOn"
             }
             case ("temp"): {
-                this.temp = newValue;
-                return "temp"
+                if (!isNaN(newValue)) {
+                    let newTemp = parseInt(newValue);
+                    if (newTemp < 16) {
+                        this.temp = 16;
+                    }
+                    if (newTemp > 32) {
+                        this.temp = 32
+                    }
+                    else {
+                        // @ts-ignore
+                        this.temp = newTemp
+                    }
+                    return "temp"
+                }
             }
             case ("speed"): {
-                this.speed = newValue;
-                return "speed"
+                if (!isNaN(newValue)) {
+                    let newSpeed = parseInt(newValue);
+                    switch (newSpeed) {
+                        case (0): {
+                            this.speed = newSpeed;
+                            break;
+                        } 
+                        case (1): {
+                            this.speed = newSpeed;
+                            break;
+                        } 
+                        case (2): {
+                            this.speed = newSpeed;
+                            break;
+                        } 
+                        case (3): {
+                            this.speed = newSpeed;
+                            break;
+                        }
+                    }
+
+                    return "speed"
+                }
             }
             case ("swing1"): {
-                this.swing1 = newValue;
+                this.swing1 = newValue == 1 ? true : false;;
                 return "swing1"
             }
             case ("swing2"): {
-                this.swing2 = newValue;
+                this.swing2 = newValue == 1 ? true : false;;
                 return "swing2"
             }
             case ("timer"): {
-                //WARN: need to add a check here to check for full hours and halfs
-                this.timer = newValue;
-                return "timer"
-            }
-            case ("fullhours"): {
-                //WARN delete this later
-                this.fullhours = newValue;
-                return "fullhours"
-            }
-            case ("isHalfHour"): {
-                //WARN delete this later
-                this.isHalfHour = newValue;
-                return "isHalfHour"
+                if(!isNaN(newValue)){
+                    this.setTimer(newValue)
+                    return "timer"
+                }
             }
             case ("isStrong"): {
-                this.isStrong = newValue;
+                this.isStrong = newValue == 1 ? true : false;;
                 return "isStrong"
             }
             case ("isFeeling"): {
-                this.isFeeling = newValue;
+                this.isFeeling = newValue == 1 ? true : false;;
                 return "isFeeling"
             }
             case ("isSleep"): {
-                this.isSleep = newValue;
+                this.isSleep = newValue == 1 ? true : false;;
                 return "isSleep"
             }
             case ("isScreen"): {
-                this.isScreen = newValue;
+                this.isScreen = newValue == 1 ? true : false;;
                 return "isScreen"
             }
             case ("isHealth"): {
-                this.isHealth = newValue;
+                this.isHealth = newValue == 1 ? true : false;;
                 return "isHealth"
             }
             default: {
@@ -250,6 +332,16 @@ class AirconditionerData implements deviceType {
             }
         }
 
+    }
+
+    private setTimer(time: number) {
+        let fullhours = Math.floor(time);
+        if (fullhours <= 9 && fullhours >= 0)
+        {
+            this.isHalfHour = time%1 == 0 ? false : true;
+        }else {
+            this.isHalfHour = false;
+        }
     }
 }
 

@@ -13,46 +13,51 @@ import { Device, TopicData } from './devies/typeClasses/device';
 import { log } from 'console';
 app.use('/', router)
 
-
-// TODO: on load add all SubTypes to mqtt client
-
 // DEL:here only for testing
 const HOST = '10.0.0.12';
 const PORT = '1883';
 
-async function updateMqttClientSubList(p:any) {
-  let client =MqttClient.getMqttClientInstance()
+async function startServer(): Promise<void> {
+  await AppData.init()
+  await MqttClient.initMqtt(HOST, PORT, [])
+  setup()
+
+  startListeningToReqests()
+}
+
+async function setup(): Promise<void> {
+  //get instances
+  let appData = await AppData.getAppDataInstance();
+  let client = MqttClient.getMqttClientInstance()
+
+  //load subscribe list
+  client.setNewSubscribeList(appData.getSubTypeList());
+
+  //add listener to update subscribe list automatically
+  appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
+  // TODO: do the same thing for tasks
+  // IMPLEMENT: schduled Functions
+  // schduled Functions
+  // initAllScheduledFunctions() 
+
+
+  // DEL: this is here for testing
+  xx(appData);
+}
+
+async function updateMqttClientSubList(callback: Function) {
+  let client = MqttClient.getMqttClientInstance()
   let appData = await AppData.getAppDataInstance()
+
   client.setNewSubscribeList(appData.getSubTypeList())
 }
 
-async function setup() {
-  let appData = await AppData.getAppDataInstance();
-  let client = MqttClient.getMqttClientInstance()
-  client.setNewSubscribeList(appData.getSubTypeList());
-  appData.addOnDeviceTopicChangeListener(updateMqttClientSubList)
-}
-
-AppData.getAppDataInstance().then(async (data) => {
-  // WARN: will crash if not given uniqe UUID each time
-  // data.addNewDevice("123112311","test",["airconditioner"])
-  // console.log(data.getGeneralData().topicList)
-  // data.removeDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342")
-  // log(data.getGeneralData().topicList)
-  // data.removeGeneralTopic("test");
-  // data.addGeneralTopic("test","test");
-  // console.log(data.getDeviceList());
-  // let x =MqttClient.getMqttClientInstance()
-  // x.setNewSubscribeList(data.getSubTypeList());
-  // data.addOnDeviceTopicChangeListener(updateMqttClientSubList)
-  xx(data.getGeneralData(),data);
-})
-
-async function xx(generalData: GeneralData, data: AppData) {
+async function xx(data: AppData) {
   // let y = []
-  // let x = data.getGeneralData().topicList[1];
+  let x = data.getGeneralData().topicList[1];
+  // await data.addListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342", x, "airconditioner", "data0", { "functionType": "default" })
   setInterval(async () => {
-    // await data.addPublishToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342", x, "airconditioner", "data0", { "functionType": "default" })
+    // data.getDeviceList()[0].setVar(0,"isOn",true)
     // await data.removeDevice("test23")
     // await  data.removeListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
   }, 1000)
@@ -69,14 +74,10 @@ async function xx(generalData: GeneralData, data: AppData) {
   // MqttClient.getMqttClientInstance().emptySubscribeList();
 }
 
+function startListeningToReqests(): void {
+  app.listen(port, () => {
+    console.log(`listening on port ${port}`)
+  })
+}
 
-// IMPLEMENT: schduled Functions
-// schduled Functions
-// initAllScheduledFunctions() 
-
-// Server setup
-MqttClient.initMqtt(HOST, PORT, [])
-app.listen(port, () => {
-  setup();
-  console.log(`listening on port ${port}`)
-})
+startServer();

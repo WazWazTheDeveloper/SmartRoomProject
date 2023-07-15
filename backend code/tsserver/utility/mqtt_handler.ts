@@ -32,7 +32,7 @@ class MqttHandler {
 
         this.mqttClient.on('message', (topic, message) => {
             log(topic)
-            this.onMassageCallback(topic, message.toString())
+            this.onMassageCallback(topic, JSON.parse(message.toString()))
         });
 
         this.mqttClient.on('close', () => {
