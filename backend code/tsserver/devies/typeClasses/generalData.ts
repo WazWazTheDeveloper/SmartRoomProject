@@ -28,7 +28,6 @@ class DeviceListItem implements deviceListItem {
 
 
 class GeneralData implements generalData {
-    // TODO: move this to general data.json of to ENV veriable or somting
     static readonly GENERAL_DATA_FILE_NAME = 'generalData';
 
     topicList: Array<GeneralTopic>;
@@ -88,7 +87,7 @@ class GeneralData implements generalData {
             const element = this.topicList[i];
             if (topicName == element.topicName) {
                 this.topicList.splice(i, 1)
-                log("removed")
+                log("removed general topid: '" +topicName+"'" )
             }
         }
 

@@ -1,9 +1,10 @@
-import { device, eventFunctionData, generalTopic, topicData } from '../types'
+import { dataPackage, device, eventFunctionData, generalTopic, topicData } from '../types'
 import data = require('../../utility/file_handler')
 import { GeneralTopic } from './generalData'
 import { AirconditionerData } from './airconditionerData'
 import { MqttClient } from '../../mqtt_client'
 import { log } from 'console'
+import { DataPackage } from './DataPackage'
 
 class TopicData implements topicData {
     topicName: string
@@ -115,27 +116,34 @@ class Device implements device {
     }
 
 
-    async onUpdateData(topic: string, message: JSON, topicData: TopicData):Promise<void> {
+    async onUpdateData(topic: string, message: DataPackage, topicData: TopicData):Promise<void> {
+        //TODO take a look at that later
+        if( message.dataType != topicData.dataType){
+            return
+        }
+        if( message.event != topicData.event){
+            return
+        }
+
         let functionToCall: Function = (topic: string, message: string) => { };
         let eventString = topicData.event
         let dataNumber = 0;
-        if (eventString.substring(0, 4).includes("data")) {
+
+        if (this.deviceData[dataNumber] && this.deviceType[dataNumber]) {
             dataNumber = parseInt(eventString.substring(4));
-            if (this.deviceData[dataNumber] && this.deviceType[dataNumber]) {
-                // TODO: add types
-                switch (topicData.functionData.functionType) {
-                    case ("default"): {
-                        functionToCall = this.callDefaultFunction(topicData, dataNumber);
-                        break;
-                    }
-                    default: {
-                        throw new Error(`function type ${topicData.functionData.functionType} does not exist`)
-                    }
+            // TODO: add types
+            switch (topicData.functionData.functionType) {
+                case ("default"): {
+                    functionToCall = this.callDefaultFunction(topicData, dataNumber);
+                    break;
+                }
+                default: {
+                    throw new Error(`function type ${topicData.functionData.functionType} does not exist`)
                 }
             }
         }
 
-        functionToCall(topic, message,dataNumber);
+        functionToCall(topic, message.data,dataNumber);
         await this.saveData()
     }
 
@@ -235,14 +243,9 @@ class Device implements device {
     sendUpdadedData(topicData:TopicData,indexOfData:number):void{
         let client = MqttClient.getMqttClientInstance();
         let data:JSON  = this.deviceData[indexOfData].getData(topicData.event)
-        //TODO add this as a type for massages (interface)
-        let dataSend = {
-            "sender":"server",
-            "dataType": topicData.dataType,
-            "event":topicData.event,
-            "data":data,
-        }
-        client.sendMassage(topicData.topicPath,JSON.stringify(dataSend))
+        let dataSend = new DataPackage("server" ,topicData.dataType,topicData.event,[data])
+
+        client.sendMassage(topicData.topicPath,dataSend)
     }
 }
 

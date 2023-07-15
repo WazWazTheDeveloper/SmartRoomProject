@@ -1,6 +1,5 @@
 import { airconditionerData, device, deviceType } from '../types'
 import data = require('../../utility/file_handler')
-import { log } from 'console';
 
 class AirconditionerData implements deviceType {
     // modes
@@ -184,6 +183,7 @@ class AirconditionerData implements deviceType {
 
     defaultUpdateFunction(topic: string, message: JSON,dataIndex:number): void {
         let keys: Array<string> = Object.keys(message)
+
         keys.forEach(key => {
             let newVal = JSON.parse(JSON.stringify(message))[key]
             try {

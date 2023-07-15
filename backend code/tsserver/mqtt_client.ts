@@ -1,3 +1,4 @@
+import { DataPackage } from "./devies/typeClasses/DataPackage";
 import { SubType } from "./devies/typeClasses/subType";
 import { MqttHandler } from "./utility/mqtt_handler";
 
@@ -14,7 +15,7 @@ class MqttClient {
         this.subscribeList = subscribeList;
     }
 
-    public static async initMqtt(host: string, port: string, subscribeList: Array<SubType>) {
+    public static async initMqtt(host: string, port: string, subscribeList: Array<SubType>):Promise<void> {
         let newMqttClient = new MqttClient(host, port, subscribeList)
         await newMqttClient.mqttClient.connect()
         mqttClientInstance = newMqttClient;
@@ -35,7 +36,7 @@ class MqttClient {
 
     }
 
-    private onMassage(topic: string, message: JSON) {
+    private onMassage(topic: string, message: DataPackage) {
         for (let index = 0; index < mqttClientInstance.subscribeList.length; index++) {
             const element = mqttClientInstance.subscribeList[index];
 
@@ -73,7 +74,7 @@ class MqttClient {
         this.subscribeList=[];
     }
 
-    public sendMassage(topic: string, message: string) {
+    public sendMassage(topic: string, message: DataPackage) {
         this.mqttClient.sendMessage(topic, message)
         return this;
     }

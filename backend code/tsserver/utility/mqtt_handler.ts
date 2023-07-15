@@ -1,6 +1,5 @@
-import { log } from "console";
-import { connect } from "http2";
 import * as mqtt from "mqtt"
+import { DataPackage } from "../devies/typeClasses/DataPackage";
 
 class MqttHandler {
     mqttClient: mqtt.MqttClient | null;
@@ -31,7 +30,8 @@ class MqttHandler {
         });
 
         this.mqttClient.on('message', (topic, message) => {
-            log(topic)
+            let _message = JSON.parse(message.toString());
+            let newDataPackage = new DataPackage(_message.sender,_message.dataType,_message.event,_message.data)
             this.onMassageCallback(topic, JSON.parse(message.toString()))
         });
 
@@ -40,9 +40,10 @@ class MqttHandler {
         });
     }
 
-    sendMessage(topic: string, message: string) {
+    sendMessage(topic: string, message: DataPackage) {
         console.log(`published "${message}" to "${topic}"`);
-        this.mqttClient?.publish(topic, message);
+        let _message = JSON.stringify(message.getAsJson())
+        this.mqttClient?.publish(topic, (_message));
         return this;
     }
 
