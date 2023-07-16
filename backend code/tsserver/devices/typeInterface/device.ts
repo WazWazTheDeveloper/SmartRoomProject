@@ -23,6 +23,7 @@ interface deviceType {
     defaultUpdateFunction:Function
     getData:Function
     getAsJson:Function
+    getVar:Function
 }
 
 export {device,topicData,deviceType}

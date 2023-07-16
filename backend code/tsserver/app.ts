@@ -3,7 +3,7 @@ import { MqttClient } from './mqtt_client';
 import { initAllScheduledFunctions } from './scheduledFunctions';
 import { AppData } from './AppData';
 import { router } from './router';
-import { Task } from './tasks';
+import { Task, VarCheck } from './tasks';
 require('dotenv').config()
 
 const app: express.Application = express();
@@ -48,26 +48,16 @@ async function updateMqttClientSubList(callback: Function) {
 }
 
 async function xx(data: AppData) {
-  // let y = []
-  let x = data.getGeneralData().topicList[1];
-  // await data.addListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342", x, "airconditioner", "data0", { "functionType": "default" })
-  // console.log(Task.deviceList)
+  let x = data.getGeneralData()
+
+  // let task = data.getTaskList()[0].addVarCheck("01b68220-abdf-441b-9ae7-fefaf4ba9342","temp",0,VarCheck.CHECK_EQUAL_TO,24);
+  // let task = data.getTaskList()[0].addTodoTask("01b68220-abdf-441b-9ae7-fefaf4ba9342",1,"temp",20)
+  // console.log(data.getTaskList()[0]);
+  data.getTaskList()[0].onUpdateData()
+
   setInterval(async () => {
-    // data.getDeviceList()[0].setVar(0,"isOn",true)
-    // data.getDeviceList()[0].setVar(0,"isOn" ,true)
-    // await data.removeDevice("test23")
-    // await  data.removeListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"})
+
   }, 1000)
-  // data.re("01b68220-abdf-441b-9ae7-fefaf4ba9342",x,"test","test",{"functionType":"default"}))
-  // let topic = data.getDeviceList()[0].listenTo[0]
-  // log(topic)
-  // let p = new SubType(topic,data.getDeviceList()[0].onUpdateData.bind(data.getDeviceList()[0]))
-  // let p2 = new SubType(topic,data.getDeviceList()[0].onUpdateData.bind(data.getDeviceList()[0]))
-  // y.push(p)
-  // y.push(p2)
-  // MqttClient.getMqttClientInstance().subscribe(p,0);
-  // MqttClient.getMqttClientInstance().subscribe(p2,0);
-  // MqttClient.getMqttClientInstance().emptySubscribeList();
 }
 
 function startListeningToReqests(): void {

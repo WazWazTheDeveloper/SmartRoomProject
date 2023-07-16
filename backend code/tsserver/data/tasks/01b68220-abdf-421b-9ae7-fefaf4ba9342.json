@@ -1,6 +1,1 @@
-{
-    "taskId" : "01b68220-abdf-421b-9ae7-fefaf4ba9342",
-    "taskName" : "test",
-    "taskType" : 0,
-    "toCheck" : []
-}
+{"taskId":"01b68220-abdf-421b-9ae7-fefaf4ba9342","taskName":"test","taskType":0,"isOn":true,"isRepeating":true,"varCheckList":[{"deviceId":"01b68220-abdf-441b-9ae7-fefaf4ba9342","varName":"temp","dataIndex":0,"checkType":0,"valueToCompareTo":24,"isTrue":true}],"toDoTaskList":[{"deviceId":"01b68220-abdf-441b-9ae7-fefaf4ba9342","dataIndex":1,"varName":"temp","newVarValue":20}]}

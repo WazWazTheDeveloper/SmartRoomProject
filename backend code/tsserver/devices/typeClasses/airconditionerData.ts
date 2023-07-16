@@ -241,6 +241,50 @@ class AirconditionerData implements deviceType {
         }
     }
 
+    getVar(varName:string) {
+        switch (varName) {
+            case ("isOn"): {
+                return this.isOn
+            }
+            case ("temp"): {
+                return this.temp
+            }
+            case ("speed"): {
+                return this.speed
+            }
+            case ("swing1"): {
+                return this.swing1
+            }
+            case ("swing2"): {
+                return this.swing2
+            }
+            case ("timer"): {
+                return this.timer
+            }
+            case ("fullhours"): {
+                return this.fullhours
+            }
+            case ("isHalfHour"): {
+                return this.isHalfHour
+            }
+            case ("isStrong"): {
+                return this.isStrong
+            }
+            case ("isFeeling"): {
+                return this.isFeeling
+            }
+            case ("isSleep"): {
+                return this.isSleep
+            }
+            case ("isScreen"): {
+                return this.isScreen
+            }
+            case ("isHealth"): {
+                return this.isHealth
+            }
+        }
+    }
+
     setVar(varChanged: string, newValue: any,dataIndex = 0): string {
         if(varChanged.substring(0, 4).includes("data")) {
             if( dataIndex == parseInt(varChanged.substring(4))){

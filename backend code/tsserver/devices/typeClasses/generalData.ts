@@ -140,12 +140,12 @@ class GeneralData implements generalData {
         return this.taskList;
     }
 
-    // IMPLEMENT
-    public addTask() {
-
+    public async addTask(generalTask : GeneralTask) {
+        this.taskList.push(generalTask)
+        await this.saveData();
     }
     // IMPLEMENT
-    public removeTask() {
+    public async removeTask() {
 
     }
 
@@ -164,4 +164,4 @@ async function getGeneralDataInstance(): Promise<GeneralData> {
     }
 }
 
-export { GeneralData, GeneralTopic, DeviceListItem, getGeneralDataInstance }
+export { GeneralData, GeneralTopic, DeviceListItem, getGeneralDataInstance ,GeneralTask}

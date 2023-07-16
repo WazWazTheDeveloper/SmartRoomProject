@@ -2,10 +2,10 @@
 import { eventFunctionData, generalTopic, topicData } from './devices/types'
 import { AirconditionerData } from "./devices/typeClasses/airconditionerData";
 import { Device, TopicData } from "./devices/typeClasses/device";
-import { DeviceListItem, GeneralData, getGeneralDataInstance } from "./devices/typeClasses/generalData";
+import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from "./devices/typeClasses/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
-import { Task } from './tasks';
+import { Task, ToDoTask, VarCheck } from './tasks';
 
 interface callbackData {
     event: string
@@ -36,9 +36,13 @@ class AppData {
             let tasks = await AppData.readTaskListFromFiles(generalData);
             let newAppDataInstance = new AppData(generalData, devices, tasks);
 
+            appDataInstance = newAppDataInstance;
             Task.initDeviceList(devices)
 
-            appDataInstance = newAppDataInstance;
+            for (let index = 0; index < tasks.length; index++) {
+                const task = tasks[index];
+                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+            }
         }
     }
 
@@ -62,9 +66,14 @@ class AppData {
             let tasks = await AppData.readTaskListFromFiles(generalData);
 
             let newAppDataInstance = new AppData(generalData, devices, tasks);
+            
             appDataInstance = newAppDataInstance;
-
             Task.initDeviceList(devices)
+
+            for (let index = 0; index < tasks.length; index++) {
+                const task = tasks[index];
+                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+            }
 
             return appDataInstance;
         }
@@ -118,7 +127,7 @@ class AppData {
         return this.deviceList;
     }
 
-    public addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo?: Array<topicData>, publishTo?: Array<topicData>): void {
+    public async addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo?: Array<topicData>, publishTo?: Array<topicData>):Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
             throw new Error("deviceTypeList should not be empty");
         }
@@ -150,6 +159,7 @@ class AppData {
         }
 
 
+        //TODO: change this to use Device.createNewDevice()
         let newDevice = new Device(deviceName, uuid, deviceType, _listenTo, _publishTo, false, deviceDataList);
 
         this.deviceList.push(newDevice);
@@ -157,8 +167,8 @@ class AppData {
     }
 
 
-    removeDevice(uuid: string): void {
-        this.generalData.removeDevice(uuid);
+    async removeDevice(uuid: string):Promise<void> {
+        await this.generalData.removeDevice(uuid);
 
         for (let i = this.deviceList.length - 1; i >= 0; i--) {
             const element = this.deviceList[i];
@@ -171,12 +181,17 @@ class AppData {
     }
 
     // IMPLEMENT addTask()
-    addTask(): void{
+    async addTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean): Promise<void>{
+        let task = await Task.createNewTask(taskId,taskName,taskType,isOn,isRepeating,[],[])
+        let generalTask = new GeneralTask(taskId)
 
+        this.generalData.addTask(generalTask)
+        this.taskList.push(task)
+        appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
     }
 
     // IMPLEMENT removeTask()
-    removeTask(taskId:string) {
+    async removeTask(taskId:string) {
 
     }
 
@@ -294,7 +309,6 @@ class AppData {
 
     // IMPLEMENT onDeviceDataChege()
     private onDeviceDataChege(callback: Function):void {
-
         callback();
     }
 

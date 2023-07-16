@@ -50,6 +50,7 @@ class Device implements device {
                 newDevice.deviceData.push(_deviceData)
             }
             await newDevice.saveData()
+            return newDevice;
     }
 
     async saveData(): Promise<void> {
@@ -208,11 +209,14 @@ class Device implements device {
 
     }
 
-    setVar(dataId:number, varName: string, newContent:any) {
+    setVar(dataId:number, varName: string, newContent:any,toTriger = true) {
         let event = this.deviceData[dataId].setVar(varName,newContent)
 
-        this.dataChanged(event);
-        this.dataChanged("data"+dataId);
+        this.saveData();
+        if(toTriger){
+            this.dataChanged(event);
+            this.dataChanged("data"+dataId);
+        }
     }
 
     dataChanged(event:string): void {
@@ -232,6 +236,7 @@ class Device implements device {
 
         client.sendMassage(topicData.topicPath,dataSend)
     }
+
 }
 
 
