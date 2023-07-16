@@ -1,8 +1,8 @@
-import {initConnectionCheck} from './scheduledFunctions/checkConnection'
+// import {initConnectionCheck} from './scheduledFunctions/checkConnection'
 
 
 function initAllScheduledFunctions() {
-    initConnectionCheck();
+    // initConnectionCheck();
 }
 
 export{initAllScheduledFunctions}

@@ -1,48 +1,71 @@
 
-import { eventFunctionData, generalTopic, topicData } from './devies/types'
-import { AirconditionerData } from "./devies/typeClasses/airconditionerData";
-import { Device, TopicData } from "./devies/typeClasses/device";
-import { DeviceListItem, GeneralData, getGeneralDataInstance } from "./devies/typeClasses/generalData";
+import { eventFunctionData, generalTopic, topicData } from './devices/types'
+import { AirconditionerData } from "./devices/typeClasses/airconditionerData";
+import { Device, TopicData } from "./devices/typeClasses/device";
+import { DeviceListItem, GeneralData, getGeneralDataInstance } from "./devices/typeClasses/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
-import { log } from 'console';
+import { Task } from './tasks';
 
 interface callbackData {
-    event : string
-    callback:Function
+    event: string
+    callback: Function
 }
 
 var appDataInstance: AppData;
 class AppData {
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
+    public static readonly ON_DEVICE_DATA_CHANGE = "deviceTopicChange";
 
+    private taskList: Array<Task>
     private generalData: GeneralData;
     private deviceList: Array<Device>;
-    private callbacks : Array<callbackData>
+    private callbacks: Array<callbackData>
 
-    private constructor(generalData: GeneralData, devices: Array<Device>) {
+    private constructor(generalData: GeneralData, devices: Array<Device>, taskList: Array<Task>) {
         this.generalData = generalData;
         this.deviceList = devices;
-        this.callbacks = []
+        this.taskList = taskList;
+        this.callbacks = [];
     }
 
-    public static async init():Promise<void> {
+    public static async init(): Promise<void> {
         if (!appDataInstance) {
             let generalData = await getGeneralDataInstance();
             let devices = await AppData.readDeviceListFromFiles(generalData);
+            let tasks = await AppData.readTaskListFromFiles(generalData);
+            let newAppDataInstance = new AppData(generalData, devices, tasks);
 
-            let newAppDataInstance = new AppData(generalData, devices);
+            Task.initDeviceList(devices)
+
             appDataInstance = newAppDataInstance;
         }
+    }
+
+    private static async readTaskListFromFiles(generalData: GeneralData): Promise<Array<Task>> {
+        let taskList = generalData.getTaskList();
+        let newTaskList: Array<Task> = [];
+        for (let i = 0; i < taskList.length; i++) {
+            const task = taskList[i];
+            // let taskData = await this.readTaskFromFiles(task.taskId)
+            let newDevice = await Task.loadFromFile(task.taskId)
+            newTaskList.push(newDevice);
+        }
+
+        return newTaskList
     }
 
     public static async getAppDataInstance(): Promise<AppData> {
         if (!appDataInstance) {
             let generalData = await getGeneralDataInstance();
             let devices = await AppData.readDeviceListFromFiles(generalData);
+            let tasks = await AppData.readTaskListFromFiles(generalData);
 
-            let newAppDataInstance = new AppData(generalData, devices);
+            let newAppDataInstance = new AppData(generalData, devices, tasks);
             appDataInstance = newAppDataInstance;
+
+            Task.initDeviceList(devices)
+
             return appDataInstance;
         }
         else {
@@ -50,7 +73,7 @@ class AppData {
         }
     }
 
-    private static async readDeviceListFromFiles(generalData: GeneralData):Promise<Array<Device>> {
+    private static async readDeviceListFromFiles(generalData: GeneralData): Promise<Array<Device>> {
         let deviceList = generalData.getDeviceList();
         let newDeviceList: Array<Device> = [];
         for (let i = 0; i < deviceList.length; i++) {
@@ -64,7 +87,7 @@ class AppData {
 
     }
 
-    private static async readDeviceFromFile(uuid: string, deviceType: Array<string>):Promise<Array<any>> {
+    private static async readDeviceFromFile(uuid: string, deviceType: Array<string>): Promise<Array<any>> {
         let deviceData: Array<any> = [];
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
@@ -83,11 +106,15 @@ class AppData {
         return deviceData;
     }
 
-    public getGeneralData():GeneralData {
+    public getGeneralData(): GeneralData {
         return this.generalData;
     }
 
-    public getDeviceList():Array<Device> {
+    public getTaskList(): Array<Task> {
+        return this.taskList;
+    }
+
+    public getDeviceList(): Array<Device> {
         return this.deviceList;
     }
 
@@ -143,6 +170,16 @@ class AppData {
         removeFile(`devices/${uuid}`)
     }
 
+    // IMPLEMENT addTask()
+    addTask(): void{
+
+    }
+
+    // IMPLEMENT removeTask()
+    removeTask(taskId:string) {
+
+    }
+
     private getDefaultDeviceData(deviceType: string): AirconditionerData {
         //TODO : add types
         switch (deviceType) {
@@ -159,6 +196,11 @@ class AppData {
         for (let i = 0; i < this.deviceList.length; i++) {
             const device = this.deviceList[i];
             device.saveData();
+        }
+
+        for (let index = 0; index < this.taskList.length; index++) {
+            const task = this.taskList[index];
+            task.saveData();
         }
 
         this.generalData.saveData();
@@ -209,20 +251,35 @@ class AppData {
 
         this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
-
+    
+    
     async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
                 await element.removeListenTopic(_generalTopic, dataType, event, functionData);
             }
-
+            
         }
-
+        
         this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    private onDeviceTopicChange(callback:Function): void {
+    private triggerCallbacks(event: string): void {
+        for (let index = 0; index < this.callbacks.length; index++) {
+            const element = this.callbacks[index];
+            switch (event) {
+                case (AppData.ON_DEVICE_TOPIC_CHANGE): {
+                    this.onDeviceTopicChange(element.callback);
+                }
+                case (AppData.ON_DEVICE_DATA_CHANGE): {
+                    this.onDeviceDataChege(element.callback)
+                }
+            }
+        }
+    }
+
+    private onDeviceTopicChange(callback: Function): void {
         let topicDataList: Array<TopicData> = [];
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
@@ -233,6 +290,12 @@ class AppData {
         }
 
         callback(topicDataList);
+    }
+
+    // IMPLEMENT onDeviceDataChege()
+    private onDeviceDataChege(callback: Function):void {
+
+        callback();
     }
 
     //HACK: probably want to find a better way to do it
@@ -247,35 +310,25 @@ class AppData {
             }
         }
 
-        return(subTypeList)
+        return (subTypeList)
     }
 
-    private triggerCallbacks(event:string):void {
-        for (let index = 0; index < this.callbacks.length; index++) {
-            const element = this.callbacks[index];
-            switch(event) {
-                case(AppData.ON_DEVICE_TOPIC_CHANGE) : {
-                    this.onDeviceTopicChange(element.callback);
-                }
-            }
-        }
-    }
 
-    on(event: string, callback: Function):void {
+    on(event: string, callback: Function): void {
         let newCallback = {
-            "event":event,
-            "callback":callback
+            "event": event,
+            "callback": callback
         }
         this.callbacks.push(newCallback)
     }
 
-    off(event: string, callback: Function):void {
-        for (let index = this.callbacks.length-1 ; index >= 0; index--) {
+    off(event: string, callback: Function): void {
+        for (let index = this.callbacks.length - 1; index >= 0; index--) {
             const _callback = this.callbacks[index];
-            if(_callback.event == event && _callback.callback == callback) {
+            if (_callback.event == event && _callback.callback == callback) {
                 this.callbacks.splice(index, 1)
             }
-            
+
         }
     }
 }

@@ -1,6 +1,7 @@
 interface generalData {
     topicList : Array<generalTopic>
     deviceList : Array<deviceListItem>
+    taskList : Array<generalTask>
 }
 
 interface generalTopic {
@@ -14,4 +15,7 @@ interface deviceListItem{
     name: string
     deviceType: Array<string>
 }
-export {generalData ,generalTopic, deviceListItem }
+interface generalTask {
+    taskId : string
+}
+export {generalData ,generalTopic, deviceListItem,generalTask }

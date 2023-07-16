@@ -1,5 +1,5 @@
-import { DataPackage } from "./devies/typeClasses/DataPackage";
-import { SubType } from "./devies/typeClasses/subType";
+import { DataPackage } from "./devices/typeClasses/DataPackage";
+import { SubType } from "./devices/typeClasses/subType";
 import { MqttHandler } from "./utility/mqtt_handler";
 
 const HOST = '10.0.0.12';

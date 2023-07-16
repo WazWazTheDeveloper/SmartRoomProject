@@ -3,6 +3,7 @@ import { MqttClient } from './mqtt_client';
 import { initAllScheduledFunctions } from './scheduledFunctions';
 import { AppData } from './AppData';
 import { router } from './router';
+import { Task } from './tasks';
 require('dotenv').config()
 
 const app: express.Application = express();
@@ -50,6 +51,7 @@ async function xx(data: AppData) {
   // let y = []
   let x = data.getGeneralData().topicList[1];
   // await data.addListenToTopicToDevice("01b68220-abdf-441b-9ae7-fefaf4ba9342", x, "airconditioner", "data0", { "functionType": "default" })
+  // console.log(Task.deviceList)
   setInterval(async () => {
     // data.getDeviceList()[0].setVar(0,"isOn",true)
     // data.getDeviceList()[0].setVar(0,"isOn" ,true)

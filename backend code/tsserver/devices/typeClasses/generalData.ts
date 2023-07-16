@@ -1,8 +1,16 @@
-import { deviceListItem, generalData, generalTopic } from "../types";
+import { deviceListItem, generalData, generalTask, generalTopic } from "../types";
 import * as data from '../../utility/file_handler'
 import { log } from "console";
 var GeneralDataInstance: GeneralData;
 
+class GeneralTask implements generalTask {
+    taskId: string
+
+    constructor(taskId: string) {
+        this.taskId = taskId;
+
+    }
+}
 class GeneralTopic implements generalTopic {
     topicName: string
     topicPath: string
@@ -13,6 +21,7 @@ class GeneralTopic implements generalTopic {
 
     }
 }
+
 
 class DeviceListItem implements deviceListItem {
     UUID: string //this should be private as you dont want use user to be able to change the UUID (i think?)
@@ -32,27 +41,36 @@ class GeneralData implements generalData {
 
     topicList: Array<GeneralTopic>;
     deviceList: Array<DeviceListItem>;
+    taskList: Array<generalTask>
 
-    constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>) {
+    constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>, taskList: Array<generalTask>) {
         this.deviceList = deviceList;
         this.topicList = topics;
+        this.taskList = taskList;
     }
 
     static async loadFromFile(): Promise<GeneralData> {
         let generalData = await data.readFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`);
 
         try {
-            let _topicList = []
+            let _topicList: Array<GeneralTopic> = []
+            let _taskList: Array<generalTask> = []
             for (let index = 0; index < generalData.topicList.length; index++) {
                 const element = generalData.topicList[index];
-                let newTopic = new GeneralTopic(element.topicName,element.topicPath)
+                let newTopic = new GeneralTopic(element.topicName, element.topicPath)
                 _topicList.push(newTopic)
             }
-            let generalDataObj = new GeneralData(generalData.deviceList, _topicList);
+
+            for (let index = 0; index < generalData.taskList.length; index++) {
+                const element = generalData.taskList[index];
+                let newTTask = new GeneralTask(element.taskId)
+                _taskList.push(newTTask)
+            }
+            let generalDataObj = new GeneralData(generalData.deviceList, _topicList, _taskList);
             return generalDataObj
         } catch (err) {
             console.log("File read failed:", err);
-            let generalDataObj = new GeneralData([], []);
+            let generalDataObj = new GeneralData([], [], []);
             generalDataObj.saveData();
             return generalDataObj
         }
@@ -63,6 +81,7 @@ class GeneralData implements generalData {
         let dataJson: generalData = {
             topicList: this.topicList,
             deviceList: this.deviceList,
+            taskList: this.taskList
         }
 
         await data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
@@ -87,21 +106,21 @@ class GeneralData implements generalData {
             const element = this.topicList[i];
             if (topicName == element.topicName) {
                 this.topicList.splice(i, 1)
-                log("removed general topid: '" +topicName+"'" )
+                log("removed general topid: '" + topicName + "'")
             }
         }
 
         this.saveData();
     }
 
-    public async addDevice(newDevice: DeviceListItem):Promise<void> {
+    public async addDevice(newDevice: DeviceListItem): Promise<void> {
         this.deviceList.push(newDevice)
         await this.saveData();
 
         console.log("new device added to general data")
     }
 
-    public async removeDevice(uuid: string):Promise<void> {
+    public async removeDevice(uuid: string): Promise<void> {
         for (let i = this.deviceList.length - 1; i >= 0; i--) {
             const element = this.deviceList[i];
             if (uuid == element.UUID) {
@@ -113,8 +132,21 @@ class GeneralData implements generalData {
         console.log("new device added to general data")
     }
 
-    public getTopics() {
+    public getTopicList() {
         return this.topicList;
+    }
+
+    public getTaskList() {
+        return this.taskList;
+    }
+
+    // IMPLEMENT
+    public addTask() {
+
+    }
+    // IMPLEMENT
+    public removeTask() {
+
     }
 
     public getDeviceList() {
@@ -122,7 +154,7 @@ class GeneralData implements generalData {
     }
 }
 
-async function getGeneralDataInstance() {
+async function getGeneralDataInstance(): Promise<GeneralData> {
     if (!GeneralDataInstance) {
         let data = await GeneralData.loadFromFile()
         GeneralDataInstance = data;

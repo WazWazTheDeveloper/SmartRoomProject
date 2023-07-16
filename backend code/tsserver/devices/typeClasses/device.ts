@@ -1,26 +1,10 @@
-import { dataPackage, device, eventFunctionData, generalTopic, topicData } from '../types'
+import { device, eventFunctionData, generalTopic, topicData } from '../types'
 import data = require('../../utility/file_handler')
 import { GeneralTopic } from './generalData'
 import { AirconditionerData } from './airconditionerData'
 import { MqttClient } from '../../mqtt_client'
-import { log } from 'console'
 import { DataPackage } from './DataPackage'
-
-class TopicData implements topicData {
-    topicName: string
-    topicPath: string
-    dataType: string
-    event: string
-    functionData: eventFunctionData
-
-    constructor(_generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData) {
-        this.topicName = _generalTopic.topicName;
-        this.topicPath = _generalTopic.topicPath
-        this.dataType = dataType
-        this.event = event
-        this.functionData = functionData
-    }
-}
+import { TopicData } from './topicData'
 
 class Device implements device {
     static readonly AIRCONDITIONER_TYPE = "airconditioner";
@@ -70,7 +54,8 @@ class Device implements device {
 
     async saveData(): Promise<void> {
         console.log(`saveing Device object ${this.uuid}`)
-
+        
+        // TODO: change deviceData: this.deviceData to get actual json fron getAsJson insted to json a hole object :)
         let dataJson: device = {
             deviceName: this.deviceName,
             uuid: this.uuid,

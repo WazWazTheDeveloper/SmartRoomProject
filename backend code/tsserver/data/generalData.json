@@ -17,5 +17,10 @@
                 "airconditioner","airconditioner"
             ]
         }
+    ],
+    "taskList" : [
+        {
+            "taskId":"01b68220-abdf-421b-9ae7-fefaf4ba9342"
+        }
     ]
 }
