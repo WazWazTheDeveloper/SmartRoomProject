@@ -14,7 +14,7 @@ class DataPackage implements dataPackage {
     }
 
     getAsJson(): dataPackage {
-        let json = {
+        let json:dataPackage = {
             "sender" : this.sender,
             "dataType" : this.dataType,
             "event" : this.event,

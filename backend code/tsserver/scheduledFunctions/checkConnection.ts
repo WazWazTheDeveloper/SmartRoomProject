@@ -1,3 +1,4 @@
+// DEL this hole file and folder
 // import CronJob = require("node-cron");
 // import mqttClient = require('../mqtt_client');
 // import data = require('../utility/file_handler')

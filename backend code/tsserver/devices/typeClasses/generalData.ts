@@ -24,7 +24,7 @@ class GeneralTopic implements generalTopic {
 
 
 class DeviceListItem implements deviceListItem {
-    UUID: string //this should be private as you dont want use user to be able to change the UUID (i think?)
+    UUID: string
     name: string
     deviceType: Array<string>
 
@@ -43,6 +43,7 @@ class GeneralData implements generalData {
     deviceList: Array<DeviceListItem>;
     taskList: Array<GeneralTask>
 
+    
     constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>, taskList: Array<GeneralTask>) {
         this.deviceList = deviceList;
         this.topicList = topics;
@@ -87,7 +88,7 @@ class GeneralData implements generalData {
         await data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
     }
 
-    public async addTopic(topicName: string, topicPath: string) {
+    public async addTopic(topicName: string, topicPath: string):Promise<void> {
         for (let index = 0; index < this.topicList.length; index++) {
             const element = this.topicList[index];
             if (element.topicName == topicName) {
@@ -101,7 +102,7 @@ class GeneralData implements generalData {
 
     }
 
-    public removeTopic(topicName: string) {
+    public removeTopic(topicName: string):void {
         for (let i = this.topicList.length - 1; i >= 0; i--) {
             const element = this.topicList[i];
             if (topicName == element.topicName) {
@@ -129,7 +130,7 @@ class GeneralData implements generalData {
 
         }
         await this.saveData();
-        console.log("new device added to general data")
+        console.log("removed device from general data")
     }
 
     public getTopicList() : Array<GeneralTopic> {
@@ -143,10 +144,19 @@ class GeneralData implements generalData {
     public async addTask(generalTask : GeneralTask): Promise<void> {
         this.taskList.push(generalTask)
         await this.saveData();
+        console.log("added task to general data")
     }
-    // IMPLEMENT removeTask()
-    public async removeTask(): Promise<void> {
+    
+    public async removeTask(taskId:string): Promise<void> {
+        for (let i = this.taskList.length - 1; i >= 0; i--) {
+            const element = this.taskList[i];
+            if (taskId == element.taskId) {
+                this.taskList.splice(i, 1)
+            }
 
+        }
+        await this.saveData();
+        console.log("removed task from general data")
     }
 
     public getDeviceList() {

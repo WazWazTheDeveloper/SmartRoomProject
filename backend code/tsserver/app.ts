@@ -1,11 +1,7 @@
 import express = require('express');
 import { MqttClient } from './mqtt_client';
-import { initAllScheduledFunctions } from './scheduledFunctions';
 import { AppData } from './AppData';
 import { router } from './router';
-import { Task, VarCheck } from './tasks';
-import { log } from 'console';
-import { DataPackage } from './devices/typeClasses/DataPackage';
 require('dotenv').config()
 
 const app: express.Application = express();
@@ -30,12 +26,9 @@ async function setup(): Promise<void> {
 
   //add listener to update subscribe list automatically
   appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
-  // TODO: do the same thing for tasks
-  // IMPLEMENT: schduled Functions
-  // schduled Functions
-  // initAllScheduledFunctions() 
-
   
+  // IMPLEMENT: schduled Functions
+  // schduled Functions like check connection
 
 
   // DEL: this is here for testing
@@ -51,21 +44,7 @@ async function updateMqttClientSubList(callback: Function) {
 
 async function xx(data: AppData) {
   let x = data.getGeneralData()
-  // MqttClient.getMqttClientInstance().sendMassage("isAlive",new DataPackage("tester","*","*",[]));
 
-  // let task = data.getTaskList()[0].addVarCheck("01b68220-abdf-441b-9ae7-fefaf4ba9342","temp",0,VarCheck.CHECK_EQUAL_TO,24);
-  // let task = data.getTaskList()[0].addTodoTask("01b68220-abdf-441b-9ae7-fefaf4ba9342",1,"temp",20)
-  // console.log(data.getTaskList()[0]);
-  try{
-    // await data.getTaskList()[0].addTimedCheck('*/2 * * * * *')
-  }
-  catch(err) {
-    log(err)
-  }
-
-  setInterval(async () => {
-
-  }, 1000)
 }
 
 function startListeningToReqests(): void {

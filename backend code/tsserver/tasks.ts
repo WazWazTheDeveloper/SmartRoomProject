@@ -1,9 +1,4 @@
-import { DataPackage } from "./devices/typeClasses/DataPackage"
 import { Device } from "./devices/typeClasses/device"
-import { GeneralTopic } from "./devices/typeClasses/generalData"
-import { TopicData } from "./devices/typeClasses/topicData"
-import { device, eventFunctionData } from "./devices/types"
-import { initAllScheduledFunctions } from "./scheduledFunctions"
 import data = require('./utility/file_handler')
 import { TimedTask } from "./utility/timedTask"
 
@@ -11,7 +6,7 @@ interface varCheck {
     deviceId: string
     varName: string
     dataIndex: number;
-    checkType: number //such and > < == and stuff
+    checkType: number
     valueToCompareTo: any
     isTrue: boolean
 }
@@ -104,7 +99,6 @@ class ToDoTask implements toDoTask {
 interface task {
     taskId: string
     taskName: string
-    taskType: string
     isOn: boolean
     isRepeating: boolean
     varCheckList: Array<VarCheck>
@@ -116,7 +110,6 @@ class Task implements task {
     private static deviceList: Array<Device> = [];
     taskId: string
     taskName: string
-    taskType: string
     isOn: boolean
     isRepeating: boolean
     varCheckList: Array<VarCheck>
@@ -126,10 +119,9 @@ class Task implements task {
     timedTasks: Array<TimedTask>
 
 
-    constructor(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>) {
+    constructor(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>) {
         this.taskId = taskId
         this.taskName = taskName
-        this.taskType = taskType
         this.isOn = isOn
         this.isRepeating = isRepeating
         this.varCheckList = varCheckList
@@ -140,13 +132,14 @@ class Task implements task {
 
     public static initDeviceList(newDeviceList: Array<Device>): void {
         Task.deviceList = newDeviceList
+
+        console.log("Device list is Task class initialized")
     }
 
     getAsJson(): task {
         let dataJson: task = {
             "taskId": this.taskId,
             "taskName": this.taskName,
-            "taskType": this.taskType,
             "isOn": this.isOn,
             "isRepeating": this.isRepeating,
             "varCheckList": this.varCheckList,
@@ -165,13 +158,11 @@ class Task implements task {
     }
 
     public static async loadFromFile(taskId: string): Promise<Task> {
-        console.log(taskId)
         let deviceDataFromJson = await data.readFile<task>(`tasks/${taskId}`);
         try {
             let newTask = new Task(
                 deviceDataFromJson.taskId,
                 deviceDataFromJson.taskName,
-                deviceDataFromJson.taskType,
                 deviceDataFromJson.isOn,
                 deviceDataFromJson.isRepeating,
                 deviceDataFromJson.varCheckList,
@@ -186,8 +177,8 @@ class Task implements task {
         }
     }
 
-    public static async createNewTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>): Promise<Task> {
-        let newTask = new Task(taskId, taskName, taskType, isOn, isRepeating, varCheckList, timedCheckList, toDoTaskList)
+    public static async createNewTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>): Promise<Task> {
+        let newTask = new Task(taskId, taskName, isOn, isRepeating, varCheckList, timedCheckList, toDoTaskList)
 
         await newTask.saveData()
 
@@ -260,6 +251,8 @@ class Task implements task {
             }
 
             this.setAllTimerCheck(false);
+
+            console.log("task: '"+this.taskName+"' executed")
         }
 
         await this.saveData()

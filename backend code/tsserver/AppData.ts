@@ -6,7 +6,6 @@ import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task, ToDoTask, VarCheck } from './tasks';
-import { initAllScheduledFunctions } from './scheduledFunctions';
 
 interface callbackData {
     event: string
@@ -146,7 +145,6 @@ class AppData {
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
             let newDeviceData = this.getDefaultDeviceData(element);
-            console.log(newDeviceData)
             deviceDataList.push(newDeviceData);
         }
 
@@ -181,19 +179,31 @@ class AppData {
         removeFile(`devices/${uuid}`)
     }
 
-    // IMPLEMENT addTask()
-    async addTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean): Promise<void>{
-        let task = await Task.createNewTask(taskId,taskName,taskType,isOn,isRepeating,[],[],[])
+    async addTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void>{
+        let task = await Task.createNewTask(taskId,taskName,isOn,isRepeating,[],[],[])
         let generalTask = new GeneralTask(taskId)
 
         this.generalData.addTask(generalTask)
         this.taskList.push(task)
         appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+
+        console.log("added new Task: " + task.taskName)
     }
 
-    // IMPLEMENT removeTask()
     async removeTask(taskId:string) {
+        let taskName = ""
+        await this.generalData.removeTask(taskId);
 
+        for (let i = this.taskList.length - 1; i >= 0; i--) {
+            const element = this.taskList[i];
+            if (taskId == element.taskId) {
+                taskName = element.taskName
+                this.taskList.splice(i, 1)
+            }
+        }
+
+        removeFile(`tasks/${taskId}`)
+        console.log("removed Task: " + taskName)
     }
 
     private getDefaultDeviceData(deviceType: string): AirconditionerData {
@@ -220,16 +230,18 @@ class AppData {
         }
 
         this.generalData.saveData();
+
+        console.log("saved AppData")
     }
 
     addGeneralTopic(topicName: string, topicPath: string): void {
         this.generalData.addTopic(topicName, topicPath)
-        console.log(`added new generalTopic {TopicName: ${topicName}, TopicPath: ${topicPath}}`)
+        console.log("added new generalTopic {TopicName: " +topicName+", TopicPath:" +topicPath+"}")
     }
 
     removeGeneralTopic(topicName: string): void {
         this.generalData.removeTopic(topicName);
-        console.log(`removed generalTopic {TopicName: ${topicName}}`)
+        console.log("removed generalTopic {TopicName: "+topicName+"}")
     }
 
     async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
@@ -308,7 +320,6 @@ class AppData {
         callback(topicDataList);
     }
 
-    // IMPLEMENT onDeviceDataChege()
     private onDeviceDataChege(callback: Function):void {
         callback();
     }
