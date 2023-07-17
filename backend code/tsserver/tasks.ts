@@ -3,7 +3,9 @@ import { Device } from "./devices/typeClasses/device"
 import { GeneralTopic } from "./devices/typeClasses/generalData"
 import { TopicData } from "./devices/typeClasses/topicData"
 import { device, eventFunctionData } from "./devices/types"
+import { initAllScheduledFunctions } from "./scheduledFunctions"
 import data = require('./utility/file_handler')
+import { TimedTask } from "./utility/timedTask"
 
 interface varCheck {
     deviceId: string
@@ -51,21 +53,36 @@ class VarCheck implements varCheck {
     }
 }
 
+interface timeCheck {
+    timingData: string
+    isTrue: boolean
+}
+
+class TimeCheck implements timeCheck {
+    timingData: string
+    isTrue: boolean
+
+    constructor(timingData: string, isTrue: boolean) {
+        this.timingData = timingData
+        this.isTrue = isTrue
+    }
+}
+
 interface toDoTask {
-    deviceId:string
+    deviceId: string
     dataIndex: number
-    varName:string
-    newVarValue:any
-    
+    varName: string
+    newVarValue: any
+
 }
 
 class ToDoTask implements toDoTask {
 
-    deviceId:string
+    deviceId: string
     dataIndex: number
-    varName:string
-    newVarValue:any
-    constructor (deviceId:string , dataIndex: number,varName:string,newVarValue:any) {
+    varName: string
+    newVarValue: any
+    constructor(deviceId: string, dataIndex: number, varName: string, newVarValue: any) {
         this.deviceId = deviceId;
         this.dataIndex = dataIndex;
         this.varName = varName;
@@ -91,6 +108,7 @@ interface task {
     isOn: boolean
     isRepeating: boolean
     varCheckList: Array<VarCheck>
+    timedCheckList: Array<TimeCheck>
     toDoTaskList: Array<ToDoTask>
 }
 
@@ -102,16 +120,22 @@ class Task implements task {
     isOn: boolean
     isRepeating: boolean
     varCheckList: Array<VarCheck>
+    timedCheckList: Array<TimeCheck>
     toDoTaskList: Array<ToDoTask>
 
-    constructor(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>,toDoTaskList: Array<ToDoTask>) {
+    timedTasks: Array<TimedTask>
+
+
+    constructor(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>) {
         this.taskId = taskId
         this.taskName = taskName
         this.taskType = taskType
         this.isOn = isOn
         this.isRepeating = isRepeating
         this.varCheckList = varCheckList
+        this.timedCheckList = timedCheckList
         this.toDoTaskList = toDoTaskList
+        this.timedTasks = []
     }
 
     public static initDeviceList(newDeviceList: Array<Device>): void {
@@ -126,6 +150,7 @@ class Task implements task {
             "isOn": this.isOn,
             "isRepeating": this.isRepeating,
             "varCheckList": this.varCheckList,
+            "timedCheckList": this.timedCheckList,
             "toDoTaskList": this.toDoTaskList
         }
 
@@ -136,10 +161,11 @@ class Task implements task {
         let dataJson: task = this.getAsJson()
 
         await data.writeFile<task>(`tasks/${this.taskId}`, dataJson)
-        console.log(`done saving Device object ${this.taskId}`)
+        console.log(`done saving Task object ${this.taskId}`)
     }
 
     public static async loadFromFile(taskId: string): Promise<Task> {
+        console.log(taskId)
         let deviceDataFromJson = await data.readFile<task>(`tasks/${taskId}`);
         try {
             let newTask = new Task(
@@ -149,8 +175,10 @@ class Task implements task {
                 deviceDataFromJson.isOn,
                 deviceDataFromJson.isRepeating,
                 deviceDataFromJson.varCheckList,
+                deviceDataFromJson.timedCheckList,
                 deviceDataFromJson.toDoTaskList
             )
+            newTask.initTimedTasks()
             return newTask
         } catch (err) {
             console.log("File read failed:", err);
@@ -158,15 +186,40 @@ class Task implements task {
         }
     }
 
-    public static async createNewTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>,toDoTaskList: Array<ToDoTask>):Promise<Task>{
-        let newTask = new Task(taskId, taskName, taskType, isOn, isRepeating, varCheckList,toDoTaskList)
+    public static async createNewTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>): Promise<Task> {
+        let newTask = new Task(taskId, taskName, taskType, isOn, isRepeating, varCheckList, timedCheckList, toDoTaskList)
 
         await newTask.saveData()
 
         return newTask
     }
 
+    initTimedTasks() {
+        this.timedTasks = [];
+        for (let index = 0; index < this.timedCheckList.length; index++) {
+            const timedCheck = this.timedCheckList[index];
+            this.initTimedTask(timedCheck)
+        }
+    }
+
+    initTimedTask(timedCheck: TimeCheck) {
+        let newTimedTask = new TimedTask(timedCheck.timingData, this.onUpdateTimedTask.bind(this, timedCheck))
+        this.timedTasks.push(newTimedTask);
+        if(this.isOn) {
+            newTimedTask.start();
+        }
+    }
+
+    onUpdateTimedTask(timedCheck: TimeCheck) {
+        timedCheck.isTrue = true;
+        this.onUpdateData()
+    }
+
     async onUpdateData(): Promise<void> {
+        if (!this.isOn) {
+            return
+        }
+
         let isAllTrue = true;
         for (let index = 0; index < this.varCheckList.length; index++) {
             const varCheck = this.varCheckList[index];
@@ -187,12 +240,26 @@ class Task implements task {
             }
         }
 
+        for (let index = 0; index < this.timedCheckList.length; index++) {
+            const timerCheck = this.timedCheckList[index];
+            isAllTrue = isAllTrue && timerCheck.isTrue
+        }
+
         if (isAllTrue) {
+            // update part
             for (let index = 0; index < this.toDoTaskList.length; index++) {
                 const task = this.toDoTaskList[index];
                 let device = this.getDeviceFromId(task.deviceId);
-                device.setVar(task.dataIndex,task.varName,task.newVarValue,false);
+                device.setVar(task.dataIndex, task.varName, task.newVarValue, false);
             }
+
+            //resetting part
+            if (!this.isRepeating) {
+                this.isOn = false;
+                this.stopAllTimedTasks();
+            }
+
+            this.setAllTimerCheck(false);
         }
 
         await this.saveData()
@@ -237,6 +304,7 @@ class Task implements task {
         return varCheck.isTrue;
     }
 
+    // HACK: I really dont like how this word
     getDeviceFromId(uuid: string): Device {
         for (let index = 0; index < Task.deviceList.length; index++) {
             const device = Task.deviceList[index];
@@ -252,7 +320,6 @@ class Task implements task {
         this.varCheckList.push(newVarCheck);
         await this.saveData()
         this.onUpdateData()
-
     }
 
     async removeVarCheck(indexOfVarCheck: number): Promise<void> {
@@ -261,10 +328,11 @@ class Task implements task {
         this.onUpdateData()
     }
 
-    async addTodoTask(deviceId:string , dataIndex: number,varName:string,newVarValue:any): Promise<void> {
+    async addTodoTask(deviceId: string, dataIndex: number, varName: string, newVarValue: any): Promise<void> {
         let newTodoTask = new ToDoTask(deviceId, dataIndex, varName, newVarValue);
         this.toDoTaskList.push(newTodoTask);
         await this.saveData()
+        this.onUpdateData()
     }
 
     async removeTodoTask(indexOfTodoTask: number): Promise<void> {
@@ -273,6 +341,61 @@ class Task implements task {
         this.onUpdateData()
     }
 
+    async addTimedCheck(timingData: string): Promise<void> {
+        let newTimedCheck = new TimeCheck(timingData, false);
+        this.timedCheckList.push(newTimedCheck);
+        this.initTimedTask(newTimedCheck);
+        await this.saveData()
+        // this.onUpdateData()
+    }
+
+    async removeTimedCheck(indexOfTimedCheck: number): Promise<void> {
+        this.timedCheckList.slice(indexOfTimedCheck, 1);
+        this.timedTasks[indexOfTimedCheck].stop();
+        this.timedTasks.slice(indexOfTimedCheck, 1);
+        await this.saveData()
+        // this.onUpdateData()
+    }
+
+    async setIsOn(isOn: boolean) {
+        this.isOn = isOn;
+        this.setAllTimerCheck(false)
+        if (this.isOn) {
+            this.startAllTimedTasks();
+        }
+        else {
+            this.stopAllTimedTasks();
+        }
+
+        await this.saveData();
+    }
+
+    setAllTimerCheck(isTrue : boolean) {
+        for (let index = 0; index < this.timedCheckList.length; index++) {
+            const timerCheck = this.timedCheckList[index];
+            const timedTask = this.timedTasks[index];
+            timerCheck.isTrue = isTrue;
+        }
+    }
+
+    stopAllTimedTasks() {
+        for (let index = 0; index < this.timedCheckList.length; index++) {
+            const timerCheck = this.timedCheckList[index];
+            const timedTask = this.timedTasks[index];
+
+            timedTask.stop()
+        }
+    }
+
+    startAllTimedTasks() {
+        for (let index = 0; index < this.timedCheckList.length; index++) {
+            const timerCheck = this.timedCheckList[index];
+            const timedTask = this.timedTasks[index];
+
+            timedTask.start()
+        }
+    }
+
 }
 
-export { Task, VarCheck,ToDoTask }
+export { Task, VarCheck, ToDoTask }

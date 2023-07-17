@@ -6,6 +6,7 @@ import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task, ToDoTask, VarCheck } from './tasks';
+import { initAllScheduledFunctions } from './scheduledFunctions';
 
 interface callbackData {
     event: string
@@ -55,7 +56,7 @@ class AppData {
             let newDevice = await Task.loadFromFile(task.taskId)
             newTaskList.push(newDevice);
         }
-
+        
         return newTaskList
     }
 
@@ -182,7 +183,7 @@ class AppData {
 
     // IMPLEMENT addTask()
     async addTask(taskId: string, taskName: string, taskType: string, isOn: boolean, isRepeating: boolean): Promise<void>{
-        let task = await Task.createNewTask(taskId,taskName,taskType,isOn,isRepeating,[],[])
+        let task = await Task.createNewTask(taskId,taskName,taskType,isOn,isRepeating,[],[],[])
         let generalTask = new GeneralTask(taskId)
 
         this.generalData.addTask(generalTask)

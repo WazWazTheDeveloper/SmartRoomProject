@@ -41,9 +41,9 @@ class GeneralData implements generalData {
 
     topicList: Array<GeneralTopic>;
     deviceList: Array<DeviceListItem>;
-    taskList: Array<generalTask>
+    taskList: Array<GeneralTask>
 
-    constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>, taskList: Array<generalTask>) {
+    constructor(deviceList: Array<deviceListItem>, topics: Array<GeneralTopic>, taskList: Array<GeneralTask>) {
         this.deviceList = deviceList;
         this.topicList = topics;
         this.taskList = taskList;
@@ -132,20 +132,20 @@ class GeneralData implements generalData {
         console.log("new device added to general data")
     }
 
-    public getTopicList() {
+    public getTopicList() : Array<GeneralTopic> {
         return this.topicList;
     }
 
-    public getTaskList() {
+    public getTaskList(): Array<GeneralTask> {
         return this.taskList;
     }
 
-    public async addTask(generalTask : GeneralTask) {
+    public async addTask(generalTask : GeneralTask): Promise<void> {
         this.taskList.push(generalTask)
         await this.saveData();
     }
-    // IMPLEMENT
-    public async removeTask() {
+    // IMPLEMENT removeTask()
+    public async removeTask(): Promise<void> {
 
     }
 
