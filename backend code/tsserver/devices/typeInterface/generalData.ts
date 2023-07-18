@@ -7,6 +7,7 @@ interface generalData {
 interface generalTopic {
     topicName: string
     topicPath: string
+    isVisible:boolean
 }
 
 

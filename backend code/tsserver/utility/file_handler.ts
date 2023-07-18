@@ -9,6 +9,7 @@ function readFile<T>(fileName:string):Promise<T> {
                 reject(err);
             }
             else {
+                console.log(`reading ${fileName}`)
                 resolve(JSON.parse(data.toString()));
             }
         });
@@ -17,10 +18,12 @@ function readFile<T>(fileName:string):Promise<T> {
 
 async function writeFile<T>(fileName:string,json:T): Promise<void> {
     let data = JSON.stringify(json);
-    await fsPromises.writeFile(`./data/${fileName}.json`, data);
+                console.log(`writing ${fileName}`)
+                await fsPromises.writeFile(`./data/${fileName}.json`, data);
 };
 
 function removeFile(filePath:string) {
+    console.log(`removing ${filePath}`)
     fs.unlink(`./data/${filePath}.json`, () => {})
 }
 

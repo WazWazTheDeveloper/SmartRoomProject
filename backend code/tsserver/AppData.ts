@@ -6,6 +6,34 @@ import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task, ToDoTask, VarCheck } from './tasks';
+import { updateDevicesToCheck } from './scheduledFunctions/checkConnection';
+
+// TODO: move this somewhere else: 
+interface settingsType {
+    listenTo: Array<topicData>
+    publishTo: Array<topicData>
+
+}
+
+class SettingsType {
+    listenTo: Array<topicData>
+    publishTo: Array<topicData>
+
+    constructor(listenTo: Array<topicData>, publishTo: Array<topicData>) {
+        this.listenTo = listenTo
+        this.publishTo = publishTo
+
+    }
+
+    getAsJson(): settingsType {
+        let json:settingsType = {
+            "listenTo" : this.listenTo,
+            "publishTo" : this.publishTo
+        }
+
+        return json
+    }
+}
 
 interface callbackData {
     event: string
@@ -127,7 +155,7 @@ class AppData {
         return this.deviceList;
     }
 
-    public async addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo?: Array<topicData>, publishTo?: Array<topicData>):Promise<void> {
+    public async addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo=[], publishTo=[]):Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
             throw new Error("deviceTypeList should not be empty");
         }
@@ -150,19 +178,30 @@ class AppData {
 
         let _publishTo: Array<topicData> = [];
         let _listenTo: Array<topicData> = [];
-        if (Array.isArray(deviceType) && deviceType.length != 0) {
+        console.log(_publishTo)
+        if (_publishTo && Array.isArray(deviceType) && deviceType.length != 0) {
             _publishTo = publishTo!
         }
-        if (Array.isArray(deviceType) && deviceType.length != 0) {
+        if (listenTo && Array.isArray(deviceType) && deviceType.length != 0) {
             _listenTo = listenTo!
         }
 
+        console.log(_publishTo)
+        this.addGeneralTopic(`${uuid}`,`device/${uuid}`,false)
+        let deviceSettingUpdateGeneralTopic = this.generalData.getTopicByName(uuid);
+        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,"updateSettings",{"functionType": ""})
+        _publishTo.push(deviceSettingUpdateTopic);
 
         //TODO: change this to use Device.createNewDevice()
-        let newDevice = new Device(deviceName, uuid, deviceType, _listenTo, _publishTo, false, deviceDataList);
+        let newDevice = new Device(deviceName, uuid, deviceType, _listenTo, _publishTo,false ,false, deviceDataList);
+
+        newDevice.settingsChanged("updateSettings")
 
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
+
+        // TODO: chenge thiss
+        updateDevicesToCheck()
     }
 
 
@@ -177,9 +216,12 @@ class AppData {
         }
 
         removeFile(`devices/${uuid}`)
+
+        // TODO: chenge this
+        updateDevicesToCheck()
     }
 
-    async addTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void>{
+    async createTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void>{
         let task = await Task.createNewTask(taskId,taskName,isOn,isRepeating,[],[],[])
         let generalTask = new GeneralTask(taskId)
 
@@ -188,6 +230,26 @@ class AppData {
         appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
 
         console.log("added new Task: " + task.taskName)
+    }
+
+    getTaskById(taskId:string):Task {
+        for (let index = 0; index < this.taskList.length; index++) {
+            const task = this.taskList[index];
+            if(task.taskId == taskId) {
+                return task
+            }
+        }
+        throw new Error("task not found: "+taskId)
+    }
+
+    getDeviceById(deviceId:string):Device {
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const device = this.deviceList[index];
+            if(device.uuid == deviceId) {
+                return device
+            }
+        }
+        throw new Error("device not found")
     }
 
     async removeTask(taskId:string) {
@@ -234,9 +296,13 @@ class AppData {
         console.log("saved AppData")
     }
 
-    addGeneralTopic(topicName: string, topicPath: string): void {
-        this.generalData.addTopic(topicName, topicPath)
-        console.log("added new generalTopic {TopicName: " +topicName+", TopicPath:" +topicPath+"}")
+    async addGeneralTopic(topicName: string, topicPath: string,isVisible:boolean): Promise<void> {
+        try {
+            await this.generalData.addTopic(topicName, topicPath,isVisible)
+            console.log("added new generalTopic {TopicName: " +topicName+", TopicPath:" +topicPath+"}")
+        }catch(err) {
+            throw err
+        }
     }
 
     removeGeneralTopic(topicName: string): void {
@@ -244,11 +310,11 @@ class AppData {
         console.log("removed generalTopic {TopicName: "+topicName+"}")
     }
 
-    async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
-                await element.addPublishTopic(_generalTopic, dataType, event, functionData);
+                await element.addPublishTopic(_generalTopic, dataType, isVisible,event, functionData);
             }
 
         }
@@ -268,11 +334,11 @@ class AppData {
         this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
-                await element.addListenTopic(_generalTopic, dataType, event, functionData);
+                await element.addListenTopic(_generalTopic, dataType, isVisible,event, functionData);
             }
 
         }
@@ -358,4 +424,4 @@ class AppData {
         }
     }
 }
-export { AppData }
+export { AppData,SettingsType,settingsType }

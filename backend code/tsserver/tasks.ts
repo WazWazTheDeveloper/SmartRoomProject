@@ -118,8 +118,10 @@ class Task implements task {
 
     timedTasks: Array<TimedTask>
 
+    // HACK: this is hacked in and need to looked into later
+    callbackOnComplate: Array<Function>
 
-    constructor(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>) {
+    constructor(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>,callbackOnComplate=[]) {
         this.taskId = taskId
         this.taskName = taskName
         this.isOn = isOn
@@ -128,6 +130,7 @@ class Task implements task {
         this.timedCheckList = timedCheckList
         this.toDoTaskList = toDoTaskList
         this.timedTasks = []
+        this.callbackOnComplate = callbackOnComplate
     }
 
     public static initDeviceList(newDeviceList: Array<Device>): void {
@@ -237,11 +240,23 @@ class Task implements task {
         }
 
         if (isAllTrue) {
-            // update part
+            // update part 
             for (let index = 0; index < this.toDoTaskList.length; index++) {
                 const task = this.toDoTaskList[index];
                 let device = this.getDeviceFromId(task.deviceId);
-                device.setVar(task.dataIndex, task.varName, task.newVarValue, false);
+                // -1 means for change the device itself
+                if(task.dataIndex == -1){
+                    device.setVar(task.varName,task.newVarValue)
+                }else {
+                    device.setDataVar(task.dataIndex, task.varName, task.newVarValue, false);
+                }
+            }
+
+            console.log("")
+            for (let index = 0; index < this.callbackOnComplate.length; index++) {
+                const _callback = this.callbackOnComplate[index];
+                _callback();
+                
             }
 
             //resetting part
@@ -334,6 +349,13 @@ class Task implements task {
         this.onUpdateData()
     }
 
+    async emptyTodoTask(): Promise<void> {
+        console.log("imhere")
+        this.toDoTaskList.splice(0,this.toDoTaskList.length);
+        await this.saveData()
+        this.onUpdateData()
+    }
+
     async addTimedCheck(timingData: string): Promise<void> {
         let newTimedCheck = new TimeCheck(timingData, false);
         this.timedCheckList.push(newTimedCheck);
@@ -348,6 +370,20 @@ class Task implements task {
         this.timedTasks.slice(indexOfTimedCheck, 1);
         await this.saveData()
         // this.onUpdateData()
+    }
+
+    // HACK: this is hacked in and need to looked into later
+    addCallbackOnComplate(callback : Function):void  {
+        this.callbackOnComplate.push(callback)
+    }
+    // HACK: this is hacked in and need to looked into later
+    removeCallbackOnComplate(callback : Function):void {
+        for (let index = 0; index < this.callbackOnComplate.length; index++) {
+            const _function = this.callbackOnComplate[index];
+            if(_function == callback) {
+                this.callbackOnComplate.splice(index, 1)
+            }
+        }
     }
 
     async setIsOn(isOn: boolean) {

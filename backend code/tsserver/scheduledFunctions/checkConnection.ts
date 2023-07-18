@@ -1,61 +1,105 @@
-// DEL this hole file and folder
-// import CronJob = require("node-cron");
-// import mqttClient = require('../mqtt_client');
-// import data = require('../utility/file_handler')
-// import { GeneralData } from "../devies/typeClasses/generalData";
-// import { Device } from "../devies/typeClasses/device";
-// import { AirconditionerDevice } from "../devies/typeClasses/airconditionerDevice";
-// import { device } from "../devies/types";
+import { AppData } from "../AppData";
+import { DataPacket } from "../devices/typeClasses/DataPacket";
+import { TopicData } from "../devices/typeClasses/topicData";
+import { generalTopic } from "../devices/types";
+import { MqttClient, SubType } from "../mqtt_client";
+import { Task } from "../tasks";
 
-// const CHECK_INTERVAL = 5
-// const IS_ALIVE_TOPIC = "isAlive";
+// TODO make this a class
 
-// const scheduledJobFunction = CronJob.schedule(`*/${CHECK_INTERVAL} * * * * *`, () => {
+const TASKID = "checkIsConnected"
+let isConnectedCheckTopic: generalTopic;
+let subType: SubType;
+async function initSubType(): Promise<void> {
+    let newTopicData = new TopicData(isConnectedCheckTopic, "*", false, "checkIsConnected", { "functionType": "*" })
+    let newSubType = new SubType(newTopicData, onUpdateFromServer)
 
+    subType = newSubType
+}
 
-//     new Promise<Array<Device<any>>>((resolve, reject) => {
-//         let devices: Array<Device<any>> = [];
-//         GeneralData.loadFromFile().then(generalData => {
-//             for (let i = 0; i < generalData.deviceList.length; i++) {
-//                 const device = generalData.deviceList[i];
-//                 AirconditionerDevice.loadFromFile(device.UUID).then(acunit => {
-//                     Device.loadFromFile<AirconditionerDevice>(device.UUID, acunit!).then(data => {
-//                         devices.push(data)
+async function onUpdateFromServer(topic: string, message: DataPacket, topicData: TopicData): Promise<void> {
+    let appData = await AppData.getAppDataInstance();
+    if (message.dataType != topicData.dataType) {
+        return
+    }
+    if (message.event != topicData.event) {
+        return
+    }
+    let deviceID = message.sender;
 
-//                         if (generalData.deviceList.length - 1 == i) {
-//                             resolve(devices);
-//                         }
-//                     });
-//                 });
-//             }
-//         })
-//     }).then(devices => {
-//         for (let i = 0; i < devices.length; i++) {
-//             devices[i].checkConnection();
-//             mqttClient.sendMessage(IS_ALIVE_TOPIC, String(Date.now()));
-//         }
-//         setInterval(() => {
-//             for (let i = 0; i < devices.length; i++) {
-//                 if (devices[i].isConnected) {
-//                     console.log(`${devices[i].uuid} is alive`)
-//                 }
-//             }
-//             // data.readFile("devices/01b68220-abdf-441b-9ae7-fefaf4ba9341").then(device => {
-//             //     if (device.isAlive) {
-//             //         console.log(`${device.uuid} is alive`)
-//             //     }
-//             // })
-//         }, 5000);
-//         console.log("Checking Connection to devices");
-//     })
+    if (deviceID != "server") {
+        try {
+            let _device = appData.getDeviceById(deviceID)
+            _device.setVar("isConnectedCheck", true)
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
+}
+async function updateDevicesToCheck() {
+    let appData = await AppData.getAppDataInstance();
+    let task = appData.getTaskById(TASKID)
+    task.emptyTodoTask()
+    for (let index = 0; index < appData.getDeviceList().length; index++) {
+        const device = appData.getDeviceList()[index];
+        task.addTodoTask(device.uuid, -1, "isConnectedCheck", false);
+    }
+}
 
+async function initConnectionCheck(): Promise<void> {
+    let appData = await AppData.getAppDataInstance();
+    let mqttClient = MqttClient.getMqttClientInstance();
+    let task: Task;
 
+    try {
+        isConnectedCheckTopic = appData.getGeneralData().getTopicByName("isConnectedCheckTopic")
+    } catch (err) {
+        await appData.addGeneralTopic("isConnectedCheckTopic", "isConnectedCheckTopic", false)
+        isConnectedCheckTopic = appData.getGeneralData().getTopicByName("isConnectedCheckTopic")
+    }
 
+    // get the task and if doent exist make a new one
+    try {
+        task = appData.getTaskById(TASKID)
+    } catch (err) {
+        await appData.createTask(TASKID, "checkIsConnected", true, false)
+        task = appData.getTaskById(TASKID)
+        task.addTimedCheck("*/5 * * * * *")
+        for (let index = 0; index < appData.getDeviceList().length; index++) {
+            const device = appData.getDeviceList()[index];
+            task.addTodoTask(device.uuid, -1, "isConnectedCheck", false);
+        }
+    }
 
-// });
+    initSubType()
+    mqttClient.subscribe(subType, 0)
 
-// function initConnectionCheck() {
-//     scheduledJobFunction.start();
-// }
+    task.addCallbackOnComplate(updater)
 
-// export { initConnectionCheck }
+    task.setIsOn(true)
+
+}
+
+async function updater(): Promise<void> {
+    console.log("starting connection check")
+    let mqttClient = MqttClient.getMqttClientInstance();
+    let checkConnectionPacket = new DataPacket("server", "*", "checkIsConnected", [])
+    mqttClient.sendMassage(isConnectedCheckTopic.topicPath, checkConnectionPacket)
+
+    setTimeout(async () => {
+        let appData = await AppData.getAppDataInstance();
+        for (let index = 0; index < appData.getDeviceList().length; index++) {
+            try {
+                const device = appData.getDeviceList()[index];
+                device.isConnected = device.isConnectedCheck
+            }
+            catch (err) { }
+        }
+
+        appData.getTaskById(TASKID).setIsOn(true)
+        console.log("connection check completed")
+    }, 5000)
+}
+
+export { initConnectionCheck ,updateDevicesToCheck}

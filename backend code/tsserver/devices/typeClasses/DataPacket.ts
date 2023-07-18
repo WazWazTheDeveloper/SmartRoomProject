@@ -1,6 +1,6 @@
-import { dataPackage } from "../types";
+import { dataPacket } from "../types";
 
-class DataPackage implements dataPackage {
+class DataPacket implements dataPacket {
     sender:string
     dataType: string
     event:string
@@ -13,16 +13,16 @@ class DataPackage implements dataPackage {
         this.data = data
     }
 
-    getAsJson(): dataPackage {
-        let json:dataPackage = {
+    getAsJson(): dataPacket {
+        let json:dataPacket = {
             "sender" : this.sender,
             "dataType" : this.dataType,
             "event" : this.event,
-            "data" : this.data,
+            "data" : this.data
         }
 
         return json
     }
 }
 
-export {DataPackage}
+export {DataPacket}

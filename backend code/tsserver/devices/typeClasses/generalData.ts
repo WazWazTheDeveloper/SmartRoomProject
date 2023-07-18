@@ -14,10 +14,12 @@ class GeneralTask implements generalTask {
 class GeneralTopic implements generalTopic {
     topicName: string
     topicPath: string
+    isVisible:boolean
 
-    constructor(topicName: string, topicPath: string) {
+    constructor(topicName: string, topicPath: string,isVisible:boolean) {
         this.topicName = topicName;
         this.topicPath = topicPath
+        this.isVisible = isVisible
 
     }
 }
@@ -51,14 +53,13 @@ class GeneralData implements generalData {
     }
 
     static async loadFromFile(): Promise<GeneralData> {
-        let generalData = await data.readFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`);
-
         try {
+            let generalData = await data.readFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`);
             let _topicList: Array<GeneralTopic> = []
             let _taskList: Array<generalTask> = []
             for (let index = 0; index < generalData.topicList.length; index++) {
                 const element = generalData.topicList[index];
-                let newTopic = new GeneralTopic(element.topicName, element.topicPath)
+                let newTopic = new GeneralTopic(element.topicName, element.topicPath, element.isVisible)
                 _topicList.push(newTopic)
             }
 
@@ -72,7 +73,7 @@ class GeneralData implements generalData {
         } catch (err) {
             console.log("File read failed:", err);
             let generalDataObj = new GeneralData([], [], []);
-            generalDataObj.saveData();
+            await generalDataObj.saveData();
             return generalDataObj
         }
     }
@@ -88,7 +89,7 @@ class GeneralData implements generalData {
         await data.writeFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
     }
 
-    public async addTopic(topicName: string, topicPath: string):Promise<void> {
+    public async addTopic(topicName: string, topicPath: string,isVisible:boolean):Promise<void> {
         for (let index = 0; index < this.topicList.length; index++) {
             const element = this.topicList[index];
             if (element.topicName == topicName) {
@@ -96,7 +97,7 @@ class GeneralData implements generalData {
             }
 
         }
-        let newTopic = new GeneralTopic(topicName, topicPath)
+        let newTopic = new GeneralTopic(topicName, topicPath,isVisible)
         this.topicList.push(newTopic)
         await this.saveData();
 
@@ -139,6 +140,16 @@ class GeneralData implements generalData {
 
     public getTaskList(): Array<GeneralTask> {
         return this.taskList;
+    }
+
+    getTopicByName(topicName: string) {
+        for (let index = 0; index < this.topicList.length; index++) {
+            const element = this.topicList[index];
+            if(element.topicName == topicName) {
+                return element
+            }
+        }
+        throw new Error("general topic not found")
     }
 
     public async addTask(generalTask : GeneralTask): Promise<void> {

@@ -1,7 +1,13 @@
 import express = require('express');
-import { MqttClient } from './mqtt_client';
+import { MqttClient, SubType } from './mqtt_client';
 import { AppData } from './AppData';
 import { router } from './router';
+import { Task } from './tasks';
+import { DataPacket } from './devices/typeClasses/DataPacket';
+import { TopicData } from './devices/typeClasses/topicData';
+import { log } from 'console';
+import { initConnectionCheck } from './scheduledFunctions/checkConnection';
+import { Device } from './devices/typeClasses/device';
 require('dotenv').config()
 
 const app: express.Application = express();
@@ -16,6 +22,8 @@ async function startServer(): Promise<void> {
   startListeningToReqests()
 }
 
+import { v4 as uuidv4 } from 'uuid';
+
 async function setup(): Promise<void> {
   //get instances
   let appData = await AppData.getAppDataInstance();
@@ -26,13 +34,14 @@ async function setup(): Promise<void> {
 
   //add listener to update subscribe list automatically
   appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
-  
-  // IMPLEMENT: schduled Functions
-  // schduled Functions like check connection
 
+  // init scheduled functions
+  initConnectionCheck()
 
-  // DEL: this is here for testing
-  xx(appData);
+  // let uuid = uuidv4();
+  // appData.removeDevice("74b160ae-d22a-4234-81f0-97a49c6d5873")
+  // await appData.addDevice(uuid,uuid,[Device.AIRCONDITIONER_TYPE]);
+  // appData.getDeviceById(uuid).addListenTopic(appData.getGeneralData().getTopicByName(uuid),"a",true,"3",{functionType : ""})
 }
 
 async function updateMqttClientSubList(callback: Function) {
@@ -40,11 +49,6 @@ async function updateMqttClientSubList(callback: Function) {
   let appData = await AppData.getAppDataInstance()
 
   client.setNewSubscribeList(appData.getSubTypeList())
-}
-
-async function xx(data: AppData) {
-  let x = data.getGeneralData()
-
 }
 
 function startListeningToReqests(): void {

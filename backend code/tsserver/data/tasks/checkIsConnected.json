@@ -1,0 +1,1 @@
+{"taskId":"checkIsConnected","taskName":"checkIsConnected","isOn":true,"isRepeating":false,"varCheckList":[],"timedCheckList":[{"timingData":"*/5 * * * * *","isTrue":false}],"toDoTaskList":[]}

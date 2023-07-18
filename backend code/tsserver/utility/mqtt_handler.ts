@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt"
-import { DataPackage } from "../devices/typeClasses/DataPackage";
+import { DataPacket } from "../devices/typeClasses/DataPacket";
 
 class MqttHandler {
     mqttClient: mqtt.MqttClient | null;
@@ -31,7 +31,7 @@ class MqttHandler {
 
         this.mqttClient.on('message', (topic, message) => {
             let _message = JSON.parse(message.toString());
-            let newDataPackage = new DataPackage(_message.sender,_message.dataType,_message.event,_message.data)
+            let newDataPackage = new DataPacket(_message.sender,_message.dataType,_message.event,_message.data)
             this.onMassageCallback(topic, JSON.parse(message.toString()))
         });
 
@@ -40,7 +40,7 @@ class MqttHandler {
         });
     }
 
-    sendMessage(topic: string, message: DataPackage) {
+    sendMessage(topic: string, message: DataPacket) {
         console.log(`published "${message}" to "${topic}"`);
         let _message = JSON.stringify(message.getAsJson())
         this.mqttClient?.publish(topic, (_message));

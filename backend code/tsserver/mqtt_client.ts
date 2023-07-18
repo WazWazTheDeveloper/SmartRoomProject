@@ -1,4 +1,4 @@
-import { DataPackage } from "./devices/typeClasses/DataPackage";
+import { DataPacket } from "./devices/typeClasses/DataPacket";
 import { SubType } from "./devices/typeClasses/subType";
 import { MqttHandler } from "./utility/mqtt_handler";
 
@@ -36,7 +36,7 @@ class MqttClient {
 
     }
 
-    private onMassage(topic: string, message: DataPackage) {
+    private onMassage(topic: string, message: DataPacket) {
         for (let index = 0; index < mqttClientInstance.subscribeList.length; index++) {
             const element = mqttClientInstance.subscribeList[index];
 
@@ -74,7 +74,7 @@ class MqttClient {
         this.subscribeList=[];
     }
 
-    public sendMassage(topic: string, message: DataPackage) {
+    public sendMassage(topic: string, message: DataPacket) {
         this.mqttClient.sendMessage(topic, message)
         return this;
     }
