@@ -1,11 +1,11 @@
 import { device, eventFunctionData, generalTopic, topicData } from '../types'
-import data = require('../../utility/file_handler')
+import data = require('../utility/file_handler')
 import { GeneralTopic } from './generalData'
 import { AirconditionerData } from './airconditionerData'
-import { MqttClient } from '../../mqtt_client'
+import { MqttClient } from '../mqtt_client'
 import { DataPacket } from './DataPacket'
 import { TopicData } from './topicData'
-import { SettingsType } from '../../AppData'
+import { SettingsType } from '../AppData'
 
 class Device implements device {
     static readonly AIRCONDITIONER_TYPE = "airconditioner";

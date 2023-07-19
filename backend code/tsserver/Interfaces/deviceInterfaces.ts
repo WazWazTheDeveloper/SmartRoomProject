@@ -1,4 +1,4 @@
-import {eventFunctionData} from '../types'
+import {eventFunctionData} from '../../types'
 
 interface device {
     deviceName:string

@@ -1,7 +1,7 @@
 import { AppData } from "../AppData";
-import { DataPacket } from "../devices/typeClasses/DataPacket";
-import { TopicData } from "../devices/typeClasses/topicData";
-import { generalTopic } from "../devices/types";
+import { DataPacket } from "../classes/DataPacket";
+import { TopicData } from "../classes/topicData";
+import { generalTopic } from "../types";
 import { MqttClient, SubType } from "../mqtt_client";
 import { Task } from "../tasks";
 

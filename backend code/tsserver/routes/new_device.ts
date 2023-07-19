@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import { v4 as uuidv4 } from 'uuid';
-import { Device } from "../devices/typeClasses/device";
+import { Device } from "../classes/device";
 import { AppData } from "../AppData";
 
 const router: express.Router = express.Router();

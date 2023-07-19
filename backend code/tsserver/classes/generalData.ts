@@ -1,5 +1,5 @@
 import { deviceListItem, generalData, generalTask, generalTopic } from "../types";
-import * as data from '../../utility/file_handler'
+import * as data from '../utility/file_handler'
 import { log } from "console";
 var GeneralDataInstance: GeneralData;
 

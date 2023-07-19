@@ -1,4 +1,4 @@
-import { Device } from "./devices/typeClasses/device"
+import { Device } from "./classes/device"
 import data = require('./utility/file_handler')
 import { TimedTask } from "./utility/timedTask"
 

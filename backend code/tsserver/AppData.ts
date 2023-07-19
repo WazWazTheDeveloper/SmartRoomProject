@@ -1,8 +1,8 @@
 
-import { eventFunctionData, generalTopic, topicData } from './devices/types'
-import { AirconditionerData } from "./devices/typeClasses/airconditionerData";
-import { Device, TopicData } from "./devices/typeClasses/device";
-import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from "./devices/typeClasses/generalData";
+import { eventFunctionData, generalTopic, topicData } from './types'
+import { AirconditionerData } from "./classes/airconditionerData";
+import { Device, TopicData } from "./classes/device";
+import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from "./classes/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task, ToDoTask, VarCheck } from './tasks';

@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt"
-import { DataPacket } from "../devices/typeClasses/DataPacket";
+import { DataPacket } from "../classes/DataPacket";
 
 class MqttHandler {
     mqttClient: mqtt.MqttClient | null;

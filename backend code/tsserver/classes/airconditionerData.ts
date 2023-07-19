@@ -1,5 +1,5 @@
 import { airconditionerData, device, deviceType } from '../types'
-import data = require('../../utility/file_handler')
+import data = require('../utility/file_handler')
 
 class AirconditionerData implements deviceType {
     // modes

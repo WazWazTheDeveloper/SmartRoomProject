@@ -1,4 +1,5 @@
-import { TopicData } from "../typeClasses/device"
+import { TopicData } from "../classes/topicData"
+
 
 interface subType {
     topicData: TopicData

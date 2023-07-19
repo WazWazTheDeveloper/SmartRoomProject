@@ -3,11 +3,11 @@ import { MqttClient, SubType } from './mqtt_client';
 import { AppData } from './AppData';
 import { router } from './router';
 import { Task } from './tasks';
-import { DataPacket } from './devices/typeClasses/DataPacket';
-import { TopicData } from './devices/typeClasses/topicData';
+import { DataPacket } from './classes/DataPacket';
+import { TopicData } from './classes/topicData';
 import { log } from 'console';
 import { initConnectionCheck } from './scheduledFunctions/checkConnection';
-import { Device } from './devices/typeClasses/device';
+import { Device } from './classes/device';
 require('dotenv').config()
 
 const app: express.Application = express();
