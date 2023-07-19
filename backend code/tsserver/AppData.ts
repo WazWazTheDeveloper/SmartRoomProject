@@ -6,7 +6,7 @@ import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task, ToDoTask, VarCheck } from './tasks';
-import { updateDevicesToCheck } from './scheduledFunctions/checkConnection';
+import { CheckConnection } from './scheduledFunctions/checkConnection';
 
 // TODO: move this somewhere else: 
 interface settingsType {
@@ -200,8 +200,7 @@ class AppData {
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
 
-        // TODO: chenge thiss
-        updateDevicesToCheck()
+        await CheckConnection.updateDevicesToCheck();
     }
 
 
@@ -217,8 +216,7 @@ class AppData {
 
         removeFile(`devices/${uuid}`)
 
-        // TODO: chenge this
-        updateDevicesToCheck()
+        await CheckConnection.updateDevicesToCheck();
     }
 
     async createTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void>{

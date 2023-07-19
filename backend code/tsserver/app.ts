@@ -6,7 +6,7 @@ import { Task } from './tasks';
 import { DataPacket } from './classes/DataPacket';
 import { TopicData } from './classes/topicData';
 import { log } from 'console';
-import { initConnectionCheck } from './scheduledFunctions/checkConnection';
+import { CheckConnection } from './scheduledFunctions/checkConnection';
 import { Device } from './classes/device';
 require('dotenv').config()
 
@@ -36,7 +36,7 @@ async function setup(): Promise<void> {
   appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
 
   // init scheduled functions
-  initConnectionCheck()
+  await CheckConnection.init()
 
   // let uuid = uuidv4();
   // appData.removeDevice("74b160ae-d22a-4234-81f0-97a49c6d5873")
