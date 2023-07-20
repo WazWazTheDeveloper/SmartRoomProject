@@ -2,16 +2,14 @@ import express = require('express');
 import { MqttClient, SubType } from './mqtt_client';
 import { AppData } from './AppData';
 import { router } from './router';
-import { Task } from './tasks';
-import { DataPacket } from './classes/DataPacket';
-import { TopicData } from './classes/topicData';
-import { log } from 'console';
+const bodyParser = require('body-parser');
 import { CheckConnection } from './scheduledFunctions/checkConnection';
-import { Device } from './classes/device';
 require('dotenv').config()
 
 const app: express.Application = express();
 app.use('/', router)
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 async function startServer(): Promise<void> {
   await AppData.init()
@@ -37,11 +35,6 @@ async function setup(): Promise<void> {
 
   // init scheduled functions
   await CheckConnection.init()
-
-  // let uuid = uuidv4();
-  // appData.removeDevice("74b160ae-d22a-4234-81f0-97a49c6d5873")
-  // await appData.addDevice(uuid,uuid,[Device.AIRCONDITIONER_TYPE]);
-  // appData.getDeviceById(uuid).addListenTopic(appData.getGeneralData().getTopicByName(uuid),"a",true,"3",{functionType : ""})
 }
 
 async function updateMqttClientSubList(callback: Function) {

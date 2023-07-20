@@ -5,7 +5,7 @@ import { Device, TopicData } from "./classes/device";
 import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from "./classes/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
-import { Task, ToDoTask, VarCheck } from './tasks';
+import { Task} from './tasks';
 import { CheckConnection } from './scheduledFunctions/checkConnection';
 
 // TODO: move this somewhere else: 
@@ -69,7 +69,7 @@ class AppData {
 
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
-                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData.bind(task));
             }
         }
     }
@@ -100,7 +100,7 @@ class AppData {
 
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
-                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE , task.onUpdateData.bind(task));
             }
 
             return appDataInstance;
@@ -169,16 +169,9 @@ class AppData {
 
         let newDeviceGeneralData = new DeviceListItem(uuid, deviceName, deviceType);
 
-        let deviceDataList: Array<any> = [];
-        for (let i = 0; i < deviceType.length; i++) {
-            const element = deviceType[i];
-            let newDeviceData = this.getDefaultDeviceData(element);
-            deviceDataList.push(newDeviceData);
-        }
-
         let _publishTo: Array<topicData> = [];
         let _listenTo: Array<topicData> = [];
-        console.log(_publishTo)
+        // console.log(_publishTo)
         if (_publishTo && Array.isArray(deviceType) && deviceType.length != 0) {
             _publishTo = publishTo!
         }
@@ -186,16 +179,15 @@ class AppData {
             _listenTo = listenTo!
         }
 
-        console.log(_publishTo)
+        // console.log(_publishTo)
         this.addGeneralTopic(`${uuid}`,`device/${uuid}`,false)
         let deviceSettingUpdateGeneralTopic = this.generalData.getTopicByName(uuid);
-        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,"updateSettings",{"functionType": ""})
+        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,Device.ON_UPDATE_SETTINGS,{"functionType": ""})
         _publishTo.push(deviceSettingUpdateTopic);
 
-        //TODO: change this to use Device.createNewDevice()
-        let newDevice = new Device(deviceName, uuid, deviceType, _listenTo, _publishTo,false ,false, deviceDataList);
+        let newDevice:Device = await Device.createNewDevice(deviceName, uuid, deviceType, _listenTo, _publishTo);
 
-        newDevice.settingsChanged("updateSettings")
+        newDevice.settingsChanged(Device.ON_UPDATE_SETTINGS)
 
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
@@ -225,7 +217,7 @@ class AppData {
 
         this.generalData.addTask(generalTask)
         this.taskList.push(task)
-        appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE , task.onUpdateData);
+        appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE , task.onUpdateData.bind(task));
 
         console.log("added new Task: " + task.taskName)
     }
@@ -299,7 +291,7 @@ class AppData {
             await this.generalData.addTopic(topicName, topicPath,isVisible)
             console.log("added new generalTopic {TopicName: " +topicName+", TopicPath:" +topicPath+"}")
         }catch(err) {
-            throw err
+            throw new Error("err")
         }
     }
 
@@ -420,6 +412,11 @@ class AppData {
             }
 
         }
+    }
+
+    changeDeviceName(uuid:string,newName:string) {
+        let device = this.getDeviceById(uuid);
+        device.setVar(Device.DEVICE_NAME , newName)
     }
 }
 export { AppData,SettingsType,settingsType }

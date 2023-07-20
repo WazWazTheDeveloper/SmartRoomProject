@@ -6,7 +6,7 @@ import { MqttClient, SubType } from "../mqtt_client";
 import { Task } from "../tasks";
 
 
-let checkConnection:CheckConnection;
+let checkConnectionObject:CheckConnection;
 class CheckConnection {
     static readonly TASKID = "checkIsConnected";
     isConnectedCheckTopic: generalTopic;
@@ -46,11 +46,11 @@ class CheckConnection {
         let newTopicData = new TopicData(isConnectedCheckTopic, "*", false, "checkIsConnected", { "functionType": "*" })
         let newSubType = new SubType(newTopicData, this.onUpdateFromServer)
 
-        checkConnection = new CheckConnection(isConnectedCheckTopic , newSubType)
+        checkConnectionObject = new CheckConnection(isConnectedCheckTopic , newSubType)
     
-        mqttClient.subscribe(checkConnection.subType, 0)
+        mqttClient.subscribe(checkConnectionObject.subType, 0)
     
-        task.addCallbackOnComplate(checkConnection.updater)
+        task.addCallbackOnComplate(checkConnectionObject.updater.bind(checkConnectionObject))
     
         task.setIsOn(true)
     }

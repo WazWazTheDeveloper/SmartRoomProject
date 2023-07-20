@@ -8,7 +8,12 @@ import { TopicData } from './topicData'
 import { SettingsType } from '../AppData'
 
 class Device implements device {
+    static readonly DEVICE_NAME = "deviceName"
+    static readonly isConnected = "isConnected"
+    static readonly isConnectedCheck = "isConnectedCheck"
     static readonly AIRCONDITIONER_TYPE = "airconditioner";
+    public static readonly ON_UPDATE_SETTINGS = 'updateSettings'
+
 
     deviceName: string
     uuid: string
@@ -43,10 +48,10 @@ class Device implements device {
         uuid: string,
         deviceType: Array<string>,
         listenTo: Array<topicData>,
-        publishTo: Array<topicData>,
-        deviceData: Array<any>) {
+        publishTo: Array<topicData>
+        ):Promise<Device> {
 
-        let newDevice = new Device(deviceName, uuid, deviceType, [], [], false, false, [])
+        let newDevice = new Device(deviceName, uuid, deviceType, listenTo, publishTo, false, false, [])
 
         for (let index = 0; index < newDevice.deviceType.length; index++) {
             const _deviceType = newDevice.deviceType[index];
@@ -60,7 +65,12 @@ class Device implements device {
     async saveData(): Promise<void> {
         console.log(`saveing Device object ${this.uuid}`)
 
-        // TODO: change deviceData: this.deviceData to get actual json fron getAsJson insted to json a hole object :)
+        let jsonArr:Array<any> = [];
+        for (let index = 0; index < this.deviceData.length; index++) {
+            const device = this.deviceData[index];  
+            jsonArr.push(device.getAsJson());
+        }
+
         let dataJson: device = {
             deviceName: this.deviceName,
             uuid: this.uuid,
@@ -69,8 +79,11 @@ class Device implements device {
             publishTo: this.publishTo,
             isConnected: this.isConnected,
             isConnectedCheck: this.isConnectedCheck,
-            deviceData: this.deviceData
+            deviceData: (jsonArr)
         }
+
+        // console.log("jsonArr")
+        // console.log(jsonArr);
 
         await data.writeFile<device>(`devices/${this.uuid}`, dataJson)
         console.log(`done saving Device object ${this.uuid}`)
@@ -98,13 +111,13 @@ class Device implements device {
 
     getAsJson() {
         let json = {
-            "deviceName" : this.deviceName,
-            "uuid" : this.uuid,
-            "deviceType" : this.deviceType,
-            "listenTo" : this.listenTo,
-            "publishTo" : this.publishTo,
-            "isConnected" : this.isConnected,
-            "deviceData" : this.deviceData
+            "deviceName": this.deviceName,
+            "uuid": this.uuid,
+            "deviceType": this.deviceType,
+            "listenTo": this.listenTo,
+            "publishTo": this.publishTo,
+            "isConnected": this.isConnected,
+            "deviceData": this.deviceData
         }
 
         return json
@@ -133,11 +146,17 @@ class Device implements device {
         let functionToCall: Function = (topic: string, message: string) => { };
         let eventString = topicData.event
         let dataNumber = 0;
+        try {
+            dataNumber = parseInt(eventString.substring(4));
+        }catch(err) {}
 
         // problem is somwhere here
         if (this.deviceData[dataNumber] && this.deviceType[dataNumber]) {
-            dataNumber = parseInt(eventString.substring(4));
-            // TODO: add types
+            if(this.deviceType[dataNumber] != topicData.dataType) {
+                return
+            }
+            // TODO: add more function types
+            // TODO add events: add more function types
             switch (topicData.functionData.functionType) {
                 case ("default"): {
                     functionToCall = this.callDefaultFunction(topicData, dataNumber);
@@ -181,7 +200,7 @@ class Device implements device {
         this.publishTo.push(newTopicData)
 
         await this.saveData();
-        this.settingsChanged("updateSettings");
+        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
         console.log("added new ListenTopic")
     }
 
@@ -200,7 +219,7 @@ class Device implements device {
             }
         }
 
-        this.settingsChanged("updateSettings");
+        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
         await this.saveData();
     }
 
@@ -209,7 +228,7 @@ class Device implements device {
         this.listenTo.push(newTopicData)
 
         await this.saveData();
-        this.settingsChanged("updateSettings");
+        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
         console.log("added new ListenTopic");
     }
 
@@ -217,10 +236,10 @@ class Device implements device {
         for (let i = this.listenTo.length - 1; i >= 0; i--) {
             const element = this.listenTo[i];
             if (
-                element.topicName == _generalTopic.topicName,
-                element.topicPath == _generalTopic.topicPath,
-                element.dataType == dataType,
-                element.event == event,
+                element.topicName == _generalTopic.topicName &&
+                element.topicPath == _generalTopic.topicPath &&
+                element.dataType == dataType &&
+                element.event == event &&
                 element.functionData.functionType == functionData.functionType
             ) {
                 this.listenTo.splice(i, 1)
@@ -228,7 +247,7 @@ class Device implements device {
             }
         }
 
-        this.settingsChanged("updateSettings");
+        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
         await this.saveData();
     }
 
@@ -236,10 +255,19 @@ class Device implements device {
 
         switch (varName) {
             //TODO:  add all other cases
-            case "isConnected":
-                this.isConnected = newContent == true ? true : false;
+            case Device.DEVICE_NAME:
+                this.deviceName = String(newContent)
+                this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+                await this.saveData();
                 break;
-            case "isConnectedCheck":
+            case Device.isConnected:
+                if (this.isConnected != true ? true : false) {
+                    this.isConnected = newContent == true ? true : false;
+                    this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+                    await this.saveData();
+                    break;
+                }
+            case Device.isConnectedCheck:
                 this.isConnectedCheck = newContent == true ? true : false;
                 break;
 
@@ -247,7 +275,6 @@ class Device implements device {
                 break;
         }
 
-        await this.saveData();
         if (toTriger) {
         }
     }

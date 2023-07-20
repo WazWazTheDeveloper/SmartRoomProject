@@ -1,0 +1,40 @@
+{
+    "deviceName": "new device",
+    "uuid": "43071a14-6b15-49dc-8ffc-1ae8a78e6bb7",
+    "deviceType": [
+        "airconditioner"
+    ],
+    "listenTo": [],
+    "publishTo": [
+        {
+            "topicName": "43071a14-6b15-49dc-8ffc-1ae8a78e6bb7",
+            "topicPath": "device/43071a14-6b15-49dc-8ffc-1ae8a78e6bb7",
+            "dataType": "settingsType",
+            "isVisible": false,
+            "event": "updateSettings",
+            "functionData": {
+                "functionType": ""
+            }
+        }
+    ],
+    "isConnected": false,
+    "isConnectedCheck": false,
+    "deviceData": [
+        {
+            "isOn": false,
+            "temp": 24,
+            "mode": 0,
+            "speed": 3,
+            "swing1": false,
+            "swing2": false,
+            "timer": 0,
+            "fullhours": 0,
+            "isHalfHour": false,
+            "isStrong": false,
+            "isFeeling": false,
+            "isSleep": false,
+            "isScreen": true,
+            "isHealth": false
+        }
+    ]
+}

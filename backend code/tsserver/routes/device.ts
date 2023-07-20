@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Device } from "../classes/device";
 import { AppData } from "../AppData";
 
+
 const router: express.Router = express.Router();
 
 router.use((req: Request, res: Response, next) => {
@@ -16,9 +17,6 @@ router.get('/getUUID', (req: Request, res: Response) => {
     res.send(uuid)
 })
 
-// IMPLEMENT: router.get('/registerNewDevice')
-// probably better to take care with handler that is driven from an mqtt massage
-// do it anyway as a fail safe or somting if unable to do it automaticly
 router.get('/registerNewDevice', async(req: Request, res: Response) => {
     let x = Device.AIRCONDITIONER_TYPE
     let newUUID = uuidv4();
@@ -34,4 +32,4 @@ router.get('/registerNewDevice', async(req: Request, res: Response) => {
     res.send()
 })
 
-export { router as newDevice };
+export { router as deviceRouter };

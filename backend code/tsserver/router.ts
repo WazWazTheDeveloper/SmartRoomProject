@@ -2,10 +2,12 @@ import express = require('express')
 const router:express.Router = express.Router()
 
 import {index} from './routes/index';
-import {newDevice} from './routes/new_device';
+import {deviceRouter} from './routes/device';
+import { appdataRouter } from './routes/appdata';
 
 router.use('/', index)
-router.use('/newDevice', newDevice)
+router.use('/device', deviceRouter)
+router.use('/appdata', appdataRouter)
 
 
 
