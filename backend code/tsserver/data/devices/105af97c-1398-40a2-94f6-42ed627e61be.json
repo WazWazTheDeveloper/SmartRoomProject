@@ -1,0 +1,27 @@
+{
+    "deviceName": "new device",
+    "uuid": "105af97c-1398-40a2-94f6-42ed627e61be",
+    "deviceType": [
+        "switch"
+    ],
+    "listenTo": [],
+    "publishTo": [
+        {
+            "topicName": "105af97c-1398-40a2-94f6-42ed627e61be",
+            "topicPath": "device/105af97c-1398-40a2-94f6-42ed627e61be",
+            "dataType": "settingsType",
+            "isVisible": false,
+            "event": "updateSettings",
+            "functionData": {
+                "functionType": ""
+            }
+        }
+    ],
+    "isConnected": false,
+    "isConnectedCheck": false,
+    "deviceData": [
+        {
+            "isOn": false
+        }
+    ]
+}

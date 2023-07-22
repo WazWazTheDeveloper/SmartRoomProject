@@ -7,6 +7,7 @@ import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task} from './tasks';
 import { CheckConnection } from './scheduledFunctions/checkConnection';
+import { SwitchData } from './classes/switchData';
 
 // TODO: move this somewhere else: 
 interface settingsType {
@@ -134,6 +135,9 @@ class AppData {
                     case (Device.AIRCONDITIONER_TYPE): {
                         deviceData.push(await AirconditionerData.loadFromFile(uuid, i));
                     }
+                    case (Device.SWITCH_TYPE): {
+                        deviceData.push(await SwitchData.loadFromFile(uuid, i));
+                    }
                 }
 
             } catch (err) {
@@ -182,12 +186,12 @@ class AppData {
         // console.log(_publishTo)
         this.addGeneralTopic(`${uuid}`,`device/${uuid}`,false)
         let deviceSettingUpdateGeneralTopic = this.generalData.getTopicByName(uuid);
-        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,Device.ON_UPDATE_SETTINGS,{"functionType": ""})
+        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,Device.CHANGE_SETTINGS_EVENT,{"functionType": ""})
         _publishTo.push(deviceSettingUpdateTopic);
 
         let newDevice:Device = await Device.createNewDevice(deviceName, uuid, deviceType, _listenTo, _publishTo);
 
-        newDevice.settingsChanged(Device.ON_UPDATE_SETTINGS)
+        newDevice.settingsChanged(Device.CHANGE_SETTINGS_EVENT)
 
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
@@ -258,11 +262,14 @@ class AppData {
         console.log("removed Task: " + taskName)
     }
 
-    private getDefaultDeviceData(deviceType: string): AirconditionerData {
+    private getDefaultDeviceData(deviceType: string): any {
         //TODO : add types
         switch (deviceType) {
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
+            }
+            case (Device.SWITCH_TYPE): {
+                return new SwitchData();
             }
             default: {
                 throw new Error(`unknown device type "${deviceType}"`)

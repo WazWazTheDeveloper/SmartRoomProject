@@ -1,4 +1,4 @@
-import {eventFunctionData} from '../../types'
+import {eventFunctionData} from '../types'
 
 interface device {
     deviceName:string
@@ -26,6 +26,7 @@ interface deviceType {
     getData:Function
     getAsJson:Function
     getVar:Function
+    // loadFromFile: Function
 }
 
 export {device,topicData,deviceType}

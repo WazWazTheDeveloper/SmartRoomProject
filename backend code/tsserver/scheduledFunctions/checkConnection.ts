@@ -4,6 +4,7 @@ import { TopicData } from "../classes/topicData";
 import { generalTopic } from "../types";
 import { MqttClient, SubType } from "../mqtt_client";
 import { Task } from "../tasks";
+import { Device } from "../classes/device";
 
 
 let checkConnectionObject:CheckConnection;
@@ -96,7 +97,7 @@ class CheckConnection {
     async updater(): Promise<void> {
         console.log("starting connection check")
         let mqttClient = MqttClient.getMqttClientInstance();
-        let checkConnectionPacket = new DataPacket("server", "*", "checkIsConnected", [])
+        let checkConnectionPacket = new DataPacket("server", "*", Device.CHANGE_DATA_EVENT, [])
         mqttClient.sendMassage(this.isConnectedCheckTopic.topicPath, checkConnectionPacket)
     
         setTimeout(async () => {

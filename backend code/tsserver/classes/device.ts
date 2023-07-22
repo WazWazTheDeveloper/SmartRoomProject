@@ -6,13 +6,24 @@ import { MqttClient } from '../mqtt_client'
 import { DataPacket } from './DataPacket'
 import { TopicData } from './topicData'
 import { SettingsType } from '../AppData'
+import { SwitchData } from './switchData'
 
 class Device implements device {
     static readonly DEVICE_NAME = "deviceName"
     static readonly isConnected = "isConnected"
     static readonly isConnectedCheck = "isConnectedCheck"
+
+    // types
     static readonly AIRCONDITIONER_TYPE = "airconditioner";
-    public static readonly ON_UPDATE_SETTINGS = 'updateSettings'
+    static readonly SWITCH_TYPE = "switch";
+
+    // events
+    public static readonly CHANGE_SETTINGS_EVENT = 'updateSettings'
+    public static readonly CHANGE_DATA_EVENT = 'updateData'
+
+    // function types
+    public static readonly DEFAULT_FUNCTION_TYPE = 'default'
+
 
 
     deviceName: string
@@ -49,7 +60,7 @@ class Device implements device {
         deviceType: Array<string>,
         listenTo: Array<topicData>,
         publishTo: Array<topicData>
-        ):Promise<Device> {
+    ): Promise<Device> {
 
         let newDevice = new Device(deviceName, uuid, deviceType, listenTo, publishTo, false, false, [])
 
@@ -65,9 +76,9 @@ class Device implements device {
     async saveData(): Promise<void> {
         console.log(`saveing Device object ${this.uuid}`)
 
-        let jsonArr:Array<any> = [];
+        let jsonArr: Array<any> = [];
         for (let index = 0; index < this.deviceData.length; index++) {
-            const device = this.deviceData[index];  
+            const device = this.deviceData[index];
             jsonArr.push(device.getAsJson());
         }
 
@@ -148,17 +159,23 @@ class Device implements device {
         let dataNumber = 0;
         try {
             dataNumber = parseInt(eventString.substring(4));
-        }catch(err) {}
+        } catch (err) { }
 
         // problem is somwhere here
+        // TODO: add a check for event
+        // TODO: add check event
+
         if (this.deviceData[dataNumber] && this.deviceType[dataNumber]) {
-            if(this.deviceType[dataNumber] != topicData.dataType) {
+            if (this.deviceType[dataNumber] != topicData.dataType) {
                 return
             }
+            if (message.event != topicData.event) {
+                return
+            }
+
             // TODO: add more function types
-            // TODO add events: add more function types
             switch (topicData.functionData.functionType) {
-                case ("default"): {
+                case (Device.DEFAULT_FUNCTION_TYPE): {
                     functionToCall = this.callDefaultFunction(topicData, dataNumber);
                     break;
                 }
@@ -174,8 +191,12 @@ class Device implements device {
 
     private callDefaultFunction(_topicData: topicData, dataNumber: number) {
         // TODO: add types
+        // TODO take a look maybe the switch here is unnececery as all devices have defaultUpdateFunction()
         switch (_topicData.dataType) {
             case (Device.AIRCONDITIONER_TYPE): {
+                return this.deviceData[dataNumber]?.defaultUpdateFunction.bind(this.deviceData[dataNumber])
+            }
+            case (Device.SWITCH_TYPE): {
                 return this.deviceData[dataNumber]?.defaultUpdateFunction.bind(this.deviceData[dataNumber])
             }
             default: {
@@ -189,6 +210,9 @@ class Device implements device {
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
             }
+            case (Device.SWITCH_TYPE): {
+                return new SwitchData();
+            }
             default: {
                 throw new Error("device type not found")
             }
@@ -200,7 +224,7 @@ class Device implements device {
         this.publishTo.push(newTopicData)
 
         await this.saveData();
-        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+        this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
         console.log("added new ListenTopic")
     }
 
@@ -219,7 +243,7 @@ class Device implements device {
             }
         }
 
-        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+        this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
         await this.saveData();
     }
 
@@ -228,7 +252,7 @@ class Device implements device {
         this.listenTo.push(newTopicData)
 
         await this.saveData();
-        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+        this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
         console.log("added new ListenTopic");
     }
 
@@ -247,7 +271,7 @@ class Device implements device {
             }
         }
 
-        this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+        this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
         await this.saveData();
     }
 
@@ -257,13 +281,13 @@ class Device implements device {
             //TODO:  add all other cases
             case Device.DEVICE_NAME:
                 this.deviceName = String(newContent)
-                this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+                this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
                 await this.saveData();
                 break;
             case Device.isConnected:
                 if (this.isConnected != true ? true : false) {
                     this.isConnected = newContent == true ? true : false;
-                    this.settingsChanged(Device.ON_UPDATE_SETTINGS);
+                    this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
                     await this.saveData();
                     break;
                 }

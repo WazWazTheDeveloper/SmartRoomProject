@@ -17,8 +17,9 @@ router.get('/getUUID', (req: Request, res: Response) => {
     res.send(uuid)
 })
 
+// TODO: add a querry to select device type
 router.get('/registerNewDevice', async(req: Request, res: Response) => {
-    let x = Device.AIRCONDITIONER_TYPE
+    let x = Device.SWITCH_TYPE
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
 
