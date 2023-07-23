@@ -2,14 +2,39 @@ import express = require('express');
 import { MqttClient, SubType } from './src/mqtt_client';
 import { AppData } from './src/AppData';
 import { router } from './src/router';
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
+import Websocket, { WebSocketServer } from 'ws';
 require('dotenv').config()
 
+
 const app: express.Application = express();
-app.use('/', router)
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json())
+app.use('/', router);
+
+const wsServer = new WebSocketServer({ noServer: true });
+
+// TODO: fix this
+wsServer.on('connection', async (socket) => {
+  let appData = await AppData.getAppDataInstance();
+  socket.send(JSON.stringify(appData.getDeviceList()))
+  console.log("connected")
+  socket.on('message', message => console.log(message));
+});
+
+// TODO make this like some sort of class
+app.get('/', async (req, res) => {
+  wsServer.clients.forEach(async (client) => {
+    // Check that connect are open and still alive to avoid socket error
+    if (client.readyState === Websocket.OPEN) {
+      let appData = await AppData.getAppDataInstance();
+      client.send(JSON.stringify(appData.getDeviceList()));
+    }
+  });
+})
+
+
 
 async function startServer(): Promise<void> {
   await AppData.init()
@@ -19,8 +44,6 @@ async function startServer(): Promise<void> {
 
   startListeningToReqests()
 }
-
-import { v4 as uuidv4 } from 'uuid';
 
 async function setup(): Promise<void> {
   //get instances
@@ -45,8 +68,15 @@ async function updateMqttClientSubList(callback: Function) {
 }
 
 function startListeningToReqests(): void {
-  app.listen(process.env.SERVER_PORT, () => {
+  let x = app.listen(process.env.SERVER_PORT, () => {
     console.log(`listening on port ${process.env.SERVER_PORT}`)
+  })
+
+  x.on('upgrade', (req, socket, head) => {
+    // TODO: add path check
+    wsServer.handleUpgrade(req, socket, head, (ws) => {
+      wsServer.emit('connection', ws, req)
+    })
   })
 }
 

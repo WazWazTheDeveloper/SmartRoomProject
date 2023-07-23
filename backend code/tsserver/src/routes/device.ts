@@ -4,6 +4,7 @@ import { Device } from "../classes/device";
 import { AppData } from "../AppData";
 
 
+
 const router: express.Router = express.Router();
 
 router.use((req: Request, res: Response, next) => {

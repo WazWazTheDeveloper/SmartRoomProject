@@ -19,10 +19,16 @@
   "dependencies": {
     "@types/express": "^4.17.17",
     "@types/node": "^20.4.0",
-    "node-cron": "^3.0.2"
+    "@types/ws": "^8.5.5",
+    "body-parser": "^1.20.2",
+    "express-ws": "^5.0.2",
+    "node-cron": "^3.0.2",
+    "ws": "^8.13.0"
   },
   "nodemonConfig": {
     "verbose": true,
-    "ignore": ["data/*"]
-}
+    "ignore": [
+      "data/*"
+    ]
+  }
 }

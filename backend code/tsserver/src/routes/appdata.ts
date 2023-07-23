@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express"
 import { AppData } from "../AppData";
+import bodyParser from "body-parser";
 
 
 const router: express.Router = express.Router();
@@ -8,8 +9,7 @@ router.use((req: Request, res: Response, next) => {
     next()
 });
 
-// TODO: change to post
-router.get('/addGeneralTopic', async (req: Request, res: Response) => {
+router.post('/addGeneralTopic', async (req: Request, res: Response) => {
     // TODO: add a check to auth
     let topicName = req.body.topicName
     let topicPath = req.body.topicPath
@@ -30,11 +30,10 @@ router.get('/addGeneralTopic', async (req: Request, res: Response) => {
 
 })
 
-// TODO: change to post
-router.get('/removeGeneralTopic', async(req: Request, res: Response) => {
+router.post('/removeGeneralTopic', async(req: Request, res: Response) => {
     // TODO: add a check to auth
-    let topicName = req.query.topicName
-    let topicPath = req.query.topicPath
+    let topicName = req.body.topicName
+    let topicPath = req.body.topicPath
     if (!topicName && !topicPath) {
         res.status(400)
         res.send("empty string");
@@ -52,14 +51,13 @@ router.get('/removeGeneralTopic', async(req: Request, res: Response) => {
     }
 })
 
-// TODO: change to post
-router.get('/addListenToTopicToDevice', async(req: Request, res: Response) => {
+router.post('/addListenToTopicToDevice', async(req: Request, res: Response) => {
     // TODO: add a check to auth
-    let deviceUUID = req.query.deviceUUID
-    let topicName = req.query.topicName
-    let event = req.query.event
-    let dataType = req.query.datatype
-    let functionType = req.query.functionType
+    let deviceUUID = req.body.deviceUUID
+    let topicName = req.body.topicName
+    let event = req.body.event
+    let dataType = req.body.datatype
+    let functionType = req.body.functionType
     
     
     //TODO: add data validation
@@ -81,14 +79,14 @@ router.get('/addListenToTopicToDevice', async(req: Request, res: Response) => {
     appdata.addListenToTopicToDevice(deviceUUID,generalTopic,dataType,true,event,{"functionType":functionType})
 })
 
-// TODO: change to post
-router.get('/removeListenToTopicFromDevice', async(req: Request, res: Response) => {
+
+router.post('/removeListenToTopicFromDevice', async(req: Request, res: Response) => {
     // TODO: add a check to auth
-    let deviceUUID = req.query.deviceUUID
-    let topicName = req.query.topicName
-    let event = req.query.event
-    let dataType = req.query.dataType
-    let functionType = req.query.functionType
+    let deviceUUID = req.body.deviceUUID
+    let topicName = req.body.topicName
+    let event = req.body.event
+    let dataType = req.body.dataType
+    let functionType = req.body.functionType
     
     //TODO: add data validation
     if (!topicName && !deviceUUID && !event && !dataType && !functionType) {
