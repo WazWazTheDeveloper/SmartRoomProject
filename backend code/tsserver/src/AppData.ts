@@ -1,13 +1,13 @@
 
 import { eventFunctionData, generalTopic, topicData } from './types'
-import { AirconditionerData } from "./classes/airconditionerData";
+import { AirconditionerData } from "./devices/airconditionerData";
 import { Device, TopicData } from "./classes/device";
 import { DeviceListItem, GeneralData, GeneralTask, getGeneralDataInstance } from "./classes/generalData";
 import { removeFile } from "./utility/file_handler";
 import { SubType } from "./mqtt_client";
 import { Task} from './tasks';
 import { CheckConnection } from './scheduledFunctions/checkConnection';
-import { SwitchData } from './classes/switchData';
+import { SwitchData } from './devices/switchData';
 
 // TODO: move this somewhere else: 
 interface settingsType {

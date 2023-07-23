@@ -1,9 +1,9 @@
 import express = require('express');
-import { MqttClient, SubType } from './mqtt_client';
-import { AppData } from './AppData';
-import { router } from './router';
+import { MqttClient, SubType } from './src/mqtt_client';
+import { AppData } from './src/AppData';
+import { router } from './src/router';
 const bodyParser = require('body-parser');
-import { CheckConnection } from './scheduledFunctions/checkConnection';
+import { CheckConnection } from './src/scheduledFunctions/checkConnection';
 require('dotenv').config()
 
 const app: express.Application = express();
