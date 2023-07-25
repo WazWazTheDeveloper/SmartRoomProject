@@ -57,6 +57,26 @@ class AppData {
         this.taskList = taskList;
         this.callbacks = [];
     }
+    getAsJson() {
+        let deviceJson = []
+        for (let index = 0; index < this.taskList.length; index++) {
+            const task = this.taskList[index];
+            deviceJson.push(task.getAsJson())
+        }
+
+        let taskJson = []
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const device = this.deviceList[index];
+            taskJson.push(device.getAsJson())
+        }
+        let json = {
+            "taskList" : taskJson,
+            "generalData" : this.generalData.getAsJson(),
+            "deviceList" : deviceJson
+        }
+
+        return json
+    }
 
     public static async init(): Promise<void> {
         if (!appDataInstance) {

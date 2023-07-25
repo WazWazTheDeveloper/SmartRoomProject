@@ -2,6 +2,7 @@ import express, { Request, Response } from "express"
 import { v4 as uuidv4 } from 'uuid';
 import { Device } from "../classes/device";
 import { AppData } from "../AppData";
+import { WebSocketServerHandler } from "../WebSocketServerHandler";
 
 
 
@@ -31,6 +32,7 @@ router.get('/registerNewDevice', async(req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/json");
     res.status(200);
     res.json(newDevice.getAsJson());
+    // WebSocketServerHandler.updateAppdata();
     res.send()
 })
 

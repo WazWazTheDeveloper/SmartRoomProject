@@ -6,11 +6,12 @@ import bodyParser from "body-parser";
 const router: express.Router = express.Router();
 
 router.use((req: Request, res: Response, next) => {
+    // TODO: add a check to auth
     next()
 });
 
+//TODO: delete this as using websocket for this stuff
 router.post('/addGeneralTopic', async (req: Request, res: Response) => {
-    // TODO: add a check to auth
     let topicName = req.body.topicName
     let topicPath = req.body.topicPath
     if (!topicName && !topicPath) {
@@ -23,15 +24,15 @@ router.post('/addGeneralTopic', async (req: Request, res: Response) => {
     try {
         await appdata.addGeneralTopic(String(topicName), String(topicPath), true)
         res.send("added general topic");
-    } catch(err) {
+    } catch (err) {
         res.status(400)
         res.send("general topic already exist");
     }
 
 })
 
-router.post('/removeGeneralTopic', async(req: Request, res: Response) => {
-    // TODO: add a check to auth
+//TODO: delete this as using websocket for this stuff
+router.post('/removeGeneralTopic', async (req: Request, res: Response) => {
     let topicName = req.body.topicName
     let topicPath = req.body.topicPath
     if (!topicName && !topicPath) {
@@ -44,22 +45,22 @@ router.post('/removeGeneralTopic', async(req: Request, res: Response) => {
     try {
         await appdata.removeGeneralTopic(String(topicName))
         res.send("removed general topic");
-    } catch(err) {
+    } catch (err) {
         // will never get triggered as removeGeneralTopic() never checks is topic exist
         res.status(400)
         res.send("general topic doesn't exist");
     }
 })
 
-router.post('/addListenToTopicToDevice', async(req: Request, res: Response) => {
-    // TODO: add a check to auth
+//TODO: delete this as using websocket for this stuff
+router.post('/addListenToTopicToDevice', async (req: Request, res: Response) => {
     let deviceUUID = req.body.deviceUUID
     let topicName = req.body.topicName
     let event = req.body.event
     let dataType = req.body.datatype
     let functionType = req.body.functionType
-    
-    
+
+
     //TODO: add data validation
     if (!topicName && !deviceUUID && !event && !dataType && !functionType) {
         res.status(400)
@@ -73,21 +74,26 @@ router.post('/addListenToTopicToDevice', async(req: Request, res: Response) => {
     dataType = String(dataType);
     functionType = String(functionType);
 
-    //TODO: add try catch when getting topic by name as it can throw error
     let appdata = await AppData.getAppDataInstance();
-    let generalTopic = await appdata.getGeneralData().getTopicByName(topicName)
-    appdata.addListenToTopicToDevice(deviceUUID,generalTopic,dataType,true,event,{"functionType":functionType})
+    try {
+        let generalTopic = await appdata.getGeneralData().getTopicByName(topicName)
+        appdata.addListenToTopicToDevice(deviceUUID, generalTopic, dataType, true, event, { "functionType": functionType })
+        res.status(200).send();
+    } catch (err) {
+        res.status(400)
+        res.send("invalid topicName");
+        return
+    }
 })
 
-
-router.post('/removeListenToTopicFromDevice', async(req: Request, res: Response) => {
-    // TODO: add a check to auth
+//TODO: delete this as using websocket for this stuff
+router.post('/removeListenToTopicFromDevice', async (req: Request, res: Response) => {
     let deviceUUID = req.body.deviceUUID
     let topicName = req.body.topicName
     let event = req.body.event
     let dataType = req.body.dataType
     let functionType = req.body.functionType
-    
+
     //TODO: add data validation
     if (!topicName && !deviceUUID && !event && !dataType && !functionType) {
         res.status(400)
@@ -102,10 +108,16 @@ router.post('/removeListenToTopicFromDevice', async(req: Request, res: Response)
     functionType = String(functionType);
 
 
-    //TODO: add try catch when getting topic by name as it can throw error
     let appdata = await AppData.getAppDataInstance();
-    let generalTopic = await appdata.getGeneralData().getTopicByName(topicName)
-    appdata.removeListenToTopicToDevice(deviceUUID,generalTopic,dataType,event,{"functionType":functionType})
+    try {
+        let generalTopic = await appdata.getGeneralData().getTopicByName(topicName)
+        appdata.removeListenToTopicToDevice(deviceUUID, generalTopic, dataType, event, { "functionType": functionType })
+        res.status(200).send();
+    } catch (err) {
+        res.status(400)
+        res.send("invalid topicName");
+        return
+    }
 })
 
 export { router as appdataRouter }

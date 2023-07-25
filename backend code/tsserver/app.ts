@@ -5,6 +5,7 @@ import { router } from './src/router';
 import bodyParser from 'body-parser';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
 import Websocket, { WebSocketServer } from 'ws';
+import { WebSocketServerHandler } from './src/WebSocketServerHandler';
 require('dotenv').config()
 
 
@@ -12,29 +13,6 @@ const app: express.Application = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
 app.use('/', router);
-
-const wsServer = new WebSocketServer({ noServer: true });
-
-// TODO: fix this
-wsServer.on('connection', async (socket) => {
-  let appData = await AppData.getAppDataInstance();
-  socket.send(JSON.stringify(appData.getDeviceList()))
-  console.log("connected")
-  socket.on('message', message => console.log(message));
-});
-
-// TODO make this like some sort of class
-app.get('/', async (req, res) => {
-  wsServer.clients.forEach(async (client) => {
-    // Check that connect are open and still alive to avoid socket error
-    if (client.readyState === Websocket.OPEN) {
-      let appData = await AppData.getAppDataInstance();
-      client.send(JSON.stringify(appData.getDeviceList()));
-    }
-  });
-})
-
-
 
 async function startServer(): Promise<void> {
   await AppData.init()
@@ -68,14 +46,18 @@ async function updateMqttClientSubList(callback: Function) {
 }
 
 function startListeningToReqests(): void {
-  let x = app.listen(process.env.SERVER_PORT, () => {
+  let server = app.listen(process.env.SERVER_PORT, () => {
     console.log(`listening on port ${process.env.SERVER_PORT}`)
   })
 
-  x.on('upgrade', (req, socket, head) => {
-    // TODO: add path check
-    wsServer.handleUpgrade(req, socket, head, (ws) => {
-      wsServer.emit('connection', ws, req)
+  WebSocketServerHandler.init();
+  let wbserver = WebSocketServerHandler.getWebSocketServer()
+  server.on('upgrade', (req, socket, head) => {
+    wbserver.handleUpgrade(req, socket, head, (ws) => {
+      if(req.url == "/appdata/websocket") {
+        console.log("req.url")
+        wbserver.emit('connection', ws, req)
+      }
     })
   })
 }

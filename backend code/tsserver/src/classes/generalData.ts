@@ -52,6 +52,16 @@ class GeneralData implements generalData {
         this.taskList = taskList;
     }
 
+    getAsJson() {
+        let json = {
+            "topicList" : this.topicList,
+            "deviceList" : this.deviceList,
+            "taskList" : this.taskList
+        }
+
+        return json
+    }
+
     static async loadFromFile(): Promise<GeneralData> {
         try {
             let generalData = await data.readFile<generalData>(`${GeneralData.GENERAL_DATA_FILE_NAME}`);

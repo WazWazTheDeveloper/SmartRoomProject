@@ -3,7 +3,7 @@ import './App.css';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import React, { useState, useCallback, useEffect } from 'react';
 
-const socketUrl = 'ws://localhost:5000';
+const socketUrl = 'ws://localhost:5000/appdata/websocket';
 
 
 function App() {
