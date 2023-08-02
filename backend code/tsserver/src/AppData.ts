@@ -145,7 +145,7 @@ class AppData {
 
     }
 
-    private static async readDeviceFromFile(uuid: string, deviceType: Array<string>): Promise<Array<any>> {
+    private static async readDeviceFromFile(uuid: string, deviceType: Array<number>): Promise<Array<any>> {
         let deviceData: Array<any> = [];
         for (let i = 0; i < deviceType.length; i++) {
             const element = deviceType[i];
@@ -179,7 +179,7 @@ class AppData {
         return this.deviceList;
     }
 
-    public async addDevice(deviceName: string, uuid: string, deviceType: Array<string>, listenTo=[], publishTo=[]):Promise<void> {
+    public async addDevice(deviceName: string, uuid: string, deviceType: Array<number>, listenTo=[], publishTo=[]):Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
             throw new Error("deviceTypeList should not be empty");
         }
@@ -193,8 +193,8 @@ class AppData {
 
         let newDeviceGeneralData = new DeviceListItem(uuid, deviceName, deviceType);
 
-        let _publishTo: Array<topicData> = [];
-        let _listenTo: Array<topicData> = [];
+        let _publishTo: Array<TopicData> = [];
+        let _listenTo: Array<TopicData> = [];
         // console.log(_publishTo)
         if (_publishTo && Array.isArray(deviceType) && deviceType.length != 0) {
             _publishTo = publishTo!
@@ -206,7 +206,7 @@ class AppData {
         // console.log(_publishTo)
         this.addGeneralTopic(`${uuid}`,`device/${uuid}`,false)
         let deviceSettingUpdateGeneralTopic = this.generalData.getTopicByName(uuid);
-        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,"settingsType",false,Device.CHANGE_SETTINGS_EVENT,{"functionType": ""})
+        let deviceSettingUpdateTopic = new TopicData(deviceSettingUpdateGeneralTopic,TopicData.settingsType,false,Device.CHANGE_SETTINGS_EVENT,{"functionType": ""})
         _publishTo.push(deviceSettingUpdateTopic);
 
         let newDevice:Device = await Device.createNewDevice(deviceName, uuid, deviceType, _listenTo, _publishTo);
@@ -282,7 +282,7 @@ class AppData {
         console.log("removed Task: " + taskName)
     }
 
-    private getDefaultDeviceData(deviceType: string): any {
+    private getDefaultDeviceData(deviceType: number): any {
         //TODO : add types
         switch (deviceType) {
             case (Device.AIRCONDITIONER_TYPE): {
@@ -327,7 +327,7 @@ class AppData {
         console.log("removed generalTopic {TopicName: "+topicName+"}")
     }
 
-    async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
+    async addPublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: number,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
@@ -339,7 +339,7 @@ class AppData {
         this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    async removePublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async removePublishToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: number, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
@@ -351,7 +351,7 @@ class AppData {
         this.triggerCallbacks(AppData.ON_DEVICE_TOPIC_CHANGE);
     }
 
-    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
+    async addListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: number,isVisible:boolean, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {
@@ -364,7 +364,7 @@ class AppData {
     }
     
     
-    async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async removeListenToTopicToDevice(uuid: string, _generalTopic: generalTopic, dataType: number, event: string, functionData: eventFunctionData): Promise<void> {
         for (let index = 0; index < this.deviceList.length; index++) {
             const element = this.deviceList[index];
             if (element.uuid == uuid) {

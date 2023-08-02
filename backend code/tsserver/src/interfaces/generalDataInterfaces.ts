@@ -14,7 +14,7 @@ interface generalTopic {
 interface deviceListItem{
     UUID: string
     name: string
-    deviceType: Array<string>
+    deviceType: Array<number>
 }
 interface generalTask {
     taskId : string

@@ -20,19 +20,21 @@ router.get('/getUUID', (req: Request, res: Response) => {
 })
 
 // TODO: add a querry to select device type
-router.get('/registerNewDevice', async(req: Request, res: Response) => {
-    let x = Device.SWITCH_TYPE
+router.post('/registerNewDevice', async(req: Request, res: Response) => {
+    let deviceType = req.body.deviceType;
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
-
-    await appdata.addDevice("new device",newUUID,[x]);
-    let newDevice = appdata.getDeviceById(newUUID);
-
-
+    
+    // TODO: add try as deviceType can be somting non existent
+    await appdata.addDevice("new device",newUUID,deviceType);
+    let newDevice:Device = appdata.getDeviceById(newUUID);
+    
     res.setHeader("Content-Type", "application/json");
+    console.log(newDevice.getAsJson())
     res.status(200);
-    res.json(newDevice.getAsJson());
-    // WebSocketServerHandler.updateAppdata();
+    res.json(newDevice.getAsJsonForArduino());
+    console.log(newDevice.getAsJsonForArduino());
+    WebSocketServerHandler.updateAppdata();
     res.send()
 })
 

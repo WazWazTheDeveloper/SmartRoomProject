@@ -1,6 +1,6 @@
 interface dataPacket {
     sender:string
-    dataType: string
+    dataType: number
     event:string
     data:Array<any>
 }

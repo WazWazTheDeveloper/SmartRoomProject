@@ -6,6 +6,17 @@ import { MqttClient, SubType } from "../mqtt_client";
 import { Task } from "../tasks";
 import { Device } from "../classes/device";
 
+//TODO: this is the type you need to send to the mqtt server to commect
+// {
+//     "sender" : "01b68220-abdf-441b-9ae7-fefaf4ba9342",
+//     "dataType" : "*",
+//     "event" : "checkIsConnected",
+//     "data" : 
+//       {"data0" : {
+//         "isOn" : false
+//       }
+//       }
+//   }
 
 let checkConnectionObject:CheckConnection;
 class CheckConnection {
@@ -44,7 +55,7 @@ class CheckConnection {
             }
         }
 
-        let newTopicData = new TopicData(isConnectedCheckTopic, "*", false, "checkIsConnected", { "functionType": "*" })
+        let newTopicData = new TopicData(isConnectedCheckTopic, TopicData.anyType, false, "checkIsConnected", { "functionType": "*" })
         let newSubType = new SubType(newTopicData, this.onUpdateFromServer)
 
         checkConnectionObject = new CheckConnection(isConnectedCheckTopic , newSubType)
@@ -97,7 +108,7 @@ class CheckConnection {
     async updater(): Promise<void> {
         console.log("starting connection check")
         let mqttClient = MqttClient.getMqttClientInstance();
-        let checkConnectionPacket = new DataPacket("server", "*", Device.CHANGE_DATA_EVENT, [])
+        let checkConnectionPacket = new DataPacket("server", TopicData.anyType, Device.CHANGE_DATA_EVENT, [])
         mqttClient.sendMassage(this.isConnectedCheckTopic.topicPath, checkConnectionPacket)
     
         setTimeout(async () => {

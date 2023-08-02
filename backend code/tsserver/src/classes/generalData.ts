@@ -28,9 +28,9 @@ class GeneralTopic implements generalTopic {
 class DeviceListItem implements deviceListItem {
     UUID: string
     name: string
-    deviceType: Array<string>
+    deviceType: Array<number>
 
-    constructor(UUID: string, name: string, deviceType: Array<string>) {
+    constructor(UUID: string, name: string, deviceType: Array<number>) {
         this.UUID = UUID
         this.name = name
         this.deviceType = deviceType

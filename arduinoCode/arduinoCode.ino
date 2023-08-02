@@ -25,11 +25,11 @@
 //   // acRemote.begin();
 //   // acRemote.execute();
 //   // delay(2000);
-//   // acRemote.setIsOn(true).execute();
-//   // EspSerial.begin(9600);  // ESP-01 module operates at 115200 baud rate
+  // acRemote.setIsOn(true).execute();
+  // EspSerial.begin(9600);  // ESP-01 module operates at 115200 baud rate
 //   // delay(1000);
 //   // EspSerial.println("AT+UART_DEF=115200,8,1,0,0");
-//   // Serial.begin(115200);     // while the Serial Monitor uses 9600 baud rate
+  // Serial.begin(115200);     // while the Serial Monitor uses 9600 baud rate
 
 //   // initialize serial for debugging
 //   Serial.begin(115200);
@@ -45,8 +45,8 @@
 //     // don't continue
 //     while (true)
 //       ;
-//   }
-
+  // }
+// 
 //   // attempt to connect to WiFi network
 //   while (status != WL_CONNECTED)
 //   {
@@ -76,17 +76,19 @@
 // }
 // void loop()
 // {
-//   // acRemote.init();
-//   // put your main code here, to run repeatedly:
-//   // while (EspSerial.available() > 0) // While the data output is available on the EspSerial interface(the ESP-01 module)
-//   //   Serial.write(EspSerial.read()); // Write it into the Serial Monitor
-//   // while (Serial.available() > 0)    // while the data is available input is available in the Serial Interface
-//   //   EspSerial.write(Serial.read()); // Send it to the ESP-01 Module
+  // acRemote.init();
+  // put your main code here, to run repeatedly:
+  // while (EspSerial.available() > 0) // While the data output is available on the EspSerial interface(the ESP-01 module)
+  //   Serial.write(EspSerial.read()); // Write it into the Serial Monitor
+  // while (Serial.available() > 0) {
+  //   EspSerial.write(Serial.read()); // Send it to the ESP-01 Module
 
-//   // Serial.println("a") ;
+  // }   // while the data is available input is available in the Serial Interface
 
-//   // if there are incoming bytes available
-//   // from the server, read them and print them
+  // Serial.println("a") ;
+
+  // if there are incoming bytes available
+  // from the server, read them and print them
 //   while (client.available())
 //   {
 //     char c = client.read();
@@ -103,7 +105,7 @@
 //     // do nothing forevermore
 //     while (true)
 //       ;
-//   }
+  // }
 // }
 
 // void printWifiStatus()

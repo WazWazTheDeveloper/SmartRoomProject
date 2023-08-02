@@ -14,8 +14,8 @@ class Device implements device {
     static readonly isConnectedCheck = "isConnectedCheck"
 
     // types
-    static readonly AIRCONDITIONER_TYPE = "airconditioner";
-    static readonly SWITCH_TYPE = "switch";
+    static readonly AIRCONDITIONER_TYPE = 0;
+    static readonly SWITCH_TYPE = 1;
 
     // events
     public static readonly CHANGE_SETTINGS_EVENT = 'updateSettings'
@@ -28,9 +28,9 @@ class Device implements device {
 
     deviceName: string
     uuid: string
-    deviceType: Array<string>
-    listenTo: Array<topicData> //topic the SERVER listen to and the DEVICE is reciving
-    publishTo: Array<topicData> //topic the SERVER reciving to and the DEVICE is listen
+    deviceType: Array<number>
+    listenTo: Array<TopicData> //topic the SERVER listen to and the DEVICE is reciving
+    publishTo: Array<TopicData> //topic the SERVER reciving to and the DEVICE is listen
     isConnected: boolean
     isConnectedCheck: boolean
     deviceData: Array<any>
@@ -38,9 +38,9 @@ class Device implements device {
     constructor(
         deviceName: string,
         uuid: string,
-        deviceType: Array<string>,
-        listenTo: Array<topicData>,
-        publishTo: Array<topicData>,
+        deviceType: Array<number>,
+        listenTo: Array<TopicData>,
+        publishTo: Array<TopicData>,
         isConnected: boolean,
         isConnectedCheck: boolean,
         deviceData: Array<any>) {
@@ -57,9 +57,9 @@ class Device implements device {
     public static async createNewDevice(
         deviceName: string,
         uuid: string,
-        deviceType: Array<string>,
-        listenTo: Array<topicData>,
-        publishTo: Array<topicData>
+        deviceType: Array<number>,
+        listenTo: Array<TopicData>,
+        publishTo: Array<TopicData>
     ): Promise<Device> {
 
         let newDevice = new Device(deviceName, uuid, deviceType, listenTo, publishTo, false, false, [])
@@ -121,17 +121,58 @@ class Device implements device {
     }
 
     getAsJson() {
-        let json = {
-            "deviceName": this.deviceName,
-            "uuid": this.uuid,
-            "deviceType": this.deviceType,
-            "listenTo": this.listenTo,
-            "publishTo": this.publishTo,
-            "isConnected": this.isConnected,
-            "deviceData": this.deviceData
+        let jsonArr: Array<any> = [];
+        for (let index = 0; index < this.deviceData.length; index++) {
+            const device = this.deviceData[index];
+            jsonArr.push(device.getAsJson());
         }
 
-        return json
+        let dataJson: device = {
+            deviceName: this.deviceName,
+            uuid: this.uuid,
+            deviceType: this.deviceType,
+            listenTo: this.listenTo,
+            publishTo: this.publishTo,
+            isConnected: this.isConnected,
+            isConnectedCheck: this.isConnectedCheck,
+            deviceData: (jsonArr)
+        }
+
+        return dataJson
+    }
+
+    getAsJsonForArduino() {
+        let jsonArr: Array<any> = [];
+        for (let index = 0; index < this.deviceData.length; index++) {
+            const device = this.deviceData[index];
+            jsonArr.push(device.getAsJson());
+        }
+
+        let listenToArr: Array<any> = [];
+        for (let index = 0; index < this.listenTo.length; index++) {
+            const listenTo = this.listenTo[index];
+            listenToArr.push(listenTo.getAsJsonForArduino());
+        }
+
+        let publishToArr: Array<any> = [];
+        for (let index = 0; index < this.publishTo.length; index++) {
+            const publishTo = this.publishTo[index];
+            publishToArr.push(publishTo.getAsJsonForArduino());
+        }
+
+        // TODO ADD TYPE
+        let dataJson = {
+            // deviceName: this.deviceName,
+            uuid: this.uuid,
+            // deviceType: this.deviceType,
+            listenTo: listenToArr,
+            publishTo: publishToArr,
+            isConnected: this.isConnected,
+            isConnectedCheck: this.isConnectedCheck,
+            deviceData: (jsonArr)
+        }
+
+        return dataJson
     }
 
     async setIsConnected(isConnected: boolean): Promise<void> {
@@ -205,7 +246,7 @@ class Device implements device {
         }
     }
 
-    private static getDefaultData(dataType: string) {
+    private static getDefaultData(dataType: number) {
         switch (dataType) {
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
@@ -219,7 +260,7 @@ class Device implements device {
         }
     }
 
-    async addPublishTopic(_generalTopic: generalTopic, dataType: string, isVisible: boolean, event: string, functionData: eventFunctionData): Promise<void> {
+    async addPublishTopic(_generalTopic: generalTopic, dataType: number, isVisible: boolean, event: string, functionData: eventFunctionData): Promise<void> {
         let newTopicData = new TopicData(_generalTopic, dataType, isVisible, event, functionData)
         this.publishTo.push(newTopicData)
 
@@ -228,7 +269,7 @@ class Device implements device {
         console.log("added new ListenTopic")
     }
 
-    async removePublishTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData) {
+    async removePublishTopic(_generalTopic: GeneralTopic, dataType: number, event: string, functionData: eventFunctionData) {
         for (let i = this.publishTo.length - 1; i >= 0; i--) {
             const element = this.publishTo[i];
             if (
@@ -247,7 +288,7 @@ class Device implements device {
         await this.saveData();
     }
 
-    async addListenTopic(_generalTopic: GeneralTopic, dataType: string, isVisible: boolean, event: string, functionData: eventFunctionData): Promise<void> {
+    async addListenTopic(_generalTopic: GeneralTopic, dataType: number, isVisible: boolean, event: string, functionData: eventFunctionData): Promise<void> {
         let newTopicData = new TopicData(_generalTopic, dataType, isVisible, event, functionData)
         this.listenTo.push(newTopicData)
 
@@ -256,7 +297,7 @@ class Device implements device {
         console.log("added new ListenTopic");
     }
 
-    async removeListenTopic(_generalTopic: GeneralTopic, dataType: string, event: string, functionData: eventFunctionData): Promise<void> {
+    async removeListenTopic(_generalTopic: GeneralTopic, dataType: number, event: string, functionData: eventFunctionData): Promise<void> {
         for (let i = this.listenTo.length - 1; i >= 0; i--) {
             const element = this.listenTo[i];
             if (
