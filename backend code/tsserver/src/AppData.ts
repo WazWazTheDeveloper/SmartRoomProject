@@ -137,7 +137,7 @@ class AppData {
         for (let i = 0; i < deviceList.length; i++) {
             const device = deviceList[i];
             let deviceData = await this.readDeviceFromFile(device.UUID, device.deviceType)
-            let newDevice = await Device.loadFromFile(device.UUID, deviceData)
+            let newDevice = await Device.loadFromFile(device.UUID, deviceData,generalData)
             newDeviceList.push(newDevice);
         }
 

@@ -35,7 +35,7 @@ async function setup(): Promise<void> {
   appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
 
   // init scheduled functions
-  await CheckConnection.init()
+  // await CheckConnection.init()
 }
 
 async function updateMqttClientSubList(callback: Function) {

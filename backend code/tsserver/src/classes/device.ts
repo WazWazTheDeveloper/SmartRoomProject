@@ -1,6 +1,6 @@
 import { device, eventFunctionData, generalTopic, topicData } from '../types'
 import data = require('../utility/file_handler')
-import { GeneralTopic } from './generalData'
+import { GeneralData, GeneralTopic, getGeneralDataInstance } from './generalData'
 import { AirconditionerData } from '../devices/airconditionerData'
 import { MqttClient } from '../mqtt_client'
 import { DataPacket } from './DataPacket'
@@ -100,15 +100,35 @@ class Device implements device {
         console.log(`done saving Device object ${this.uuid}`)
     }
 
-    static async loadFromFile(uuid: string, deviceData: Array<any>): Promise<Device> {
+    static async loadFromFile(uuid: string, deviceData: Array<any>,generalData: GeneralData): Promise<Device> {
         let deviceDataFromJson = await data.readFile<Device>(`devices/${uuid}`);
+
+        let listenToArr: Array<TopicData> = []
+        for (let index = 0; index < deviceDataFromJson.listenTo.length; index++) {
+            const listenTo = deviceDataFromJson.listenTo[index];
+            let generalTopic = generalData.getTopicByName(listenTo.topicName);
+
+            // TODO: functionData is object and not functionData Object
+            let newListenTo = new TopicData(generalTopic,listenTo.dataType,listenTo.isVisible,listenTo.event,listenTo.functionData)
+            listenToArr.push(newListenTo);
+        }
+
+        let publishToArr: Array<TopicData> = []
+        for (let index = 0; index < deviceDataFromJson.publishTo.length; index++) {
+            const publishTo = deviceDataFromJson.publishTo[index];
+            let generalTopic = generalData.getTopicByName(publishTo.topicName);
+
+            // TODO: functionData is object and not functionData Object
+            let newListenTo = new TopicData(generalTopic,publishTo.dataType,publishTo.isVisible,publishTo.event,publishTo.functionData)
+            publishToArr.push(newListenTo);
+        }
         try {
             let newDevice = new Device(
                 deviceDataFromJson.deviceName,
                 deviceDataFromJson.uuid,
                 deviceDataFromJson.deviceType,
-                deviceDataFromJson.listenTo,
-                deviceDataFromJson.publishTo,
+                listenToArr,
+                publishToArr,
                 deviceDataFromJson.isConnected,
                 deviceDataFromJson.isConnectedCheck,
                 deviceData
@@ -174,6 +194,37 @@ class Device implements device {
 
         return dataJson
     }
+
+    getPublishToAsJsonForArduino() {
+        // BUG: add check if empty
+        let publishToArr: Array<any> = [];
+        for (let index = 0; index < this.publishTo.length; index++) {
+            const publishTo:TopicData = this.publishTo[index];
+            publishToArr.push(publishTo.getAsJsonForArduino());
+        }
+
+
+        let dataJson = {
+            arr: publishToArr,
+        }
+
+        return dataJson
+    }
+
+    getListenToAsJsonForArduino() {
+        let listenToArr: Array<any> = [];
+        for (let index = 0; index < this.listenTo.length; index++) {
+            const listenTo = this.listenTo[index];
+            listenToArr.push(listenTo.getAsJsonForArduino());
+        }
+
+        let dataJson = {
+            arr: listenToArr,
+        }
+
+        return dataJson
+    }
+
 
     async setIsConnected(isConnected: boolean): Promise<void> {
         if (this.isConnected != isConnected) {

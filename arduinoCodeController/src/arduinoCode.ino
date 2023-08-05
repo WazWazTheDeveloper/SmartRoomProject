@@ -2,8 +2,11 @@
 #include <ArduinoJson.h>
 #include "SoftwareSerial.h"
 #include <ArduinoMqttClient.h>
+#include "AcRemote.h"
+#include <EEPROM.h>
 
 SoftwareSerial ESPSERIAL(14, 15); // RX, TX
+AcRemote acRemote = AcRemote();
 
 char *wifi_ssid = "home";
 char *wifi_password = "0525611397";
@@ -20,24 +23,32 @@ const int DV_SEND_REQUEST = 1;
 const int DV_IS_DEVICE = 2;
 int state = DV_NO_DEVICE;
 
+char uuid[37];
+
+char publishToTopic[2][60] =
+    {
+        '\0',
+        '\0'}; // arduino listen to this
+char listenToToTopic[60] = {'\0'};
+
 void setup_wifi()
 {
   WiFi.init(&ESPSERIAL);
 
   // check for the presence of the shield
-  if (WiFi.status() == WL_NO_SHIELD)
-  {
-    Serial.println(F("WiFi shield not present"));
-    // don't continue
-    while (true)
-      ;
-  }
+  // if (WiFi.status() == WL_NO_SHIELD)
+  // {
+  //   Serial.println(F("WiFi shield not present"));
+  //   // don't continue
+  //   while (true)
+  //     ;
+  // }
 
   // attempt to connect to WiFi network
   while (status != WL_CONNECTED)
   {
-    Serial.print(F("Attempting to connect to WPA SSID: "));
-    Serial.println(wifi_ssid);
+    // Serial.print(F("Attempting to connect to WPA SSID: "));
+    // Serial.println(wifi_ssid);
     // Connect to WPA/WPA2 network
     status = WiFi.begin(wifi_ssid, wifi_password);
   }
@@ -47,253 +58,298 @@ void setup_wifi()
   // Serial.println(WiFi.localIP());
 }
 
-void sendNewDeviceRequest()
+void setUpMqtt()
 {
-  char output[256];
-  DynamicJsonDocument doc(256);
-  JsonArray deviceType = doc.createNestedArray(F("deviceType"));
-  deviceType.add(0);
-  serializeJsonPretty(doc, output);
-
-  if (wifiClient.connect(broker, 5000))
+  // Serial.println("1232");
+  if (!mqttClient.connect(broker, port))
   {
-    Serial.println(F("Connected to server"));
-    // Make a HTTP request
-    wifiClient.println(F("POST /device/registerNewDevice HTTP/1.1"));
-    wifiClient.println(F("Host: 10.0.0.12:5000"));
-    wifiClient.println(F("Accept: */*"));
-    wifiClient.println("Content-Length: " + String(strlen(output)));
-    wifiClient.println(F("Content-Type: application/json"));
-    wifiClient.println();
-    wifiClient.print(output);
+    // Serial.print("MQTT connection failed! Error code = ");
+    Serial.println(mqttClient.connectError());
+
+    while (1)
+      ;
+  }
+  mqttClient.onMessage(onMqttMessage);
+  // Serial.println("You're connected to the MQTT broker!");
+  // Serial.println();
+
+  // Serial.print("Subscribing to topics: ");
+  // for (int i = 0; i < strlen(*publishToTopic); i++)
+  // {
+  //   Serial.println(publishToTopic[i]);
+  //   if (strlen(publishToTopic[i]) != 0)
+  //   {
+  //     mqttClient.subscribe(publishToTopic[i]);
+  //   }
+  // }
+
+  // subscribe to a topic
+  // mqttClient.subscribe("test");
+
+  // topics can be unsubscribed using:
+  // mqttClient.unsubscribe();
+}
+
+void onMqttMessage(int messageSize)
+{
+  // String s = "";
+  // // we received a message, print out the topic and contents
+  // // Serial.println("Received a message with topic '");
+  // Serial.print(mqttClient.messageTopic());
+  // // Serial.print("', length ");
+  // Serial.print(messageSize);
+  // // Serial.println(" bytes:");
+
+  // // use the Stream interface to print the contents
+  // while (mqttClient.available())
+  // {
+  //   s.concat((char)mqttClient.read());
+  // }
+  // Serial.println();
+  // Serial.println(s);
+
+  // StaticJsonDocument<500> doc;
+  // DeserializationError error = deserializeJson(doc, s);
+
+  // // Test if parsing succeeds.
+  // if (error)
+  // {
+  //   // Serial.print(F("deserializeJson() failed: "));
+  //   Serial.println(error.f_str());
+  //   return;
+  // }
+  // int l = doc[("temp")];
+  // Serial.println(l);
+
+  // doc.clear();
+}
+
+void writeUUID()
+{
+  int addressIndex = 0;
+  for (int i = 0; i < 36; i++)
+  {
+    EEPROM.write(addressIndex, uuid[i] >> 8);
+    EEPROM.write(addressIndex + 1, uuid[i] & 0xFF);
+    addressIndex += 2;
   }
 }
 
-void setUpDevice(char *response)
+void readUUID()
 {
-  // Serial.println(response);
-  // // TODO: add a calculation to get the correct size for doc and char array
-  // char charArray[2048];
-  // StaticJsonDocument<2048> doc;
-  // DeserializationError err = deserializeJson(doc, response);
-  // Serial.println("err.f_str()");
-  // Serial.println(err.f_str());
-  // const char *sensor = doc["uuid"];
-  // JsonArray lightstates = doc["publishTo"];
-  // JsonObject sensor1 = lightstates[0];
-  // const char *sensor12 = sensor1["topicPath"];
-  // Serial.println(sensor);
-  // Serial.println("sensor");
-  // Serial.println(sensor12);
-
-  // delay(10000);
+  int addressIndex = 0;
+  for (int i = 0; i < 36; i++)
+  {
+    uuid[i] = (EEPROM.read(addressIndex) << 8) + EEPROM.read(addressIndex + 1);
+    addressIndex += 2;
+  }
+  uuid[36] = '\0';
 }
 
-// TODO: delete later
-// int getContentLength()
-// {
-//   boolean isNum = false;
-//   String num;
-//   while (wifiClient.available())
-//   {
-//     char c = wifiClient.read();
-//     if (isNum)
-//     {
-//       if (c == '\n')
-//       {
-//         return (num.toInt());
-//       }
-//       num.concat(c);
-//     }
-//     else
-//     {
-//       if (c == 'C')
-//       {
-//         c = wifiClient.read();
-//         if (c == 'o')
-//         {
-//           c = wifiClient.read();
-//           if (c == 'n')
-//           {
-//             c = wifiClient.read();
-//             if (c == 't')
-//             {
-//               c = wifiClient.read();
-//               if (c == 'e')
-//               {
-//                 c = wifiClient.read();
-//                 if (c == 'n')
-//                 {
-//                   c = wifiClient.read();
-//                   if (c == 't')
-//                   {
-//                     c = wifiClient.read();
-//                     if (c == '-')
-//                     {
-//                       c = wifiClient.read();
-//                       if (c == 'L')
-//                       {
-//                         c = wifiClient.read();
-//                         if (c == 'e')
-//                         {
-//                           c = wifiClient.read();
-//                           if (c == 'n')
-//                           {
-//                             c = wifiClient.read();
-//                             if (c == 'g')
-//                             {
-//                               c = wifiClient.read();
-//                               if (c == 't')
-//                               {
-//                                 c = wifiClient.read();
-//                                 if (c == 'h')
-//                                 {
-//                                   c = wifiClient.read();
-//                                   if (c == ':')
-//                                   {
-//                                     c = wifiClient.read();
-//                                     isNum = true;
-//                                   }
-//                                 }
-//                               }
-//                             }
-//                           }
-//                         }
-//                       }
-//                     }
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
+void getUUID()
+{
+  readUUID();
+  if (strlen(uuid) != 0)
+  {
+    return;
+  }
+  else
+  {
+    sendHttpRequest(0);
+    checkData();
+    wifiClient.readBytes(uuid, 36);
+    uuid[36] = '\0';
+    writeUUID();
+  }
+}
 
-void readData(char **buffer)
+void sendHttpRequest(int8_t requestNumber)
+{
+
+  if (wifiClient.connect(broker, 5000))
+  {
+    switch (requestNumber)
+    {
+    case 0:
+      wifiClient.println(F("POST /device/registerNewDevice?deviceType='0' HTTP/1.1"));
+      break;
+    case 1:
+      wifiClient.println("GET /device/getData?uuid=" + String(uuid) + " HTTP/1.1");
+      break;
+    case 2:
+      wifiClient.println("GET /device/getPublishTo?uuid=" + String(uuid) + " HTTP/1.1");
+      break;
+    case 3:
+      wifiClient.println("GET /device/getListenTo?uuid=" + String(uuid) + " HTTP/1.1");
+      break;
+    }
+
+    // wifiClient.println(("GET /device/getData?uuid=" + String(uuid) + "HTTP/1.1"));
+    wifiClient.println(F("Host: 10.0.0.12:5000"));
+    wifiClient.println(F("Connection: close"));
+    wifiClient.println(F("Accept: */*"));
+    wifiClient.println();
+  }
+}
+
+boolean setUpDevice()
+{
+
+  // get data
+  sendHttpRequest(1);
+  checkData();
+  updateData(0);
+
+  // TODO: get ListenTo
+  sendHttpRequest(2);
+  checkData();
+  updateData(2);
+  // TODO: get PublishTo
+
+  // Serial.println(uuid);
+}
+
+void updateData(int8_t type)
+{
+  StaticJsonDocument<256> doc;
+  DeserializationError error;
+
+  if (type == 1)
+  {
+    error = deserializeJson(doc, mqttClient);
+  }
+  else
+  {
+    error = deserializeJson(doc, wifiClient);
+  }
+
+  if (error)
+  {
+    Serial.println(error.f_str());
+    return;
+  }
+
+  if (type == 0 || type == 1)
+  {
+    bool isOn = doc["isOn"];             // false
+    int temp = doc["temp"];              // 24
+    int mode = doc["mode"];              // 0
+    int speed = doc["speed"];            // 3
+    bool swing1 = doc["swing1"];         // false
+    bool swing2 = doc["swing2"];         // false
+    int timer = doc["timer"];            // 0
+    int fullhours = doc["fullhours"];    // 0
+    bool isHalfHour = doc["isHalfHour"]; // false
+    bool isStrong = doc["isStrong"];     // false
+    bool isFeeling = doc["isFeeling"];   // false
+    bool isSleep = doc["isSleep"];       // false
+    bool isScreen = doc["isScreen"];     // true
+    bool isHealth = doc["isHealth"];     // false
+
+    acRemote
+        .setIsOn(isOn)
+        .setTemp(temp)
+        .setMode(mode)
+        .setSpeed(speed)
+        .setSwing1(swing1)
+        .setSwing2(swing2)
+        .setTimer(timer)
+        .setIsStrong(isStrong)
+        .setIsFeeling(isFeeling)
+        .setIsSleep(isSleep)
+        .setIsHealth(isHealth)
+        .execute();
+
+    doc.clear();
+  }
+  else if (type == 2 || type == 3)
+  {
+    JsonArray json = doc["arr"];
+    for (int8_t i = 0; i < json.size(); i++)
+    {
+      if (type == 2)
+      {
+        strcpy(publishToTopic[i], json[i]);
+      }
+      else
+      {
+        strcpy(listenToToTopic, json[i]);
+      }
+    }
+  }
+
+  doc.clear();
+}
+
+boolean checkData()
 {
   char status[32] = {0};
   wifiClient.readBytesUntil('\r', status, sizeof(status));
-  // Serial.println(status);
+  Serial.println(status);
 
   // Check HTTP status
   if (strcmp(status, "HTTP/1.1 200 OK") != 0)
   {
-    Serial.print(F("Unexpected response: "));
+    Serial.print(("Unexpected response: "));
     Serial.println(status);
     wifiClient.stop();
-    return;
+    return 0;
   }
 
   // Skip HTTP headers
   char endOfHeaders[] = "\n\r\n";
-  if (!wifiClient.find(endOfHeaders)) {
-    Serial.println(F("Invalid response"));
+  if (!wifiClient.find(endOfHeaders))
+  {
+    Serial.println(("Invalid response"));
     wifiClient.stop();
-    return;
+    return 0;
   }
-    // Serial.println();
-
-    // Serial.println(response);
-  // TODO: add a calculation to get the correct size for doc and char array
-  // while (wifiClient.available())
-  // {
-  //   Serial.print(char(wifiClient.read()));
-  // }
-  
-  // char charArray[2048];
-  DynamicJsonDocument  doc(1024);
-  DeserializationError err = deserializeJson(doc, wifiClient);
-  Serial.println("err.f_str()");
-  Serial.println(err.f_str());
-  // const char *sensor = doc["uuid"];
-  // JsonArray lightstates = doc["publishTo"];
-  // JsonObject sensor1 = lightstates[0];
-  // const char *sensor12 = sensor1["topicPath"];
-  // Serial.println(sensor);
-  // Serial.println("sensor");
-  // Serial.println(sensor12);
-
-  delay(10000);
-  // Serial.println("status");
-
-  // uint16_t y = getContentLength();
-  // *buffer = new char[y + 1];
-  // boolean isBody = false;
-  // while ((wifiClient.available()))
-  // {
-
-  //   if (isBody)
-  //   {
-  //     wifiClient.readBytes(*buffer, y);
-  //     *buffer[y] = '\0';
-
-  //     for (size_t i = 0; i < strlen(*buffer); i++)
-  //     {
-  //       if (*buffer[i] == '"')
-  //       {
-  //         *buffer[i] == '\"';
-  //       }
-  //     }
-  //   }
-  //   else
-  //   {
-  //     char c = wifiClient.read();
-  //     if (c == '\n')
-  //     {
-  //       c = wifiClient.read();
-  //       if (c == '\r')
-  //       {
-  //         c = wifiClient.read();
-  //         if (c == '\n')
-  //         {
-  //           isBody = true;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  return 1;
 }
 
 void setup()
 {
   Serial.begin(115200);
   ESPSERIAL.begin(9600);
+  acRemote.begin();
   setup_wifi();
 }
 
 void loop()
 {
   // mqttClient.poll();
+  // //TODO: add check to see if uuid is in eeprom and if so send request with only uuid if (state == DV_NO_DEVICE)
   if (state == DV_NO_DEVICE)
   {
-    sendNewDeviceRequest();
+    getUUID();
+    // Serial.println(uuid);
+    // sendNewDeviceRequest();
     state = DV_SEND_REQUEST;
   }
   else if (state == DV_SEND_REQUEST)
   {
-    char *responseBody;
-    readData(&responseBody);
-    setUpDevice(responseBody);
-    // if (responseBody != "")
+    // while (wifiClient.available())
     // {
-    //   Serial.println("responseBody: ");
-    //   Serial.println(responseBody);
+    //   Serial.print(char(wifiClient.read()));
     // }
+
+    // checkData();
+    setUpDevice();
+    // while (wifiClient.available())
+    // {
+    //   Serial.print(char(wifiClient.read()));
+    // }
+    // Serial.println("XXX");
+
+    // state = DV_IS_DEVICE;
   }
   else if (state == DV_IS_DEVICE)
   {
-    /* code */
+    setUpMqtt();
+    //   state = 4;
   }
+  // else
+  // {
+  //   Serial.println("cc");
+  // }
 }
-
-// HTTP/1.1 200 OK
-// X-Powered-By: Express
-// Content-Type: application/json; charset=utf-8
-// Content-Length: 609
-// ETag: W/"261-fd3v1jJIep7mDWCfS0ctx8kaC6I"
-// Date: Wed, 02 Aug 2023 18:45:00 GMT
-// Connection: keep-alive
-// Keep-Alive: timeout=5

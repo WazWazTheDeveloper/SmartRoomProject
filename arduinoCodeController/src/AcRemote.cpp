@@ -9,7 +9,7 @@ void defaultCallback(){};
 
 AcRemote& AcRemote::begin(){
     IrSender.begin();
-    Serial.println("send");
+    // Serial.println(F("send"));
     return *this;
 }
 
@@ -17,6 +17,7 @@ AcRemote& AcRemote::execute()
 {
     calcRawData();
     IrSender.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), NEC_KHZ); // Note the approach used to automatically calculate the size of the array.
+    // Serial.println(F("send"));
     return *this;
 }
 

@@ -21,21 +21,72 @@ router.get('/getUUID', (req: Request, res: Response) => {
 
 // TODO: add a querry to select device type
 router.post('/registerNewDevice', async(req: Request, res: Response) => {
-    let deviceType = req.body.deviceType;
+    let deviceType = req.query.deviceType;
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
+
+    // TODO: change to convertor
+    let deviceTypeList= [0]
     
     // TODO: add try as deviceType can be somting non existent
-    await appdata.addDevice("new device",newUUID,deviceType);
+    await appdata.addDevice("new device",newUUID,deviceTypeList);
     let newDevice:Device = appdata.getDeviceById(newUUID);
     
-    res.setHeader("Content-Type", "application/json");
-    console.log(newDevice.getAsJson())
+    // res.setHeader("Content-Type", "application/json");
+    // console.log(newDevice.getAsJson())
     res.status(200);
-    res.json(newDevice.getAsJsonForArduino());
-    console.log(newDevice.getAsJsonForArduino());
+    res.json();
     WebSocketServerHandler.updateAppdata();
-    res.send()
+    res.send(newUUID);
+})
+
+
+router.get('/getData', async(req: Request, res: Response) => {
+    let uuid = req.query.uuid;
+    let appdata = await AppData.getAppDataInstance();
+    
+    // TODO: change to convertor
+    let uuidString= String(uuid)
+    
+    res.setHeader("Content-Type", "application/json");
+    // TODO: add try as deviceType can be somting non existent
+    let device:Device = appdata.getDeviceById(uuidString);
+    
+    res.status(200);
+    res.json(device.deviceData[0].getAsJson());
+    res.send();
+})
+
+router.get('/getPublishTo', async(req: Request, res: Response) => {
+    let uuid = req.query.uuid;
+    let appdata = await AppData.getAppDataInstance();
+
+    // TODO: change to convertor
+    let uuidString= String(uuid)
+    
+    res.setHeader("Content-Type", "application/json");
+    // TODO: add try as deviceType can be somting non existent
+    let device:Device = appdata.getDeviceById(uuidString);
+    
+    res.status(200);
+    res.json(device.getPublishToAsJsonForArduino());
+    res.send();
+})
+
+router.get('/getListenTo', async(req: Request, res: Response) => {
+    let uuid = req.query.uuid;
+    let appdata = await AppData.getAppDataInstance();
+
+    // TODO: change to convertor
+    let uuidString= String(uuid)
+    
+    res.setHeader("Content-Type", "application/json");
+    // TODO: add try as deviceType can be somting non existent
+    let device:Device = appdata.getDeviceById(uuidString);
+    
+    res.status(200);
+    res.json(device.getListenToAsJsonForArduino());
+    res.send();
 })
 
 export { router as deviceRouter };
