@@ -8,22 +8,22 @@ class AcRemote
 {
 private:
     bool isOn;
-    int temp;
-    int mode;
-    int speed;
+    int8_t temp;
+    int8_t mode;
+    int8_t speed;
     bool swing1;
     bool swing2;
     float timer;
-    int fullhours;
+    int8_t fullhours;
     bool isHalfHour;
     bool isStrong;
     bool isSleep;
     bool isFeeling;
     bool isScreen;
     bool isHealth;
-    int buttonPressed;
+    int8_t buttonPressed;
 
-    void (*callback)();
+    // void (*callback)();
 
     // byte 0
     const uint8_t addressArray = 195;
@@ -80,60 +80,60 @@ public:
     uint16_t rawData[211];
 
     // modes
-    const int MODE_AUTO = 0;
-    const int MODE_COOL = 1;
-    const int MODE_DRY = 2;
-    const int MODE_HEAT = 3;
-    const int MODE_FAN = 4;
+    const int8_t MODE_AUTO = 0;
+    const int8_t MODE_COOL = 1;
+    const int8_t MODE_DRY = 2;
+    const int8_t MODE_HEAT = 3;
+    const int8_t MODE_FAN = 4;
 
     // speed
-    const int SPEED_LOW = 0;
-    const int SPEED_MED = 1;
-    const int SPEED_HIGH = 2;
-    const int SPEED_AUTO = 3;
+    const int8_t SPEED_LOW = 0;
+    const int8_t SPEED_MED = 1;
+    const int8_t SPEED_HIGH = 2;
+    const int8_t SPEED_AUTO = 3;
 
-    const int onOffButton = 0;
-    const int modeButton = 1;
-    const int tempPlusButton = 2;
-    const int tempMinusButton = 3;
-    const int timerButton = 4;
-    const int speedButton = 5;
-    const int swing1Button = 6;
-    const int swing2Button = 7;
-    const int strongButton = 8;
-    const int feelButton = 9;
-    const int sleepButton = 10;
-    const int screenButton = 11;
-    const int healthButton = 12;
-    AcRemote(void (_callback)(),bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth);
+    const int8_t onOffButton = 0;
+    const int8_t modeButton = 1;
+    const int8_t tempPlusButton = 2;
+    const int8_t tempMinusButton = 3;
+    const int8_t timerButton = 4;
+    const int8_t speedButton = 5;
+    const int8_t swing1Button = 6;
+    const int8_t swing2Button = 7;
+    const int8_t strongButton = 8;
+    const int8_t feelButton = 9;
+    const int8_t sleepButton = 10;
+    const int8_t screenButton = 11;
+    const int8_t healthButton = 12;
+    // AcRemote(void (_callback)(),bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth);
     AcRemote(
-        bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth);
-    AcRemote(void (*callback)());
+        bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth);
+    // AcRemote(void (*callback)());
     AcRemote();
     AcRemote& setIsOn(bool _isOn);
-    bool getIsOn();
-    AcRemote& setTemp(int _temp);
-    int getTemp();
-    AcRemote& setMode(int _mode);
-    int getMode();
-    AcRemote& setSpeed(int _speed);
-    int getSpeed();
+    // bool getIsOn();
+    AcRemote& setTemp(int8_t _temp);
+    // int8_t getTemp();
+    AcRemote& setMode(int8_t _mode);
+    // int8_t getMode();
+    AcRemote& setSpeed(int8_t _speed);
+    // int8_t getSpeed();
     AcRemote& setSwing1(bool _swing1);
-    bool getSwing1();
+    // bool getSwing1();
     AcRemote& setSwing2(bool _swing2);
-    bool getSwing2();
-    AcRemote& setTimer(int _timer);
-    float getTimer();
+    // bool getSwing2();
+    AcRemote& setTimer(int8_t _timer);
+    // float getTimer();
     AcRemote& setIsStrong(bool _isStrong);
-    bool getIsStrong();
+    // bool getIsStrong();
     AcRemote& setIsSleep(bool _isSleep);
-    bool getIsSleep();
+    // bool getIsSleep();
     AcRemote& setIsFeeling(bool _isFeeling);
-    bool getIsFeeling();
+    // bool getIsFeeling();
     AcRemote& setIsHealth(bool _isHealth);
-    bool getIsHealth();
+    // bool getIsHealth();
     AcRemote& setIsScreen();
-    bool getIsScreen();
+    // bool getIsScreen();
     AcRemote& calcRawData();
     AcRemote& execute();
     AcRemote& begin();

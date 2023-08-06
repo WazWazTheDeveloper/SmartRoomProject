@@ -4,15 +4,16 @@
 #include <ArduinoMqttClient.h>
 #include "AcRemote.h"
 #include <EEPROM.h>
+// #include <MemoryUsage.h>
 
 SoftwareSerial ESPSERIAL(14, 15); // RX, TX
 AcRemote acRemote = AcRemote();
 
-char *wifi_ssid = "home";
-char *wifi_password = "0525611397";
+char *wifi_ssid = ("home");
+char *wifi_password = ("0525611397");
 int status = WL_IDLE_STATUS;
 
-const char broker[] = "10.0.0.12";
+const char broker[] = ("10.0.0.12");
 int port = 1883;
 
 WiFiEspClient wifiClient;
@@ -35,72 +36,57 @@ void setup_wifi()
 {
   WiFi.init(&ESPSERIAL);
 
-  // check for the presence of the shield
-  // if (WiFi.status() == WL_NO_SHIELD)
-  // {
-  //   Serial.println(F("WiFi shield not present"));
-  //   // don't continue
-  //   while (true)
-  //     ;
-  // }
-
-  // attempt to connect to WiFi network
   while (status != WL_CONNECTED)
   {
-    // Serial.print(F("Attempting to connect to WPA SSID: "));
-    // Serial.println(wifi_ssid);
-    // Connect to WPA/WPA2 network
     status = WiFi.begin(wifi_ssid, wifi_password);
   }
 
-  Serial.println(F("You're connected to the network"));
-  // Serial.println("IP address: ");
-  // Serial.println(WiFi.localIP());
+  // Serial.println(("You're connected to the network"));
+}
+
+void subTopics()
+{
+  for (size_t i = 0; i < 2; i++)
+  {
+    if (strlen(publishToTopic[i]) != 0)
+    {
+      mqttClient.subscribe(publishToTopic[i]);
+    }
+  }
+  if (strlen(listenToToTopic) != 0)
+  {
+    mqttClient.subscribe(listenToToTopic);
+  }
 }
 
 void setUpMqtt()
 {
-  // Serial.println("1232");
+  // Serial.println(F("ye"));
   if (!mqttClient.connect(broker, port))
   {
-    // Serial.print("MQTT connection failed! Error code = ");
-    Serial.println(mqttClient.connectError());
-
+    // Serial.println(mqttClient.connectError());
     while (1)
       ;
   }
   mqttClient.onMessage(onMqttMessage);
-  // Serial.println("You're connected to the MQTT broker!");
-  // Serial.println();
-
-  // Serial.print("Subscribing to topics: ");
-  // for (int i = 0; i < strlen(*publishToTopic); i++)
-  // {
-  //   Serial.println(publishToTopic[i]);
-  //   if (strlen(publishToTopic[i]) != 0)
-  //   {
-  //     mqttClient.subscribe(publishToTopic[i]);
-  //   }
-  // }
-
-  // subscribe to a topic
-  // mqttClient.subscribe("test");
-
-  // topics can be unsubscribed using:
-  // mqttClient.unsubscribe();
+  subTopics();
+  mqttClient.subscribe("/1");
+  // mqttClient.subscribe("/test");
+  Serial.println(("ye"));
 }
 
 void onMqttMessage(int messageSize)
 {
+  // Serial.println(F("ye"));
   // String s = "";
-  // // we received a message, print out the topic and contents
-  // // Serial.println("Received a message with topic '");
-  // Serial.print(mqttClient.messageTopic());
-  // // Serial.print("', length ");
-  // Serial.print(messageSize);
-  // // Serial.println(" bytes:");
+  // we received a message, print out the topic and contents
+  // Serial.println("Received a message with topic '");
+  Serial.print(mqttClient.messageTopic());
+  // Serial.print("', length ");
+  Serial.print(messageSize);
+  // Serial.println(" bytes:");
 
-  // // use the Stream interface to print the contents
+  // use the Stream interface to print the contents
   // while (mqttClient.available())
   // {
   //   s.concat((char)mqttClient.read());
@@ -153,43 +139,52 @@ void getUUID()
   {
     return;
   }
-  else
-  {
-    sendHttpRequest(0);
-    checkData();
-    wifiClient.readBytes(uuid, 36);
-    uuid[36] = '\0';
-    writeUUID();
-  }
+  sendHttpRequest(0);
+  checkData();
+  wifiClient.readBytes(uuid, 36);
+  uuid[36] = '\0';
+  writeUUID();
 }
 
-void sendHttpRequest(int8_t requestNumber)
+boolean sendHttpRequest(int8_t requestNumber)
 {
-
+  char tempString[75] = {'\0'};
   if (wifiClient.connect(broker, 5000))
   {
-    switch (requestNumber)
+    if (requestNumber == 0)
     {
-    case 0:
-      wifiClient.println(F("POST /device/registerNewDevice?deviceType='0' HTTP/1.1"));
-      break;
-    case 1:
-      wifiClient.println("GET /device/getData?uuid=" + String(uuid) + " HTTP/1.1");
-      break;
-    case 2:
-      wifiClient.println("GET /device/getPublishTo?uuid=" + String(uuid) + " HTTP/1.1");
-      break;
-    case 3:
-      wifiClient.println("GET /device/getListenTo?uuid=" + String(uuid) + " HTTP/1.1");
-      break;
+      strcpy(tempString, "POST /device/registerNewDevice?deviceType='0'");
     }
+    else
+    {
+      strcpy(tempString, ("GET /device/"));
+      if (requestNumber == 1)
+      {
+        strcat(tempString, "getData");
+      }
+      else if (requestNumber == 2)
+      {
+        strcat(tempString, "getPublishTo");
+      }
+      else if (requestNumber == 3)
+      {
+        strcat(tempString, "getListenTo");
+      }
+      strcat(tempString, "?uuid=");
+      strcat(tempString, uuid);
+    }
+    strcat(tempString, " HTTP/1.1");
 
-    // wifiClient.println(("GET /device/getData?uuid=" + String(uuid) + "HTTP/1.1"));
-    wifiClient.println(F("Host: 10.0.0.12:5000"));
-    wifiClient.println(F("Connection: close"));
-    wifiClient.println(F("Accept: */*"));
+    // Serial.println(tempString);
+    wifiClient.println(tempString);
+    wifiClient.println(("Host: 10.0.0.12:5000"));
+    wifiClient.println(("Connection: close"));
+    wifiClient.println(("Accept: */*"));
     wifiClient.println();
+
+    return 1;
   }
+  return 0;
 }
 
 boolean setUpDevice()
@@ -209,9 +204,9 @@ boolean setUpDevice()
   // Serial.println(uuid);
 }
 
-void updateData(int8_t type)
+boolean updateData(int8_t type)
 {
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<140> doc;
   DeserializationError error;
 
   if (type == 1)
@@ -226,7 +221,7 @@ void updateData(int8_t type)
   if (error)
   {
     Serial.println(error.f_str());
-    return;
+    return 0;
   }
 
   if (type == 0 || type == 1)
@@ -260,25 +255,44 @@ void updateData(int8_t type)
         .setIsHealth(isHealth)
         .execute();
 
-    doc.clear();
+    // acRemote
+    //     .setIsOn(doc["isOn"]].as<bool>())
+    //     .setTemp(doc[("b")].as<int>())
+    //     .setMode(doc[("c")].as<int>())
+    //     .setSpeed(doc[("d")].as<int>())
+    //     .setSwing1(doc[("e")].as<bool>())
+    //     .setSwing2(doc[("f")].as<bool>())
+    //     .setTimer(doc[("g")].as<int>())
+    //     .setIsStrong(doc[("h")].as<bool>())
+    //     .setIsFeeling(doc[("i")].as<bool>())
+    //     .setIsSleep(doc[("g")].as<bool>())
+    //     .setIsHealth(doc[("k")].as<bool>())
+    //     .execute();
   }
   else if (type == 2 || type == 3)
   {
-    JsonArray json = doc["arr"];
-    for (int8_t i = 0; i < json.size(); i++)
+    // serializeJson(json , Serial);
+    for (int8_t i = 0; i < doc[("arr")].size(); i++)
     {
+      const char *arr_i = doc[("arr")][i]; // "1"
       if (type == 2)
       {
-        strcpy(publishToTopic[i], json[i]);
+        mqttClient.unsubscribe(publishToTopic[i]);
+        strcpy(publishToTopic[i], arr_i);
+        // Serial.println("arr_0");
+        // Serial.println(publishToTopic[i]);
       }
       else
       {
-        strcpy(listenToToTopic, json[i]);
+        mqttClient.unsubscribe(listenToToTopic);
+        strcpy(listenToToTopic, arr_i);
       }
     }
   }
 
+  subTopics();
   doc.clear();
+  return 1;
 }
 
 boolean checkData()
@@ -317,39 +331,22 @@ void setup()
 
 void loop()
 {
-  // mqttClient.poll();
-  // //TODO: add check to see if uuid is in eeprom and if so send request with only uuid if (state == DV_NO_DEVICE)
+  // // TODO: add check to see if uuid is in eeprom and if so send request with only uuid if (state == DV_NO_DEVICE)
   if (state == DV_NO_DEVICE)
   {
     getUUID();
-    // Serial.println(uuid);
-    // sendNewDeviceRequest();
     state = DV_SEND_REQUEST;
   }
   else if (state == DV_SEND_REQUEST)
   {
-    // while (wifiClient.available())
-    // {
-    //   Serial.print(char(wifiClient.read()));
-    // }
-
-    // checkData();
+    // get data
     setUpDevice();
-    // while (wifiClient.available())
-    // {
-    //   Serial.print(char(wifiClient.read()));
-    // }
-    // Serial.println("XXX");
 
-    // state = DV_IS_DEVICE;
-  }
-  else if (state == DV_IS_DEVICE)
-  {
+    state = DV_IS_DEVICE;
     setUpMqtt();
-    //   state = 4;
   }
-  // else
-  // {
-  //   Serial.println("cc");
-  // }
+  else
+  {
+    mqttClient.poll();
+  }
 }

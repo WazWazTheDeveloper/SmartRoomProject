@@ -153,6 +153,23 @@ class AirconditionerData implements deviceType {
         return json;
     }
 
+    getAsJsonForArduino() {
+        let json = {
+            "a": this.isOn,
+            "b": this.temp,
+            "c": this.mode,
+            "d": this.speed,
+            "e": this.swing1,
+            "f": this.swing2,
+            "g": this.timer,
+            "h": this.isStrong,
+            'i': this.isFeeling,
+            "j": this.isSleep,
+            "k": this.isHealth
+        }
+        return json;
+    }
+
     static loadFromFile(uuid: string, dataPlace: number): Promise<AirconditionerData> {
         return new Promise<AirconditionerData>((resolve, reject) => {
             data.readFile<device>(`devices/${uuid}`).then(acData => {

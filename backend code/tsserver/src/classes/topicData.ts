@@ -30,7 +30,7 @@ class TopicData implements topicData{
             functionData: this.functionData,
         }
 
-        return dataJson
+        return this.topicPath
     }
 }
 

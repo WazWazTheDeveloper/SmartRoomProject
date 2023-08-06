@@ -1,16 +1,15 @@
-#include "USBAPI.h"
 #define IR_SEND_PIN 8
 
 #include "AcRemote.h"
 #include "Arduino.h"
 #include <IRremote.hpp>
 
-void defaultCallback(){};
+// void defaultCallback(){};
 
 AcRemote& AcRemote::begin(){
     IrSender.begin();
     // Serial.println(F("send"));
-    return *this;
+    // return *this;
 }
 
 AcRemote& AcRemote::execute()
@@ -21,7 +20,26 @@ AcRemote& AcRemote::execute()
     return *this;
 }
 
-AcRemote::AcRemote(void (*_callback)(), bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
+// AcRemote::AcRemote(void (*_callback)(), bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
+// {
+//     setIsOn(_isOn);
+//     setTemp(temp);
+//     setMode(_mode);
+//     setSpeed(_speed);
+//     setSwing1(_swing1);
+//     setSwing2(_swing2);
+//     setTimer(_timer);
+//     setIsStrong(_isStrong);
+//     setIsSleep(_isSleep);
+//     setIsFeeling(_isFeeling);
+//     setIsScreen();
+//     setIsHealth(_isHealth);
+//     buttonPressed = buttonArray[onOffButton];
+
+//     void (*callback)() = _callback;
+// }
+
+AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
 {
     setIsOn(_isOn);
     setTemp(temp);
@@ -37,46 +55,27 @@ AcRemote::AcRemote(void (*_callback)(), bool _isOn, int _temp, int _mode, int _s
     setIsHealth(_isHealth);
     buttonPressed = buttonArray[onOffButton];
 
-    void (*callback)() = _callback;
+    // void (*callback)() = defaultCallback;
 }
 
-AcRemote::AcRemote(bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
-{
-    setIsOn(_isOn);
-    setTemp(temp);
-    setMode(_mode);
-    setSpeed(_speed);
-    setSwing1(_swing1);
-    setSwing2(_swing2);
-    setTimer(_timer);
-    setIsStrong(_isStrong);
-    setIsSleep(_isSleep);
-    setIsFeeling(_isFeeling);
-    setIsScreen();
-    setIsHealth(_isHealth);
-    buttonPressed = buttonArray[onOffButton];
+// AcRemote::AcRemote(void (*_callback)())
+// {
+//     setIsOn(false);
+//     setTemp(24);
+//     setMode(MODE_AUTO);
+//     setSpeed(SPEED_AUTO);
+//     setSwing1(false);
+//     setSwing2(false);
+//     setTimer(0);
+//     setIsStrong(false);
+//     setIsSleep(false);
+//     setIsFeeling(false);
+//     setIsScreen();
+//     setIsHealth(false);
+//     buttonPressed = buttonArray[onOffButton];
 
-    void (*callback)() = defaultCallback;
-}
-
-AcRemote::AcRemote(void (*_callback)())
-{
-    setIsOn(false);
-    setTemp(24);
-    setMode(MODE_AUTO);
-    setSpeed(SPEED_AUTO);
-    setSwing1(false);
-    setSwing2(false);
-    setTimer(0);
-    setIsStrong(false);
-    setIsSleep(false);
-    setIsFeeling(false);
-    setIsScreen();
-    setIsHealth(false);
-    buttonPressed = buttonArray[onOffButton];
-
-    callback = *_callback;
-}
+//     callback = *_callback;
+// }
 
 AcRemote::AcRemote()
 {
@@ -94,7 +93,7 @@ AcRemote::AcRemote()
     setIsHealth(false);
     buttonPressed = buttonArray[onOffButton];
 
-    callback = defaultCallback;
+    // callback = defaultCallback;
 }
 
 AcRemote& AcRemote::setIsOn(bool _isOn)
@@ -104,12 +103,12 @@ AcRemote& AcRemote::setIsOn(bool _isOn)
 
     return *this;
 }
-bool AcRemote::getIsOn()
-{
-    return isOn;
-}
+// bool AcRemote::getIsOn()
+// {
+//     return isOn;
+// }
 
-AcRemote& AcRemote::setTemp(int _temp)
+AcRemote& AcRemote::setTemp(int8_t _temp)
 {
     if (temp < 16 || temp > 32)
     {
@@ -127,12 +126,12 @@ AcRemote& AcRemote::setTemp(int _temp)
 
     return *this;
 }
-int AcRemote::getTemp()
-{
-    return temp;
-}
+// int8_t AcRemote::getTemp()
+// {
+//     return temp;
+// }
 
-AcRemote& AcRemote::setMode(int _mode)
+AcRemote& AcRemote::setMode(int8_t _mode)
 {
     if (_mode >= 0 && _mode <= 4)
     {
@@ -141,12 +140,12 @@ AcRemote& AcRemote::setMode(int _mode)
     }
     return *this;
 }
-int AcRemote::getMode()
-{
-    return mode;
-}
+// int8_t AcRemote::getMode()
+// {
+//     return mode;
+// }
 
-AcRemote& AcRemote::setSpeed(int _speed)
+AcRemote& AcRemote::setSpeed(int8_t _speed)
 {
     if (_speed >= 0 && _speed <= 3)
     {
@@ -155,10 +154,10 @@ AcRemote& AcRemote::setSpeed(int _speed)
     }
     return *this;
 }
-int AcRemote::getSpeed()
-{
-    return speed;
-}
+// int8_t AcRemote::getSpeed()
+// {
+//     return speed;
+// }
 
 AcRemote& AcRemote::setSwing1(bool _swing1)
 {
@@ -166,10 +165,10 @@ AcRemote& AcRemote::setSwing1(bool _swing1)
     buttonPressed = buttonArray[swing1Button];
     return *this;
 }
-bool AcRemote::getSwing1()
-{
-    return swing1;
-}
+// bool AcRemote::getSwing1()
+// {
+//     return swing1;
+// }
 
 AcRemote& AcRemote::setSwing2(bool _swing2)
 {
@@ -177,15 +176,15 @@ AcRemote& AcRemote::setSwing2(bool _swing2)
     buttonPressed = buttonArray[swing2Button];
     return *this;
 }
-bool AcRemote::getSwing2()
-{
-    return swing2;
-}
+// bool AcRemote::getSwing2()
+// {
+//     return swing2;
+// }
 
-AcRemote& AcRemote::setTimer(int _timer)
+AcRemote& AcRemote::setTimer(int8_t _timer)
 {
     timer = _timer;
-    fullhours = static_cast<int>(timer);
+    fullhours = static_cast<int8_t>(timer);
     if (fullhours <= 9 && fullhours >= 0)
     {
         isHalfHour = fmod(0, 1) == 0 ? false : true;
@@ -195,10 +194,10 @@ AcRemote& AcRemote::setTimer(int _timer)
     buttonPressed = buttonArray[timerButton];
     return *this;
 }
-float AcRemote::getTimer()
-{
-    return timer;
-}
+// float AcRemote::getTimer()
+// {
+//     return timer;
+// }
 
 AcRemote& AcRemote::setIsStrong(bool _isStrong)
 {
@@ -206,10 +205,10 @@ AcRemote& AcRemote::setIsStrong(bool _isStrong)
     buttonPressed = buttonArray[strongButton];
     return *this;
 }
-bool AcRemote::getIsStrong()
-{
-    return isStrong;
-}
+// bool AcRemote::getIsStrong()
+// {
+//     return isStrong;
+// }
 
 AcRemote& AcRemote::setIsSleep(bool _isSleep)
 {
@@ -217,10 +216,10 @@ AcRemote& AcRemote::setIsSleep(bool _isSleep)
     buttonPressed = buttonArray[sleepButton];
     return *this;
 }
-bool AcRemote::getIsSleep()
-{
-    return isSleep;
-}
+// bool AcRemote::getIsSleep()
+// {
+//     return isSleep;
+// }
 
 AcRemote& AcRemote::setIsFeeling(bool _isFeeling)
 {
@@ -228,10 +227,10 @@ AcRemote& AcRemote::setIsFeeling(bool _isFeeling)
     buttonPressed = buttonArray[feelButton];
     return *this;
 }
-bool AcRemote::getIsFeeling()
-{
-    return isFeeling;
-}
+// bool AcRemote::getIsFeeling()
+// {
+//     return isFeeling;
+// }
 
 AcRemote& AcRemote::setIsHealth(bool _isHealth)
 {
@@ -239,10 +238,10 @@ AcRemote& AcRemote::setIsHealth(bool _isHealth)
     buttonPressed = buttonArray[healthButton];
     return *this;
 }
-bool AcRemote::getIsHealth()
-{
-    return isHealth;
-}
+// bool AcRemote::getIsHealth()
+// {
+//     return isHealth;
+// }
 
 AcRemote& AcRemote::setIsScreen()
 {
@@ -250,10 +249,10 @@ AcRemote& AcRemote::setIsScreen()
     buttonPressed = buttonArray[screenButton];
     return *this;
 }
-bool AcRemote::getIsScreen()
-{
-    return isScreen;
-}
+// bool AcRemote::getIsScreen()
+// {
+//     return isScreen;
+// }
 
 void AcRemote::calcRawBytes()
 {
@@ -408,7 +407,7 @@ void AcRemote::calcRawBytes()
 
 uint8_t AcRemote::calcCheckSum()
 {
-    int tempLastBit = 0;
+    int8_t tempLastBit = 0;
     for (size_t i = 0; i < 12; i++)
     {
         tempLastBit += reversedBitsNum(rawBytes[i]);
@@ -454,10 +453,12 @@ AcRemote& AcRemote::calcRawData()
     rawData[210] = 480;
 
     // for each byte is rawBytes
-    for (int i = 0; i < 13; i++)
+    for (int8_t i = 0; i < 13; i++)
     {
         uint8_t curByte = rawBytes[i];
 
+        // char tempByte[8] = {'\0'};
+        // TODO: turn this into achar array to save space
         String byteString = String(curByte, 2);
 
         int byteLength = byteString.length();
@@ -467,9 +468,9 @@ AcRemote& AcRemote::calcRawData()
         }
 
         // for each bit in a byte
-        for (int j = 0; j < 8; j++)
+        for (int8_t j = 0; j < 8; j++)
         {
-            int placeOnRawData = 2 + i * 16 + j * 2;
+            int8_t placeOnRawData = 2 + i * 16 + j * 2;
             if (byteString[j] == '0')
             {
                 rawData[placeOnRawData] = 480;
