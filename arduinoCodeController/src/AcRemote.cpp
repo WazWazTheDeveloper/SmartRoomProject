@@ -9,7 +9,7 @@
 AcRemote& AcRemote::begin(){
     IrSender.begin();
     // Serial.println(F("send"));
-    // return *this;
+    return *this;
 }
 
 AcRemote& AcRemote::execute()
@@ -112,7 +112,7 @@ AcRemote& AcRemote::setTemp(int8_t _temp)
 {
     if (temp < 16 || temp > 32)
     {
-        return;
+        return *this;
     }
     if (_temp > temp)
     {

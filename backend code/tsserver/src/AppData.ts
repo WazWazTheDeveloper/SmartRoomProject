@@ -216,6 +216,7 @@ class AppData {
         this.deviceList.push(newDevice);
         this.generalData.addDevice(newDeviceGeneralData);
 
+        // TODO: reenable this cluster fuck later and change this to be somewhere else
         await CheckConnection.updateDevicesToCheck();
     }
 

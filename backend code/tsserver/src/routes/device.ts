@@ -35,7 +35,7 @@ router.post('/registerNewDevice', async(req: Request, res: Response) => {
     // res.setHeader("Content-Type", "application/json");
     // console.log(newDevice.getAsJson())
     res.status(200);
-    res.json();
+    // res.json();
     WebSocketServerHandler.updateAppdata();
     res.send(newUUID);
 })
@@ -53,7 +53,9 @@ router.get('/getData', async(req: Request, res: Response) => {
     let device:Device = appdata.getDeviceById(uuidString);
     
     res.status(200);
-    res.json(device.deviceData[0].getAsJson());
+    res.json(device.deviceData[0].getAsJsonForArduino());
+    console.log(device.deviceData[0].getAsJsonForArduino())
+    console.log("yy")
     res.send();
 })
 
@@ -70,6 +72,8 @@ router.get('/getPublishTo', async(req: Request, res: Response) => {
     
     res.status(200);
     res.json(device.getPublishToAsJsonForArduino());
+    console.log("x")
+    console.log(device.getPublishToAsJsonForArduino())
     res.send();
 })
 
@@ -86,6 +90,7 @@ router.get('/getListenTo', async(req: Request, res: Response) => {
     
     res.status(200);
     res.json(device.getListenToAsJsonForArduino());
+    console.log("y")
     res.send();
 })
 

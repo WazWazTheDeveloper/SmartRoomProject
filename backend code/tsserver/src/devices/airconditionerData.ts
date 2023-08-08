@@ -155,17 +155,17 @@ class AirconditionerData implements deviceType {
 
     getAsJsonForArduino() {
         let json = {
-            "a": this.isOn,
-            "b": this.temp,
-            "c": this.mode,
-            "d": this.speed,
-            "e": this.swing1,
-            "f": this.swing2,
-            "g": this.timer,
-            "h": this.isStrong,
-            'i': this.isFeeling,
-            "j": this.isSleep,
-            "k": this.isHealth
+            "isOn": this.isOn,
+            "temp": this.temp,
+            "mode": this.mode,
+            "speed": this.speed,
+            "swing1": this.swing1,
+            "swing2": this.swing2,
+            "timer": this.timer,
+            "isStrong": this.isStrong,
+            'isFeeling': this.isFeeling,
+            "isSleep": this.isSleep,
+            "isHealth": this.isHealth
         }
         return json;
     }
