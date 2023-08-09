@@ -1,12 +1,18 @@
 #ifndef AcRemote_h
 #define AcRemote_h
 #include "Arduino.h"
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
 
 // #include <string>
 
 class AcRemote
 {
 private:
+    const uint16_t kIrLed = 2; // ESP8266 GPIO pin to use. Recommended: 4 (D2)
+    
+    
+    IRsend irsend;
     bool isOn;
     int8_t temp;
     int8_t mode;
@@ -26,6 +32,7 @@ private:
     // void (*callback)();
 
     // byte 0
+
     const uint8_t addressArray = 195;
 
     // byte 1

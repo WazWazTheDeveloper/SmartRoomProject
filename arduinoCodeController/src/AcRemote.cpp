@@ -1,22 +1,27 @@
-#define IR_SEND_PIN 8
-
 #include "AcRemote.h"
 #include "Arduino.h"
-#include <IRremote.hpp>
 
 // void defaultCallback(){};
 
-AcRemote& AcRemote::begin(){
-    IrSender.begin();
-    // Serial.println(F("send"));
+AcRemote &AcRemote::begin()
+{
+    irsend.begin();
+    // Serial.println(F("init"));
     return *this;
 }
 
-AcRemote& AcRemote::execute()
+AcRemote &AcRemote::execute()
 {
     calcRawData();
-    IrSender.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), NEC_KHZ); // Note the approach used to automatically calculate the size of the array.
+    irsend.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), 38); // Note the approach used to automatically calculate the size of the array.
+        Serial.println(sizeof(rawData) / sizeof(rawData[0]));
+    // for (size_t i = 0; i < sizeof(rawData) / sizeof(rawData[0]); i++)
+    // {
+    // Serial.print(rawData[i]);
+    // Serial.print(',');
+    // }
     // Serial.println(F("send"));
+    delay(50);
     return *this;
 }
 
@@ -39,7 +44,7 @@ AcRemote& AcRemote::execute()
 //     void (*callback)() = _callback;
 // }
 
-AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
+AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth) : irsend(kIrLed)
 {
     setIsOn(_isOn);
     setTemp(temp);
@@ -77,7 +82,7 @@ AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _
 //     callback = *_callback;
 // }
 
-AcRemote::AcRemote()
+AcRemote::AcRemote() : irsend(kIrLed)
 {
     setIsOn(false);
     setTemp(24);
@@ -96,7 +101,7 @@ AcRemote::AcRemote()
     // callback = defaultCallback;
 }
 
-AcRemote& AcRemote::setIsOn(bool _isOn)
+AcRemote &AcRemote::setIsOn(bool _isOn)
 {
     isOn = _isOn;
     buttonPressed = buttonArray[onOffButton];
@@ -108,7 +113,7 @@ AcRemote& AcRemote::setIsOn(bool _isOn)
 //     return isOn;
 // }
 
-AcRemote& AcRemote::setTemp(int8_t _temp)
+AcRemote &AcRemote::setTemp(int8_t _temp)
 {
     if (temp < 16 || temp > 32)
     {
@@ -131,7 +136,7 @@ AcRemote& AcRemote::setTemp(int8_t _temp)
 //     return temp;
 // }
 
-AcRemote& AcRemote::setMode(int8_t _mode)
+AcRemote &AcRemote::setMode(int8_t _mode)
 {
     if (_mode >= 0 && _mode <= 4)
     {
@@ -145,7 +150,7 @@ AcRemote& AcRemote::setMode(int8_t _mode)
 //     return mode;
 // }
 
-AcRemote& AcRemote::setSpeed(int8_t _speed)
+AcRemote &AcRemote::setSpeed(int8_t _speed)
 {
     if (_speed >= 0 && _speed <= 3)
     {
@@ -159,7 +164,7 @@ AcRemote& AcRemote::setSpeed(int8_t _speed)
 //     return speed;
 // }
 
-AcRemote& AcRemote::setSwing1(bool _swing1)
+AcRemote &AcRemote::setSwing1(bool _swing1)
 {
     swing1 = _swing1;
     buttonPressed = buttonArray[swing1Button];
@@ -170,7 +175,7 @@ AcRemote& AcRemote::setSwing1(bool _swing1)
 //     return swing1;
 // }
 
-AcRemote& AcRemote::setSwing2(bool _swing2)
+AcRemote &AcRemote::setSwing2(bool _swing2)
 {
     swing2 = _swing2;
     buttonPressed = buttonArray[swing2Button];
@@ -181,14 +186,16 @@ AcRemote& AcRemote::setSwing2(bool _swing2)
 //     return swing2;
 // }
 
-AcRemote& AcRemote::setTimer(int8_t _timer)
+AcRemote &AcRemote::setTimer(int8_t _timer)
 {
     timer = _timer;
     fullhours = static_cast<int8_t>(timer);
     if (fullhours <= 9 && fullhours >= 0)
     {
         isHalfHour = fmod(0, 1) == 0 ? false : true;
-    }else {
+    }
+    else
+    {
         isHalfHour = false;
     }
     buttonPressed = buttonArray[timerButton];
@@ -199,7 +206,7 @@ AcRemote& AcRemote::setTimer(int8_t _timer)
 //     return timer;
 // }
 
-AcRemote& AcRemote::setIsStrong(bool _isStrong)
+AcRemote &AcRemote::setIsStrong(bool _isStrong)
 {
     isStrong = _isStrong;
     buttonPressed = buttonArray[strongButton];
@@ -210,7 +217,7 @@ AcRemote& AcRemote::setIsStrong(bool _isStrong)
 //     return isStrong;
 // }
 
-AcRemote& AcRemote::setIsSleep(bool _isSleep)
+AcRemote &AcRemote::setIsSleep(bool _isSleep)
 {
     isSleep = _isSleep;
     buttonPressed = buttonArray[sleepButton];
@@ -221,7 +228,7 @@ AcRemote& AcRemote::setIsSleep(bool _isSleep)
 //     return isSleep;
 // }
 
-AcRemote& AcRemote::setIsFeeling(bool _isFeeling)
+AcRemote &AcRemote::setIsFeeling(bool _isFeeling)
 {
     isFeeling = _isFeeling;
     buttonPressed = buttonArray[feelButton];
@@ -232,7 +239,7 @@ AcRemote& AcRemote::setIsFeeling(bool _isFeeling)
 //     return isFeeling;
 // }
 
-AcRemote& AcRemote::setIsHealth(bool _isHealth)
+AcRemote &AcRemote::setIsHealth(bool _isHealth)
 {
     isHealth = _isHealth;
     buttonPressed = buttonArray[healthButton];
@@ -243,7 +250,7 @@ AcRemote& AcRemote::setIsHealth(bool _isHealth)
 //     return isHealth;
 // }
 
-AcRemote& AcRemote::setIsScreen()
+AcRemote &AcRemote::setIsScreen()
 {
     isScreen = !isScreen;
     buttonPressed = buttonArray[screenButton];
@@ -444,33 +451,26 @@ uint8_t AcRemote::reversedBitsNum(uint8_t n)
     return abs(dn);
 }
 
-AcRemote& AcRemote::calcRawData()
+AcRemote &AcRemote::calcRawData()
 {
     calcRawBytes();
-
     rawData[0] = 8930;
     rawData[1] = 4570;
     rawData[210] = 480;
-
     // for each byte is rawBytes
-    for (int8_t i = 0; i < 13; i++)
+    for (int i = 0; i < 13; i++)
     {
         uint8_t curByte = rawBytes[i];
-
-        // char tempByte[8] = {'\0'};
-        // TODO: turn this into achar array to save space
         String byteString = String(curByte, 2);
-
         int byteLength = byteString.length();
         for (size_t i = 0; i < 8 - byteLength; i++)
         {
             byteString = "0" + byteString;
         }
-
         // for each bit in a byte
-        for (int8_t j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
         {
-            int8_t placeOnRawData = 2 + i * 16 + j * 2;
+            int placeOnRawData = 2 + i * 16 + j * 2;
             if (byteString[j] == '0')
             {
                 rawData[placeOnRawData] = 480;
@@ -483,6 +483,5 @@ AcRemote& AcRemote::calcRawData()
             }
         }
     }
-
     return *this;
 }
