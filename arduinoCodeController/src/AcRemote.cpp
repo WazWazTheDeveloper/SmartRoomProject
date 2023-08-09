@@ -44,7 +44,7 @@ AcRemote &AcRemote::execute()
 //     void (*callback)() = _callback;
 // }
 
-AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth) : irsend(kIrLed)
+AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth) : irsend(kIrLed,true)
 {
     setIsOn(_isOn);
     setTemp(temp);
@@ -82,7 +82,7 @@ AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _
 //     callback = *_callback;
 // }
 
-AcRemote::AcRemote() : irsend(kIrLed)
+AcRemote::AcRemote() : irsend(kIrLed,true)
 {
     setIsOn(false);
     setTemp(24);
