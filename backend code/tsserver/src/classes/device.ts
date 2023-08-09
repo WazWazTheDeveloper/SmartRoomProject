@@ -195,7 +195,7 @@ class Device implements device {
         return dataJson
     }
 
-    getPublishToAsJsonForArduino() {
+    getPublishToAsArrayForArduino() {
         // BUG: add check if empty
         let publishToArr: Array<any> = [];
         for (let index = 0; index < this.publishTo.length; index++) {
@@ -208,10 +208,10 @@ class Device implements device {
             arr: publishToArr,
         }
 
-        return dataJson
+        return publishToArr
     }
 
-    getListenToAsJsonForArduino() {
+    getListenToAsArrayForArduino() {
         let listenToArr: Array<any> = [];
         for (let index = 0; index < this.listenTo.length; index++) {
             const listenTo = this.listenTo[index];
@@ -222,7 +222,7 @@ class Device implements device {
             arr: listenToArr,
         }
 
-        return dataJson
+        return listenToArr
     }
 
 

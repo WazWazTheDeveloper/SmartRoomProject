@@ -27,10 +27,10 @@ class TopicData implements topicData{
             dataType: this.dataType,
             // isVisible: this.isVisible,
             event: this.event,
-            functionData: this.functionData,
+            // functionData: this.functionData,
         }
 
-        return this.topicPath
+        return dataJson
     }
 }
 
