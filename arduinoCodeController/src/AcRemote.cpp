@@ -14,7 +14,6 @@ AcRemote &AcRemote::execute()
 {
     calcRawData();
     irsend.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), 38); // Note the approach used to automatically calculate the size of the array.
-        Serial.println(sizeof(rawData) / sizeof(rawData[0]));
     // for (size_t i = 0; i < sizeof(rawData) / sizeof(rawData[0]); i++)
     // {
     // Serial.print(rawData[i]);
@@ -85,7 +84,7 @@ AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _
 AcRemote::AcRemote() : irsend(kIrLed,true)
 {
     setIsOn(false);
-    setTemp(24);
+    setTemp(20);
     setMode(MODE_AUTO);
     setSpeed(SPEED_AUTO);
     setSwing1(false);
@@ -113,9 +112,9 @@ AcRemote &AcRemote::setIsOn(bool _isOn)
 //     return isOn;
 // }
 
-AcRemote &AcRemote::setTemp(int8_t _temp)
+AcRemote &AcRemote::setTemp(int _temp)
 {
-    if (temp < 16 || temp > 32)
+    if (_temp < 16 || _temp > 32)
     {
         return *this;
     }
@@ -123,7 +122,7 @@ AcRemote &AcRemote::setTemp(int8_t _temp)
     {
         buttonPressed = buttonArray[tempPlusButton];
     }
-    if (_temp > temp)
+    if (_temp < temp)
     {
         buttonPressed = buttonArray[tempMinusButton];
     }
@@ -131,12 +130,12 @@ AcRemote &AcRemote::setTemp(int8_t _temp)
 
     return *this;
 }
-// int8_t AcRemote::getTemp()
-// {
-//     return temp;
-// }
+int AcRemote::getTemp()
+{
+    return temp;
+}
 
-AcRemote &AcRemote::setMode(int8_t _mode)
+AcRemote &AcRemote::setMode(int _mode)
 {
     if (_mode >= 0 && _mode <= 4)
     {
@@ -150,7 +149,7 @@ AcRemote &AcRemote::setMode(int8_t _mode)
 //     return mode;
 // }
 
-AcRemote &AcRemote::setSpeed(int8_t _speed)
+AcRemote &AcRemote::setSpeed(int _speed)
 {
     if (_speed >= 0 && _speed <= 3)
     {
@@ -186,7 +185,7 @@ AcRemote &AcRemote::setSwing2(bool _swing2)
 //     return swing2;
 // }
 
-AcRemote &AcRemote::setTimer(int8_t _timer)
+AcRemote &AcRemote::setTimer(int _timer)
 {
     timer = _timer;
     fullhours = static_cast<int8_t>(timer);

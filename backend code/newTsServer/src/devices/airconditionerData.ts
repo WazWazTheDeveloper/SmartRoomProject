@@ -1,8 +1,8 @@
-import { airconditionerData, device, deviceType } from '../types'
-import data = require('../utility/file_handler')
+import { AirconditionerDataType, IDeviceData } from "./deviceData.interface";
+import data = require('../handlers/file_handler')
+import { DeviceType } from "../interfaces/device.interface";
 
-class AirconditionerData implements deviceType {
-    // modes
+class AirconditionerData implements IDeviceData {
     readonly MODE_AUTO = 0;
     readonly MODE_COOL = 1;
     readonly MODE_DRY = 2;
@@ -22,8 +22,8 @@ class AirconditionerData implements deviceType {
     swing1: Boolean
     swing2: Boolean
     timer: number
-    fullhours: number
-    isHalfHour: Boolean
+    // fullhours: number
+    // isHalfHour: Boolean
     isStrong: Boolean
     isFeeling: Boolean
     isSleep: Boolean
@@ -42,8 +42,7 @@ class AirconditionerData implements deviceType {
         isFeeling?: Boolean,
         isSleep?: Boolean,
         isScreen?: Boolean,
-        isHealth?: Boolean,
-        callbackOnchange?: Function) {
+        isHealth?: Boolean) {
 
         if (isOn) {
             this.isOn = isOn
@@ -83,13 +82,13 @@ class AirconditionerData implements deviceType {
         }
         if (timer) {
             this.timer = timer
-            this.fullhours = 0
-            this.isHalfHour = false
+            // this.fullhours = 0
+            // this.isHalfHour = false
         }
         else {
             this.timer = 0
-            this.fullhours = 0
-            this.isHalfHour = false
+            // this.fullhours = 0
+            // this.isHalfHour = false
         }
         if (isStrong) {
             this.isStrong = isStrong
@@ -131,10 +130,34 @@ class AirconditionerData implements deviceType {
             this.isHealth = false
 
         }
+
+        this.setData = this.setData.bind(this);
+        this.setVar = this.setVar.bind(this);
+        this.getAsJson = this.getAsJson.bind(this);
+        this.getData = this.getData.bind(this);
+        this.getVar = this.getVar.bind(this);
     }
 
-    getAsJson(): airconditionerData {
-        let json: airconditionerData = {
+    static createFromJson(data:AirconditionerDataType) : AirconditionerData {
+        let DeviceData = new AirconditionerData(
+            data.isOn,
+            data.temp,
+            data.mode,
+            data.speed,
+            data.swing1,
+            data.swing2,
+            data.timer,
+            data.isStrong,
+            data.isFeeling,
+            data.isSleep,
+            data.isScreen,
+            data.isHealth)
+
+            return DeviceData;
+    }
+
+    getAsJson(): AirconditionerDataType {
+        let json: AirconditionerDataType = {
             "isOn": this.isOn,
             "temp": this.temp,
             "mode": this.mode,
@@ -142,8 +165,8 @@ class AirconditionerData implements deviceType {
             "swing1": this.swing1,
             "swing2": this.swing2,
             "timer": this.timer,
-            "fullhours": this.fullhours,
-            "isHalfHour": this.isHalfHour,
+            // "fullhours": this.fullhours,
+            // "isHalfHour": this.isHalfHour,
             "isStrong": this.isStrong,
             'isFeeling': this.isFeeling,
             "isSleep": this.isSleep,
@@ -153,27 +176,10 @@ class AirconditionerData implements deviceType {
         return json;
     }
 
-    getAsJsonForArduino() {
-        let json = {
-            "isOn": this.isOn,
-            "temp": this.temp,
-            "mode": this.mode,
-            "speed": this.speed,
-            "swing1": this.swing1,
-            "swing2": this.swing2,
-            "timer": this.timer,
-            "isStrong": this.isStrong,
-            'isFeeling': this.isFeeling,
-            "isSleep": this.isSleep,
-            "isHealth": this.isHealth
-        }
-        return json;
-    }
-
     static loadFromFile(uuid: string, dataPlace: number): Promise<AirconditionerData> {
         return new Promise<AirconditionerData>((resolve, reject) => {
-            data.readFile<device>(`devices/${uuid}`).then(acData => {
-                let data = acData.deviceData[dataPlace]
+            data.readFile<DeviceType>(`devices/${uuid}`).then(acData => {
+                let data = acData.deviceData[dataPlace].data;
                 let newAirconditionerDevice = new AirconditionerData(
                     data.isOn,
                     data.temp,
@@ -198,19 +204,7 @@ class AirconditionerData implements deviceType {
         });
     }
 
-    defaultUpdateFunction(topic: string, message: JSON,dataIndex:number): void {
-        let keys: Array<string> = Object.keys(message)
-
-        keys.forEach(key => {
-            let newVal = JSON.parse(JSON.stringify(message))[key]
-            try {
-                this.setVar(key, newVal,dataIndex)
-            } catch (err) {
-                //its fine :)
-            }
-        });
-    }
-
+    // TODO: probably dont need it as you always want to send full data
     getData(event: string) {
         if (event.substring(0, 4).includes("data")) {
             return this.getAsJson()
@@ -302,16 +296,24 @@ class AirconditionerData implements deviceType {
         }
     }
 
-    setVar(varChanged: string, newValue: any,dataIndex = 0): string {
-        if(varChanged.substring(0, 4).includes("data")) {
-            if( dataIndex == parseInt(varChanged.substring(4))){
-                this.defaultUpdateFunction("non",newValue,dataIndex)
+    setData(newData : any) {
+        let keys: Array<string> = Object.keys(newData)
+
+        keys.forEach(key => {
+            let newVal = JSON.parse(JSON.stringify(newData))[key]
+            try {
+                this.setVar(key, newVal)
+            } catch (err) {
+                //its fine :)
             }
-        }
-        switch (varChanged) {
+        });
+    }
+
+    setVar(varName: string, newValue: any) {
+        switch (varName) {
             case ("isOn"): {
                 this.isOn = newValue == 1 ? true : false;
-                return "isOn"
+                return
             }
             case ("temp"): {
                 if (!isNaN(newValue)) {
@@ -326,7 +328,7 @@ class AirconditionerData implements deviceType {
                         // @ts-ignore
                         this.temp = newTemp
                     }
-                    return "temp"
+                    return
                 }
             }
             case ("speed"): {
@@ -351,59 +353,50 @@ class AirconditionerData implements deviceType {
                         }
                     }
 
-                    return "speed"
+                    return
                 }
             }
             case ("swing1"): {
                 this.swing1 = newValue == 1 ? true : false;;
-                return "swing1"
+                return
             }
             case ("swing2"): {
                 this.swing2 = newValue == 1 ? true : false;;
-                return "swing2"
+                    return
             }
             case ("timer"): {
                 if(!isNaN(newValue)){
-                    this.setTimer(newValue)
-                    return "timer"
+                    this.timer = newValue
+                    return
                 }
             }
             case ("isStrong"): {
                 this.isStrong = newValue == 1 ? true : false;;
-                return "isStrong"
+                    return
             }
             case ("isFeeling"): {
                 this.isFeeling = newValue == 1 ? true : false;;
-                return "isFeeling"
+                    return
             }
             case ("isSleep"): {
                 this.isSleep = newValue == 1 ? true : false;;
-                return "isSleep"
+                    return
             }
             case ("isScreen"): {
                 this.isScreen = newValue == 1 ? true : false;;
-                return "isScreen"
+                    return
             }
             case ("isHealth"): {
                 this.isHealth = newValue == 1 ? true : false;;
-                return "isHealth"
+                    return
             }
             default: {
                 throw new Error("variable not found")
+                return
             }
         }
 
     }
-
-    private setTimer(time: number) {
-        let fullhours = Math.floor(time);
-        if (fullhours <= 9 && fullhours >= 0)
-        {
-            this.isHalfHour = time%1 == 0 ? false : true;
-        }else {
-            this.isHalfHour = false;
-        }
-    }
 }
 
-export { AirconditionerData }
+export {AirconditionerData}

@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt"
-import { DataPacket } from "../classes/DataPacket";
+import { DataPacket } from "../classes/dataPacket";
 
 class MqttHandler {
     mqttClient: mqtt.MqttClient | null;
@@ -30,10 +30,14 @@ class MqttHandler {
         });
 
         this.mqttClient.on('message', (topic, message) => {
-            // TODO: add type catch to json.parse
-            let _message = JSON.parse(message.toString());
-            let newDataPackage = new DataPacket(_message.sender,_message.dataType,_message.event,_message.data)
-            this.onMassageCallback(topic, JSON.parse(message.toString()))
+            try {
+                let _message = JSON.parse(message.toString());
+                let newDataPackage: DataPacket = new DataPacket(_message.sender,_message.receiver, _message.dataType, _message.dataAt, _message.event, _message.data)
+                this.onMassageCallback(topic, newDataPackage)
+            }
+            catch (err) {
+                console.log(err);
+            }
         });
 
         this.mqttClient.on('close', () => {
@@ -42,7 +46,7 @@ class MqttHandler {
     }
 
     sendMessage(topic: string, message: DataPacket) {
-        console.log(`published "${message}" to "${topic}"`);
+        // console.log(`published: \n "${message}"\n to "${topic}"`);
         let _message = JSON.stringify(message.getAsJson())
         this.mqttClient?.publish(topic, (_message));
         return this;

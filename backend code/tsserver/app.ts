@@ -4,7 +4,7 @@ import { AppData } from './src/AppData';
 import { router } from './src/router';
 import bodyParser from 'body-parser';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
-import Websocket, { WebSocketServer } from 'ws';
+import { AppdataEvent } from "./src/interfaces/";
 import { WebSocketServerHandler } from './src/WebSocketServerHandler';
 require('dotenv').config()
 
@@ -32,7 +32,9 @@ async function setup(): Promise<void> {
   client.setNewSubscribeList(appData.getSubTypeList());
 
   //add listener to update subscribe list automatically
-  appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, updateMqttClientSubList);
+  appData.on(AppData.ON_DEVICE_DATA_ADDED, (eventData:AppdataEvent) => {
+
+  }));
 
   // init scheduled functions
   await CheckConnection.init()

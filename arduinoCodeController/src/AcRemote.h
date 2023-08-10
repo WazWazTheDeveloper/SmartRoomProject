@@ -14,20 +14,20 @@ private:
     
     IRsend irsend;
     bool isOn;
-    int8_t temp;
-    int8_t mode;
-    int8_t speed;
+    int temp;
+    int mode;
+    int speed;
     bool swing1;
     bool swing2;
     float timer;
-    int8_t fullhours;
+    int fullhours;
     bool isHalfHour;
     bool isStrong;
     bool isSleep;
     bool isFeeling;
     bool isScreen;
     bool isHealth;
-    int8_t buttonPressed;
+    int buttonPressed;
 
     // void (*callback)();
 
@@ -119,17 +119,17 @@ public:
     AcRemote();
     AcRemote& setIsOn(bool _isOn);
     // bool getIsOn();
-    AcRemote& setTemp(int8_t _temp);
-    // int8_t getTemp();
-    AcRemote& setMode(int8_t _mode);
+    AcRemote& setTemp(int _temp);
+    int getTemp();
+    AcRemote& setMode(int _mode);
     // int8_t getMode();
-    AcRemote& setSpeed(int8_t _speed);
+    AcRemote& setSpeed(int _speed);
     // int8_t getSpeed();
     AcRemote& setSwing1(bool _swing1);
     // bool getSwing1();
     AcRemote& setSwing2(bool _swing2);
     // bool getSwing2();
-    AcRemote& setTimer(int8_t _timer);
+    AcRemote& setTimer(int _timer);
     // float getTimer();
     AcRemote& setIsStrong(bool _isStrong);
     // bool getIsStrong();

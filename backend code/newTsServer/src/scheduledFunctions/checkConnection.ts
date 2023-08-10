@@ -1,32 +1,22 @@
-import { AppData } from "../AppData";
-import { DataPacket } from "../classes/DataPacket";
-import { TopicData } from "../classes/topicData";
-import { generalTopic } from "../types";
-import { MqttClient, SubType } from "../mqtt_client";
-import { Task } from "../tasks";
+import { AppData } from "../appData";
+import { DataPacket } from "../classes/dataPacket";
 import { Device } from "../classes/device";
-
-//TODO: this is the type you need to send to the mqtt server to commect
-// {
-//     "sender" : "01b68220-abdf-441b-9ae7-fefaf4ba9342",
-//     "dataType" : "*",
-//     "event" : "checkIsConnected",
-//     "data" : 
-//       {"data0" : {
-//         "isOn" : false
-//       }
-//       }
-//   }
+import { GeneralTopic } from "../classes/generalData";
+import { Task } from "../classes/task";
+import { MqttClient } from "../mqtt_client";
 
 let checkConnectionObject:CheckConnection;
+
 class CheckConnection {
     static readonly TASKID = "checkIsConnected";
-    isConnectedCheckTopic: generalTopic;
-    subType: SubType;
 
-    constructor(isConnectedCheckTopic: generalTopic , subType: SubType) {
+    isConnectedCheckTopic: GeneralTopic;
+
+    constructor(isConnectedCheckTopic: GeneralTopic) {
         this.isConnectedCheckTopic = isConnectedCheckTopic
-        this.subType = subType
+
+        this.onMassageFromMqtt = this.onMassageFromMqtt.bind(this)
+        this.updater = this.updater.bind(this)
     }
 
     static async init() {
@@ -35,6 +25,7 @@ class CheckConnection {
         let task: Task;
         let isConnectedCheckTopic;
     
+        // getGeneralTopic
         try {
             isConnectedCheckTopic = appData.getGeneralData().getTopicByName("isConnectedCheckTopic")
         } catch (err) {
@@ -51,43 +42,34 @@ class CheckConnection {
             task.addTimedCheck("*/5 * * * * *")
             for (let index = 0; index < appData.getDeviceList().length; index++) {
                 const device = appData.getDeviceList()[index];
-                task.addTodoTask(device.uuid, -1, "isConnectedCheck", false);
+                task.addTodoTask(device.getUUID(), -1, "isConnectedCheck", false);
             }
         }
 
-        let newTopicData = new TopicData(isConnectedCheckTopic, TopicData.anyType, false, "checkIsConnected", { "functionType": "*" })
-        let newSubType = new SubType(newTopicData, this.onUpdateFromServer)
-
-        checkConnectionObject = new CheckConnection(isConnectedCheckTopic , newSubType)
+        checkConnectionObject = new CheckConnection(isConnectedCheckTopic)
     
-        mqttClient.subscribe(checkConnectionObject.subType, 0)
+        mqttClient.subscribe(isConnectedCheckTopic.topicPath,checkConnectionObject.onMassageFromMqtt)
     
-        task.addCallbackOnComplate(checkConnectionObject.updater.bind(checkConnectionObject))
+        task.setCallbackOnComplate(checkConnectionObject.updater)
     
         task.setIsOn(true)
     }
 
-    // static async getCheckConnectionInstance() {
-    //     if(!checkConnection) {
-    //         await CheckConnection.init();
-    //     }
-    //     return checkConnection
-    // }
-
-    static async onUpdateFromServer(topic: string, message: DataPacket, topicData: TopicData): Promise<void> {
+    async onMassageFromMqtt(topic: string, message: DataPacket): Promise<void> {
+        console.log(message);
         let appData = await AppData.getAppDataInstance();
         // if (message.dataType != topicData.dataType) {
         //     return
         // }
-        if (message.event != Device.CHECK_COMMECTION_EVENT) {
+        if (message.event != DataPacket.CHECK_IS_CONNECTED) {
         return
         }
         let deviceID = message.sender;
     
-        if (deviceID != "server") {
+        if (deviceID != DataPacket.SENDER_SERVER) {
             try {
                 let _device = appData.getDeviceById(deviceID)
-                _device.setVar(Device.isConnectedCheck, true)
+                _device.setDeviceVar(Device.isConnectedCheck,true)
             }
             catch (err) {
                 console.log(err)
@@ -101,14 +83,14 @@ class CheckConnection {
         task.emptyTodoTask()
         for (let index = 0; index < appData.getDeviceList().length; index++) {
             const device = appData.getDeviceList()[index];
-            task.addTodoTask(device.uuid, -1, "isConnectedCheck", false);
+            task.addTodoTask(device.getUUID(), -1, "isConnectedCheck", false);
         }
     }
 
     async updater(): Promise<void> {
         console.log("starting connection check")
         let mqttClient = MqttClient.getMqttClientInstance();
-        let checkConnectionPacket = new DataPacket("server", TopicData.anyType, Device.CHECK_COMMECTION_EVENT, [])
+        let checkConnectionPacket = new DataPacket(DataPacket.SENDER_SERVER,DataPacket.REVEIVER_ALL,-1,-1,DataPacket.CHECK_IS_CONNECTED,{})
         mqttClient.sendMassage(this.isConnectedCheckTopic.topicPath, checkConnectionPacket)
     
         setTimeout(async () => {
@@ -116,7 +98,7 @@ class CheckConnection {
             for (let index = 0; index < appData.getDeviceList().length; index++) {
                 try {
                     const device = appData.getDeviceList()[index];
-                    device.setVar(Device.isConnected,device.isConnectedCheck)
+                    device.setDeviceVar(Device.isConnected,device.getIsConnectedCheck())
                 }
                 catch (err) { }
             }
@@ -127,4 +109,4 @@ class CheckConnection {
     }
 }
 
-export { CheckConnection}
+export {CheckConnection}

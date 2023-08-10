@@ -20,6 +20,7 @@ class Device implements device {
     // events
     public static readonly CHANGE_SETTINGS_EVENT = 'updateSettings'
     public static readonly CHANGE_DATA_EVENT = 'updateData'
+    public static readonly CHECK_COMMECTION_EVENT = 'checkConnection'
 
     // function types
     public static readonly DEFAULT_FUNCTION_TYPE = 'default'
@@ -377,12 +378,12 @@ class Device implements device {
                 await this.saveData();
                 break;
             case Device.isConnected:
-                if (this.isConnected != true ? true : false) {
-                    this.isConnected = newContent == true ? true : false;
+                if (this.isConnected != newContent) {
+                    this.isConnected = newContent;
                     this.settingsChanged(Device.CHANGE_SETTINGS_EVENT);
                     await this.saveData();
-                    break;
                 }
+                    break;
             case Device.isConnectedCheck:
                 this.isConnectedCheck = newContent == true ? true : false;
                 break;
@@ -405,6 +406,8 @@ class Device implements device {
             this.dataChanged("data" + dataId);
         }
     }
+
+    // copyied until here
 
     settingsChanged(event: string): void {
         for (let index = 0; index < this.publishTo.length; index++) {

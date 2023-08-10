@@ -45,6 +45,8 @@ var appDataInstance: AppData;
 class AppData {
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
     public static readonly ON_DEVICE_DATA_CHANGE = "deviceTopicChange";
+    public static readonly ON_DEVICE_DATA_REMOVED = "deviceRemoved";
+    public static readonly ON_DEVICE_DATA_ADDED = "deviceAdded";
 
     private taskList: Array<Task>
     private generalData: GeneralData;

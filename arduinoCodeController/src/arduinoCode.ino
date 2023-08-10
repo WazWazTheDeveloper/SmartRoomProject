@@ -26,13 +26,13 @@ int state = DV_NO_DEVICE;
 
 char uuid[37];
 
-char publishToTopic[2][72] =
-    {
-        '\0',
-        '\0'}; // arduino listen to this
-char listenToToTopic[2][72] = {
-    '\0',
-    '\0'};
+const int DEVICE_TOPIC_CHANGE = 0;
+const int CHECK_IS_CONNECTED = 1;
+const int DEVICE_DATA_CHANGE = 2;
+const int DATA_CHANGE = 3;
+
+char topic[72] =
+    {'\0'}; // arduino listen to this
 
 void setup_wifi()
 {
@@ -52,44 +52,39 @@ void setup_wifi()
 }
 void unSubTopics()
 {
-    for (size_t i = 0; i < 2; i++)
-    {
-        if (strlen(publishToTopic[i]) != 0)
-        {
-            mqttClient.unsubscribe(publishToTopic[i]);
-        }
-    }
+    mqttClient.unsubscribe(topic);
 
-    for (size_t i = 0; i < 2; i++)
-    {
-        if (strlen(publishToTopic[i]) != 0)
-        {
-            mqttClient.unsubscribe(listenToToTopic[i]);
-        }
-    }
+    // for (size_t i = 0; i < 2; i++)
+    // {
+    //     if (strlen(publishToTopic[i]) != 0)
+    //     {
+    //         mqttClient.unsubscribe(publishToTopic[i]);
+    //     }
+    // }
 }
 
 void subTopics()
 {
-    for (size_t i = 0; i < 2; i++)
-    {
-        if (strlen(publishToTopic[i]) != 0)
-        {
-            Serial.println(publishToTopic[i]);
-            Serial.println(mqttClient.subscribe(publishToTopic[i]));
-        }
-    }
+    mqttClient.subscribe(topic);
+    // for (size_t i = 0; i < 2; i++)
+    // {
+    //     if (strlen(publishToTopic[i]) != 0)
+    //     {
+    //         Serial.println(publishToTopic[i]);
+    //         Serial.println(mqttClient.subscribe(publishToTopic[i]));
+    //     }
+    // }
 
-    for (size_t i = 0; i < 2; i++)
-    {
-        if (strlen(listenToToTopic[i]) != 0)
-        {
-            Serial.println(listenToToTopic[i]);
-            mqttClient.subscribe(listenToToTopic[i]);
-        }
-    }
-    Serial.println(mqttClient.subscribe(("/device/614c0e2d-c5aa-4320-98a1-ca5490f74a98")));
-    Serial.println(ESP.getFreeHeap());
+    // for (size_t i = 0; i < 2; i++)
+    // {
+    //     if (strlen(listenToToTopic[i]) != 0)
+    //     {
+    //         Serial.println(listenToToTopic[i]);
+    //         mqttClient.subscribe(listenToToTopic[i]);
+    //     }
+    // }
+    // Serial.println(mqttClient.subscribe(("/device/614c0e2d-c5aa-4320-98a1-ca5490f74a98")));
+    // Serial.println(ESP.getFreeHeap());
 }
 
 void setUpMqtt()
@@ -102,56 +97,84 @@ void setUpMqtt()
             ;
     }
     Serial.println(F("mqttClient.connectError()"));
-    Serial.println(mqttClient.subscribe(("/device/614c0e2d-c5aa-4320-98a1-ca5490f74a98")));
     mqttClient.onMessage(onMqttMessage);
     subTopics();
-    // mqttClient.subscribe("/1");
-    // mqttClient.subscribe("/test");
-    // for (size_t i = 0; i < 2; i++)
-    // {
-    //     if (strlen(publishToTopic[i]) != 0)
-    //     {
-    //         Serial.println(publishToTopic[i]);
-    //         Serial.println(mqttClient.subscribe(publishToTopic[i]));
-    //     }
-    // }
-    Serial.println(mqttClient.subscribe("/1"));
+    Serial.println(mqttClient.subscribe("isConnectedCheckTopic"));
     Serial.println(F("ye"));
 }
 
 void onMqttMessage(int messageSize)
 {
-    // Serial.println(F("ye"));
-    // String s = "";
-    // we received a message, print out the topic and contents
-    // Serial.println("Received a message with topic '");
-    Serial.print(mqttClient.messageTopic());
-    // Serial.print("', length ");
-    Serial.print(messageSize);
-    // Serial.println(" bytes:");
+    // massge will look like this:
+    //  {"sender": "server","dataType": 0,"dataAt": 0,"event": "checkConnection","data": [{"isOn": true,"temp": 25,"mode": 0,"speed": 3,"swing1": true,"swing2": false,"timer": 0,"fullhours": 0,"isHalfHour": false,"isStrong": false,"isFeeling": false,"isSleep": false,"isScreen": true,"isHealth": false}]}
 
-    // use the Stream interface to print the contents
-    // while (mqttClient.available())
-    // {
-    //   s.concat((char)mqttClient.read());
-    // }
-    // Serial.println();
-    // Serial.println(s);
+    StaticJsonDocument<512> doc;
+    byte data[512] = {0};
+    mqttClient.readBytes(data, messageSize);
 
-    // StaticJsonDocument<500> doc;
-    // DeserializationError error = deserializeJson(doc, s);
+    DeserializationError error = deserializeJson(doc, data);
 
-    // // Test if parsing succeeds.
-    // if (error)
-    // {
-    //   // Serial.print(F("deserializeJson() failed: "));
-    //   Serial.println(error.f_str());
-    //   return;
-    // }
-    // int l = doc[("temp")];
-    // Serial.println(l);
+    if (error)
+    {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+    }
 
-    // doc.clear();
+    const char *sender = doc["sender"];     // "server"
+    const char *receiver = doc["receiver"]; // "server"
+    int dataType = doc["dataType"];         // 0
+    int dataAt = doc["dataAt"];             // 0
+    int event = doc["event"];               // "checkConnection"
+
+    if (strcmp(sender, "server") != 0)
+    {
+        return;
+    }
+
+    Serial.println(dataType);
+    Serial.println(dataAt);
+    Serial.println(event);
+
+    if (event == CHECK_IS_CONNECTED)
+    {
+        sendIsConnected();
+    }
+
+    if (strcmp(sender, uuid) == 0 || strcmp(sender, "*") == 0)
+    {
+        if (event == DATA_CHANGE)
+        {
+            // add option for more then one data type
+            JsonObject data = doc["data"][0];
+            updateData(data);
+        }
+    }
+    doc.clear();
+}
+
+void sendIsConnected()
+{
+    Serial.println("data");
+    StaticJsonDocument<192> doc;
+    JsonObject root = doc.to<JsonObject>();
+
+    doc["sender"].set(uuid);
+    doc["dataType"].set(-1);
+    doc["dataAt"].set(-1);
+    doc["event"].set("checkConnection");
+    JsonArray arr = root.createNestedArray("arrValues");
+
+    char data[192];
+    serializeJson(doc, data);
+    Serial.println(data);
+    Serial.println(strlen(data));
+
+    mqttClient.beginMessage("isConnectedCheckTopic"); // topic
+    mqttClient.print(data);
+    mqttClient.endMessage();
+
+    doc.clear();
 }
 
 void clearUUID()
@@ -219,7 +242,7 @@ boolean sendHttpRequest(int8_t requestNumber)
             }
             else if (requestNumber == 2)
             {
-                strcat(tempString, "getPubSubData");
+                strcat(tempString, "getTopic");
             }
             strcat(tempString, "?uuid=");
             strcat(tempString, uuid);
@@ -264,33 +287,60 @@ void setUpDevice()
     // get data
     sendHttpRequest(1);
     checkData();
-    updateData(0);
+    updateData();
     wifiClient.stop();
 
-    Serial.println(ESP.getFreeHeap());
     sendHttpRequest(2);
     checkData();
-    updatePubSubData();
+    updateTopicPath();
     wifiClient.stop();
 
     // Serial.println(uuid);
     // return 1;
 }
 
-boolean updateData(int8_t type)
+boolean updateData(JsonObject &data)
 {
-    DynamicJsonDocument doc(256);
+    bool isOn = data["isOn"];             // false
+    int temp = data["temp"];              // 24
+    int mode = data["mode"];              // 0
+    int speed = data["speed"];            // 3
+    bool swing1 = data["swing1"];         // false
+    bool swing2 = data["swing2"];         // false
+    int timer = data["timer"];            // 0
+    int fullhours = data["fullhours"];    // 0
+    bool isHalfHour = data["isHalfHour"]; // false
+    bool isStrong = data["isStrong"];     // false
+    bool isFeeling = data["isFeeling"];   // false
+    bool isSleep = data["isSleep"];       // false
+    bool isScreen = data["isScreen"];     // true
+    bool isHealth = data["isHealth"];     // false
+
+    acRemote
+        .setIsOn(isOn)
+        .setTemp(temp)
+        .setMode(mode)
+        .setSpeed(speed)
+        .setSwing1(swing1)
+        .setSwing2(swing2)
+        .setTimer(timer)
+        .setIsStrong(isStrong)
+        .setIsFeeling(isFeeling)
+        .setIsSleep(isSleep)
+        .setIsHealth(isHealth)
+        .execute();
+
+    Serial.println(acRemote.getTemp());
+
+    return 1;
+}
+
+boolean updateData()
+{
+    StaticJsonDocument<512> doc;
 
     DeserializationError error;
-
-    if (type == 1)
-    {
-        error = deserializeJson(doc, mqttClient);
-    }
-    else
-    {
-        error = deserializeJson(doc, wifiClient);
-    }
+    error = deserializeJson(doc, wifiClient);
 
     if (error)
     {
@@ -298,46 +348,46 @@ boolean updateData(int8_t type)
         return 0;
     }
 
-    if (type == 0 || type == 1)
-    {
-        bool isOn = doc["isOn"];             // false
-        int temp = doc["temp"];              // 24
-        int mode = doc["mode"];              // 0
-        int speed = doc["speed"];            // 3
-        bool swing1 = doc["swing1"];         // false
-        bool swing2 = doc["swing2"];         // false
-        int timer = doc["timer"];            // 0
-        int fullhours = doc["fullhours"];    // 0
-        bool isHalfHour = doc["isHalfHour"]; // false
-        bool isStrong = doc["isStrong"];     // false
-        bool isFeeling = doc["isFeeling"];   // false
-        bool isSleep = doc["isSleep"];       // false
-        bool isScreen = doc["isScreen"];     // true
-        bool isHealth = doc["isHealth"];     // false
+    JsonArray dataArr = doc["deviceData"];
+    JsonObject data = dataArr[0];
 
-        acRemote
-            .setIsOn(isOn)
-            .setTemp(temp)
-            .setMode(mode)
-            .setSpeed(speed)
-            .setSwing1(swing1)
-            .setSwing2(swing2)
-            .setTimer(timer)
-            .setIsStrong(isStrong)
-            .setIsFeeling(isFeeling)
-            .setIsSleep(isSleep)
-            .setIsHealth(isHealth)
-            .execute();
-    }
+    bool isOn = data["isOn"];             // false
+    int temp = data["temp"];              // 24
+    int mode = data["mode"];              // 0
+    int speed = data["speed"];            // 3
+    bool swing1 = data["swing1"];         // false
+    bool swing2 = data["swing2"];         // false
+    int timer = data["timer"];            // 0
+    int fullhours = data["fullhours"];    // 0
+    bool isHalfHour = data["isHalfHour"]; // false
+    bool isStrong = data["isStrong"];     // false
+    bool isFeeling = data["isFeeling"];   // false
+    bool isSleep = data["isSleep"];       // false
+    bool isScreen = data["isScreen"];     // true
+    bool isHealth = data["isHealth"];     // false
+
+    acRemote
+        .setIsOn(isOn)
+        .setTemp(temp)
+        .setMode(mode)
+        .setSpeed(speed)
+        .setSwing1(swing1)
+        .setSwing2(swing2)
+        .setTimer(timer)
+        .setIsStrong(isStrong)
+        .setIsFeeling(isFeeling)
+        .setIsSleep(isSleep)
+        .setIsHealth(isHealth)
+        .execute();
 
     // subTopics();
     doc.clear();
     return 1;
 }
 
-boolean updatePubSubData()
+boolean updateTopicPath()
 {
-    DynamicJsonDocument doc(512);
+    StaticJsonDocument<512> doc;
 
     // TODO: add check to also use mqtt
     DeserializationError error = deserializeJson(doc, wifiClient);
@@ -350,28 +400,30 @@ boolean updatePubSubData()
     }
 
     unSubTopics();
-    int8 i = 0;
-    for (JsonObject listenTo_item : doc["listenTo"].as<JsonArray>())
-    {
 
-        const char *listenTo_item_topicPath = listenTo_item["topicPath"];
-        int listenTo_item_dataType = listenTo_item["dataType"];   // 0, 0
-        const char *listenTo_item_event = listenTo_item["event"]; // "updateSettings", "updateSettings"
-        strcpy(listenToToTopic[i], listenTo_item_topicPath);
-        i++;
-    }
+    strcpy(topic, doc["topicPath"]);
+    // int8 i = 0;
+    // for (JsonObject listenTo_item : doc["listenTo"].as<JsonArray>())
+    // {
 
-    i = 0;
-    for (JsonObject publishTo_item : doc["publishTo"].as<JsonArray>())
-    {
+    //     const char *listenTo_item_topicPath = listenTo_item["topicPath"];
+    //     int listenTo_item_dataType = listenTo_item["dataType"];   // 0, 0
+    //     const char *listenTo_item_event = listenTo_item["event"]; // "updateSettings", "updateSettings"
+    //     strcpy(listenToToTopic[i], listenTo_item_topicPath);
+    //     i++;
+    // }
 
-        const char *publishTo_item_topicPath = publishTo_item["topicPath"];
-        int publishTo_item_dataType = publishTo_item["dataType"];   // 0, 0
-        const char *publishTo_item_event = publishTo_item["event"]; // "updateSettings", "updateSettings"
+    // i = 0;
+    // for (JsonObject publishTo_item : doc["publishTo"].as<JsonArray>())
+    // {
 
-        strcpy(publishToTopic[i], publishTo_item_topicPath);
-        i++;
-    }
+    //     const char *publishTo_item_topicPath = publishTo_item["topicPath"];
+    //     int publishTo_item_dataType = publishTo_item["dataType"];   // 0, 0
+    //     const char *publishTo_item_event = publishTo_item["event"]; // "updateSettings", "updateSettings"
+
+    //     strcpy(publishToTopic[i], publishTo_item_topicPath);
+    //     i++;
+    // }
 
     // subTopics();
 
