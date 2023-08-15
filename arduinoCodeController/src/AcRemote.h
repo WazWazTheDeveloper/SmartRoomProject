@@ -51,7 +51,7 @@ private:
 
     // byte 5
     const uint8_t isHalfHourArray[2] = {0, 60};
-    const uint8_t isStrongArray[2] = {0, 3};
+    const uint8_t isStrongArray[2] = {0, 2};
 
     // byte 6
     const uint8_t isSleepArray[2] = {0, 32};
@@ -124,7 +124,7 @@ public:
     AcRemote& setMode(int _mode);
     // int8_t getMode();
     AcRemote& setSpeed(int _speed);
-    // int8_t getSpeed();
+    int8_t getSpeed();
     AcRemote& setSwing1(bool _swing1);
     // bool getSwing1();
     AcRemote& setSwing2(bool _swing2);

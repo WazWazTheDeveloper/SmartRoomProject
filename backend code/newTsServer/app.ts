@@ -34,16 +34,19 @@ async function startServer(): Promise<void> {
         client.subscribe(device.getTopicPath(),appData.updateDevice)
     }
 
-    appData.on(AppData.ON_DEVICE_DATA_ADDED, async (eventData:AppdataEvent) => {
+
+    //TODO: make this pretty
+    appData.on(AppData.ON_DEVICE_ADDED, async (eventData:AppdataEvent) => {
       let client = MqttClient.getMqttClientInstance()
       let appData = await AppData.getAppDataInstance();
       client.subscribe(appData.getDeviceById(eventData.deviceUUID).getTopicPath(),appData.updateDevice)
     });
 
-    appData.on(AppData.ON_DEVICE_DATA_REMOVED, async (eventData:AppdataEvent) => {
+    appData.on(AppData.ON_DEVICE_REMOVED, async (eventData:AppdataEvent) => {
       let client = MqttClient.getMqttClientInstance()
       let appData = await AppData.getAppDataInstance();
-      client.unsubscribe(appData.getDeviceById(eventData.deviceUUID).getTopicPath(),appData.updateDevice)
+      //TODO: change this to use the oldTopic property of eventData as deivce is deleted and does not exist any more
+      client.unsubscribe(eventData.oldTopic,appData.updateDevice)
     });
 
     appData.on(AppData.ON_DEVICE_TOPIC_CHANGE, async (eventData:AppdataEvent) => {
@@ -58,7 +61,7 @@ async function startServer(): Promise<void> {
       let appData = await AppData.getAppDataInstance();
       let device = appData.getDeviceById(eventData.deviceUUID)
       let event = DataPacket.DATA_CHANGE;
-      let massage: DataPacket = new DataPacket(DataPacket.SENDER_SERVER,eventData.deviceUUID,eventData.dataType,eventData.dataAt,event,device.getAsJsonForArduino())
+      let massage: DataPacket = new DataPacket(DataPacket.SENDER_SERVER,eventData.deviceUUID,eventData.dataType,eventData.dataAt,event,device.getAsJsonForArduino(eventData.dataAt))
       client.sendMassage(device.getTopicPath(),massage);
     });
   

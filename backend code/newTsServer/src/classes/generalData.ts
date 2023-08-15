@@ -67,6 +67,7 @@ class GeneralData implements GeneralDataType {
             let _topicList: Array<GeneralTopic> = []
             let _taskList: Array<GeneralTask> = []
             let _deviceList: Array<DeviceListItem> = []
+
             for (let index = 0; index < generalData.topicList.length; index++) {
                 const element = generalData.topicList[index];
                 let newTopic = new GeneralTopic(element.topicName, element.topicPath, element.isVisible)
@@ -79,7 +80,7 @@ class GeneralData implements GeneralDataType {
                 _taskList.push(newTTask)
             }
 
-            for (let index = 0; index < generalData.taskList.length; index++) {
+            for (let index = 0; index < generalData.deviceList.length; index++) {
                 const element = generalData.deviceList[index];
                 let newDevice = new DeviceListItem(element.UUID, element.name, element.deviceType)
                 _deviceList.push(newDevice)

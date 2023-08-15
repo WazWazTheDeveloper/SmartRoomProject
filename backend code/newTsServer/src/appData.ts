@@ -1,9 +1,8 @@
 import { Device } from "./classes/device";
-import { GeneralData, GeneralTopic, getGeneralDataInstance } from "./classes/generalData";
+import { GeneralData, getGeneralDataInstance } from "./classes/generalData";
 import { Task } from "./classes/task";
 import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";
-import { DataPacket } from "./classes/dataPacket";
 
 var appDataInstance: AppData;
 
@@ -18,8 +17,8 @@ class AppData {
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
     public static readonly ON_DEVICE_DATA_CHANGE = "deviceDataChange";
     public static readonly ON_DATA_CHANGE = "dataChange";
-    public static readonly ON_DEVICE_DATA_REMOVED = "deviceRemoved";
-    public static readonly ON_DEVICE_DATA_ADDED = "deviceAdded";
+    public static readonly ON_DEVICE_REMOVED = "deviceRemoved";
+    public static readonly ON_DEVICE_ADDED = "deviceAdded";
 
     private taskList: Array<Task>
     private generalData: GeneralData;
@@ -152,7 +151,7 @@ class AppData {
 
         let eventData : AppdataEvent = {
             deviceUUID:newDevice.getUUID(),
-            event: AppData.ON_DEVICE_DATA_ADDED,
+            event: AppData.ON_DEVICE_ADDED,
             dataType : -1,
             dataAt : -1,
             oldTopic : "",
@@ -163,6 +162,14 @@ class AppData {
 
     async removeDevice(uuid: string): Promise<void> {
         await this.generalData.removeDevice(uuid);
+
+        let topic: string = ""
+        //TODO: add type errr of stuff
+        try{
+            topic= this.getDeviceById(uuid).getTopicPath();
+        }catch(err) {
+            
+        }
 
         for (let i = this.deviceList.length - 1; i >= 0; i--) {
             const element = this.deviceList[i];
@@ -176,10 +183,10 @@ class AppData {
 
         let eventData : AppdataEvent = {
             deviceUUID:uuid,
-            event: AppData.ON_DEVICE_DATA_REMOVED,
+            event: AppData.ON_DEVICE_REMOVED,
             dataType : -1,
             dataAt : -1,
-            oldTopic : "",
+            oldTopic : topic,
         }
 
         this.triggerCallbacks(eventData)
@@ -221,6 +228,8 @@ class AppData {
     }
 
     public getDeviceById(deviceId: string): Device {
+        // console.log(this.deviceList)
+        
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
             if (device.getUUID() == deviceId) {
@@ -288,8 +297,21 @@ class AppData {
         }
     }
 
-    updateDevice(message: DataPacket) {
-
+    updateDevice(receiver : string, dataType : number,dataAt : number, data: any) {
+        let device : Device
+        try{
+            device = this.getDeviceById(receiver)
+        }catch(err) {
+            return;
+        }
+        if( dataType == -1) {
+            device.setDeviceData(data);
+        }
+        else {
+            if(device.getDeviceData()[dataAt].dataType == dataType) {
+                device.setData(dataAt,data);
+            }
+        }
     }
 }
 

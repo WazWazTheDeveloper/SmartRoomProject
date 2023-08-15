@@ -158,10 +158,10 @@ AcRemote &AcRemote::setSpeed(int _speed)
     }
     return *this;
 }
-// int8_t AcRemote::getSpeed()
-// {
-//     return speed;
-// }
+int8_t AcRemote::getSpeed()
+{
+    return speed;
+}
 
 AcRemote &AcRemote::setSwing1(bool _swing1)
 {
@@ -301,7 +301,12 @@ void AcRemote::calcRawBytes()
     uint8_t tempByte4 = 0;
 
     tempByte4 += fullHoursArray[fullhours];
-    tempByte4 += speedArray[speed];
+    if(isStrong) {
+        tempByte4 += speedArray[SPEED_HIGH];
+    }
+    else {
+        tempByte4 += speedArray[speed];
+    }
 
     rawBytes[4] = tempByte4;
 

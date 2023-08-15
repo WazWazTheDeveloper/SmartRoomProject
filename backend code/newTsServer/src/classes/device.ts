@@ -4,6 +4,7 @@ import data = require('../handlers/file_handler')
 import { GeneralData, GeneralTopic } from "./generalData";
 import { AppdataEvent } from "../interfaces/appData.interface";
 import { AppData } from "../appData";
+import { SwitchData } from "../devices/switchData";
 
 // implements DeviceType
 class Device {
@@ -43,7 +44,7 @@ class Device {
         this.isConnected = isConnected
         this.isConnectedCheck = isConnectedCheck
         this.deviceData = deviceData
-        this.callbackOnChange = callbackOnChange;
+        this.callbackOnChange = callbackOnChange
     }
 
     public async saveData(): Promise<void> {
@@ -82,12 +83,12 @@ class Device {
 
     private static getDefaultData(dataType: number) {
         switch (dataType) {
+            // TODO add Types
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
             }
             case (Device.SWITCH_TYPE): {
-                // TODO enable this
-                // return new SwitchData();
+                return new SwitchData();
             }
             default: {
                 throw new Error("device type not found")
@@ -125,6 +126,10 @@ class Device {
                 let _device = AirconditionerData.createFromJson(data);
                 return _device;
             }
+            case (Device.SWITCH_TYPE): {
+                let _device = SwitchData.createFromJson(data);
+                return _device;
+            }
             // TODO: add device Types
 
         }
@@ -155,30 +160,30 @@ class Device {
         return dataJson
     }
 
-    // IMPLEMENT: idk think of somting
-    public getAsJsonForArduino() {
-        let deviceDataJsonArr: Array<DeviceDataType> = [];
-        for (let index = 0; index < this.deviceData.length; index++) {
-            const device = this.deviceData[index];
-            let DeviceDataTypeJson: DeviceDataType = {
-                dataType: device.dataType,
-                data: device.data.getAsJson()
-            }
-            deviceDataJsonArr.push(DeviceDataTypeJson);
-        }
+    public getAsJsonForArduino(dataAt: number) {
+        // DEL
+        // let deviceDataJsonArr: Array<DeviceDataType> = [];
+        // for (let index = 0; index < this.deviceData.length; index++) {
+        //     const device = this.deviceData[index];
+        //     let DeviceDataTypeJson: any = device.data.getAsJson();
+        //     deviceDataJsonArr.push(DeviceDataTypeJson);
+        // }
 
-        let dataJson: any = {
-            // deviceName: this.deviceName,
-            // uuid: this.uuid,
-            // topicPath: this.topicPath,
-            deviceData: deviceDataJsonArr,
-            // isConnected: this.isConnected,
-            // isConnectedCheck: this.isConnectedCheck,
-            // isAccepted: this.isAccepted
+        // let dataJson: any = {
+        //     // deviceName: this.deviceName,
+        //     // uuid: this.uuid,
+        //     // topicPath: this.topicPath,
+        //     deviceData: deviceDataJsonArr,
+        //     // isConnected: this.isConnected,
+        //     // isConnectedCheck: this.isConnectedCheck,
+        //     // isAccepted: this.isAccepted
 
-        }
+        // }
 
-        return dataJson
+        const data = this.deviceData[dataAt].data.getAsJson();
+
+
+        return data
     }
 
     setDallbackOnChange(newFucnction:Function) {
@@ -226,11 +231,6 @@ class Device {
     public setDeviceName(newDeviceName: string) {
         this.deviceName = newDeviceName;
     }
-
-    async onUpdateData(): Promise<void> {
-
-    }
-
 
     async setVar(dataAt: number, varName: string, newContent: any) {
         let eventData: AppdataEvent = {

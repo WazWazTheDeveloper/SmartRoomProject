@@ -331,6 +331,22 @@ class AirconditionerData implements IDeviceData {
                     return
                 }
             }
+            case ("mode"): {
+                if (!isNaN(newValue)) {
+                    let newMode = parseInt(newValue);
+                    if (newMode < 0) {
+                        this.mode = 0;
+                    }
+                    if (newMode > 3) {
+                        this.mode = 3
+                    }
+                    else {
+                        // @ts-ignore
+                        this.mode = newMode
+                    }
+                    return
+                }
+            }
             case ("speed"): {
                 if (!isNaN(newValue)) {
                     let newSpeed = parseInt(newValue);

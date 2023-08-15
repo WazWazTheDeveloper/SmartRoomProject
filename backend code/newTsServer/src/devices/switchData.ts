@@ -14,6 +14,14 @@ class SwitchData implements IDeviceData {
         this.getData = this.getData.bind(this);
         this.getVar = this.getVar.bind(this);
     }
+
+    static createFromJson(data:SwitchDataType) : SwitchData {
+        let DeviceData = new SwitchData(
+            data.isOn)
+
+            return DeviceData;
+    }
+    
     static loadFromFile(uuid: string, dataPlace: number) {
         return new Promise<SwitchDataType>((resolve, reject) => {
             data.readFile<DeviceType>(`devices/${uuid}`).then(acData => {
