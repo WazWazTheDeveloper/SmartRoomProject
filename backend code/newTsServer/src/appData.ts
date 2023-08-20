@@ -1,6 +1,7 @@
 import { Device } from "./classes/device";
 import { GeneralData, getGeneralDataInstance } from "./classes/generalData";
 import { Task } from "./classes/task";
+import { WebSocketServerHandler } from "./handlers/WebSocketServerHandler";
 import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";
 
@@ -36,16 +37,16 @@ class AppData {
     }
 
     public getAsJson() {
-        let deviceJson = []
+        let taskJson = []
         for (let index = 0; index < this.taskList.length; index++) {
             const task = this.taskList[index];
-            deviceJson.push(task.getAsJson())
+            taskJson.push(task.getAsJson())
         }
 
-        let taskJson = []
+        let deviceJson = []
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
-            taskJson.push(device.getAsJson())
+            deviceJson.push(device.getAsJson())
         }
         let json = {
             "taskList": taskJson,
@@ -277,6 +278,9 @@ class AppData {
 
             }
         }
+
+        // TODO: move this somwere alse:
+        WebSocketServerHandler.updateAppdata();
     }
 
     on(event: string, callback: Function): void {

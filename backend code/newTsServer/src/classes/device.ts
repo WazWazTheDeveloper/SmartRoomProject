@@ -181,7 +181,9 @@ class Device {
         // }
 
         const data = this.deviceData[dataAt].data.getAsJson();
-
+        let dataJson: any = {
+            data:data
+        }
 
         return data
     }
@@ -221,6 +223,7 @@ class Device {
 
         this.topicPath = newTopicPath;
 
+        this.saveData();
         this.callbackOnChange(eventData);
     }
 
@@ -229,6 +232,7 @@ class Device {
     }
 
     public setDeviceName(newDeviceName: string) {
+        this.saveData();
         this.deviceName = newDeviceName;
     }
 
@@ -242,6 +246,7 @@ class Device {
         }
 
         this.deviceData[dataAt].data.setVar(varName, newContent);
+        this.saveData();
 
         this.callbackOnChange(eventData);
     }
@@ -256,7 +261,7 @@ class Device {
         }
 
         this.deviceData[dataAt].data.setData(newContent);
-
+        this.saveData();
         this.callbackOnChange(eventData);
     }
 
@@ -297,6 +302,8 @@ class Device {
                 break;
         }
 
+        // TODO: make this go only once
+        // this.saveData();
     }
 
     
@@ -320,6 +327,7 @@ class Device {
             }
         });
 
+        this.saveData();
         this.callbackOnChange(eventData);
     }
 }

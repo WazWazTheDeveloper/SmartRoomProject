@@ -1,3 +1,6 @@
+#define red_led_pin 0
+#define green_led_pin 3
+#define RESET_EEPROM_PIN 1
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 // #include "SoftwareSerial.h"
@@ -25,6 +28,7 @@ const int DV_SEND_REQUEST = 1;
 const int DV_IS_DEVICE = 2;
 int state = DV_NO_DEVICE;
 
+// TODO: delete this
 char uuid[37] = "89e84f71-bd88-4b1f-867d-231bbdce3d72";
 
 const int DEVICE_TOPIC_CHANGE = 0;
@@ -35,6 +39,9 @@ const int DATA_CHANGE = 3;
 char topic[72] = {'\0'};
 const int deviceTypeCount = sizeof(deviceType) / sizeof(deviceType[0]);
 DeviceData *deviecDataArr[deviceTypeCount];
+
+// bool redLedStateLast = true;
+// bool redLedStateCur = true;
 
 bool createDevices()
 {
@@ -77,11 +84,12 @@ void subTopics()
     mqttClient.subscribe(topic);
 }
 
-void setUpMqtt()
+bool setUpMqtt()
 {
     if (!mqttClient.connect(broker, port))
     {
         Serial.println(mqttClient.connectError());
+        return 0;
         while (1)
             ;
     }
@@ -89,6 +97,8 @@ void setUpMqtt()
     mqttClient.onMessage(onMqttMessage);
     subTopics();
     mqttClient.subscribe("isConnectedCheckTopic");
+
+    return 1;
 }
 
 void onMqttMessage(int messageSize)
@@ -101,6 +111,7 @@ void onMqttMessage(int messageSize)
 
     if (error)
     {
+        setRedLed(true);
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
         return;
@@ -147,6 +158,7 @@ void onMqttMessage(int messageSize)
         }
     }
 
+    setRedLed(false);
     doc.clear();
 }
 
@@ -184,6 +196,7 @@ void clearUUID()
         EEPROM.write(i, 0);
     }
     EEPROM.end();
+    // TODO: clear uuid var
     Serial.println("cleared eeprom");
 }
 
@@ -361,12 +374,12 @@ boolean updateData(int dataAt)
 
     if (error)
     {
+        setRedLed(true);
         Serial.println(error.f_str());
         return 0;
     }
 
-    JsonArray dataArr = doc["deviceData"];
-    JsonObject data = dataArr[0];
+    JsonObject data = doc["data"];
 
     if (deviecDataArr[dataAt]->getDataType() == deviceType[dataAt])
     {
@@ -378,6 +391,7 @@ boolean updateData(int dataAt)
     Serial.print(dataAt);
     Serial.print(" of type: ");
     Serial.print(deviceType[dataAt]);
+    setRedLed(false);
     return 1;
 }
 
@@ -385,11 +399,11 @@ boolean updateTopicPath()
 {
     StaticJsonDocument<512> doc;
 
-    // TODO: add check to also use mqtt
     DeserializationError error = deserializeJson(doc, wifiClient);
 
     if (error)
     {
+        setRedLed(true);
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
         return 0;
@@ -401,6 +415,7 @@ boolean updateTopicPath()
 
     Serial.print(F("updated topic path"));
     doc.clear();
+    setRedLed(false);
     return 1;
 }
 
@@ -432,21 +447,41 @@ boolean checkData()
 
 void setup()
 {
+    //********** CHANGE PIN FUNCTION  TO GPIO **********
+    // GPIO 1 (TX) swap the pin to a GPIO.
+    pinMode(1, FUNCTION_3);
+    // GPIO 3 (RX) swap the pin to a GPIO.
+    pinMode(3, FUNCTION_3);
+    //**************************************************
+
+    //********** CHANGE PIN FUNCTION  TO TX/RX **********
+    // GPIO 1 (TX) swap the pin to a TX.
+    // pinMode(1, FUNCTION_0);
+    // GPIO 3 (RX) swap the pin to a RX.
+    // pinMode(3, FUNCTION_0);
+    //***************************************************
+
+    pinMode(red_led_pin, OUTPUT);
+    pinMode(green_led_pin, OUTPUT);
+    pinMode(RESET_EEPROM_PIN, INPUT);
+
     EEPROM.begin(512);
-    Serial.begin(115200);
+    // Serial.begin(115200);
     setup_wifi();
-    // TODO add if
+
     if (!createDevices())
     {
+        setRedLed(true);
         while (true)
             ;
     }
+    setRedLed(true);
+    // updateRedLed();
     // clearUUID();
 }
 
 void loop()
 {
-    // TODO: add check to see if uuid is in eeprom and if so send request with only uuid if (state == DV_NO_DEVICE)
     if (state == DV_NO_DEVICE)
     {
         if (getUUID())
@@ -454,14 +489,29 @@ void loop()
             Serial.println(uuid);
             state = DV_SEND_REQUEST;
         }
+        else
+        {
+            setRedLed(true);
+        }
     }
     else if (state == DV_SEND_REQUEST)
     {
         // get data
         if (setUpDevice())
         {
-            setUpMqtt();
-            state = DV_IS_DEVICE;
+            if (setUpMqtt())
+            {
+                state = DV_IS_DEVICE;
+                setRedLed(false);
+            }
+            else
+            {
+                setRedLed(true);
+            }
+        }
+        else
+        {
+            setRedLed(true);
         }
     }
     else
@@ -469,5 +519,25 @@ void loop()
         mqttClient.poll();
     }
 
-    // delay(2000);
+    if (digitalRead(RESET_EEPROM_PIN) == LOW)
+    {
+        clearUUID();
+        setRedLed(false);
+        Serial.println(uuid);
+        state = DV_NO_DEVICE;
+    }
+}
+
+// void updateRedLed()
+// {
+//     digitalWrite(red_led_pin, !redLedStateCur);
+//     digitalWrite(green_led_pin, !redLedStateCur);
+//     redLedStateLast = redLedStateCur;
+// }
+
+void setRedLed(bool newState)
+{
+    // redLedStateCur = newState;
+    digitalWrite(red_led_pin, !newState);
+    digitalWrite(green_led_pin,!newState);
 }

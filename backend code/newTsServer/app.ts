@@ -33,8 +33,7 @@ async function startServer(): Promise<void> {
         const device = appData.getDeviceList()[index];
         client.subscribe(device.getTopicPath(),appData.updateDevice)
     }
-
-
+  
     //TODO: make this pretty
     appData.on(AppData.ON_DEVICE_ADDED, async (eventData:AppdataEvent) => {
       let client = MqttClient.getMqttClientInstance()
@@ -45,7 +44,6 @@ async function startServer(): Promise<void> {
     appData.on(AppData.ON_DEVICE_REMOVED, async (eventData:AppdataEvent) => {
       let client = MqttClient.getMqttClientInstance()
       let appData = await AppData.getAppDataInstance();
-      //TODO: change this to use the oldTopic property of eventData as deivce is deleted and does not exist any more
       client.unsubscribe(eventData.oldTopic,appData.updateDevice)
     });
 

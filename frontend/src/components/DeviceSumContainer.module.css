@@ -1,0 +1,250 @@
+.device_container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    background: var(--surface);
+    border-radius: 40px;
+    border: white solid 1px;
+    display: flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+    transition: 0.1s;
+}
+
+.device_container:hover {
+    /* TODO: maybe change this */
+    transform: scale(1.01);
+    cursor: pointer;
+}
+
+.device_sub_container {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+.device_device_name_container {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.device_device_name_container::after {
+    content: '';
+    position: absolute;
+    margin: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--on-surface);
+}
+
+.device_device_name_container p {
+    width: 100%;
+    text-align: left;
+    color: var(--on-surface);
+    margin-left: 20px;
+    font-size: 1rem;
+}
+
+.setting_icon {
+    margin-right: 10px;
+    fill: var(--on-surface);
+    transition: 0.2s;
+}
+
+.setting_icon:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.device_is_online_container {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.device_is_online_container::after {
+    content: '';
+    position: absolute;
+    margin: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--on-surface);
+}
+
+.device_is_online_container p {
+    text-align: left;
+    color: var(--on-surface);
+    font-size: 1.8rem;
+}
+
+.device_is_online_dot {
+    position: relative;
+    margin-left: 20px;
+    margin-right: 5px;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    border: solid white 1px;
+}
+
+.gray_dot {
+    background: gray;
+}
+
+.green_dot {
+    background: rgb(0, 255, 0);
+}
+
+.data_container {
+    position: relative;
+    width: 250px;
+    height: 125px;
+}
+
+/* AcData */
+
+.acdata_container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.acdata_container p {
+    position: relative;
+    color: var(--on-surface);
+}
+
+.acdata_ison {
+    position: relative;
+    width: 100%;
+    height: 20%;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.acdata_sub_container {
+    position: relative;
+    width: 50%;
+    height: 80%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: top;
+}
+
+.acdata_p_container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+.acdata_p_container p {
+    position: relative;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.acdata_p_container p:first-child {
+    margin-left: 10px;
+    margin-right: 0.5rem;
+}
+
+.red {
+    color: red !important;
+}
+
+.green {
+    color: rgb(0, 255, 0) !important;
+}
+
+/* TODO: add media querrys */
+
+@media screen and (max-width: 480px) {
+    .device_container {
+        width: 125px;
+        height: 125px;
+        border-radius: 15px;
+    }
+
+    .device_container:hover {
+        /* TODO: maybe change this */
+        transform: scale(1);
+        cursor: pointer;
+    }
+
+    .device_device_name_container p {
+        margin-left: 10px;
+        font-size: 0.6rem;
+    }
+
+    .setting_icon {
+        width: 40px;
+        margin-right: 5px;
+        fill: white;
+        transition: 0.2s;
+    }
+
+    .setting_icon:hover {
+        transform: scale(1);
+        cursor: pointer;
+    }
+
+    .device_is_online_container p {
+        font-size: 0.9rem;
+    }
+
+    .device_is_online_dot {
+        margin-left: 5px;
+        margin-right: 5px;
+        width: 17.5px;
+        height: 17.5px;
+    }
+
+    .data_container {
+        position: relative;
+        width: 125px;
+        height: 62.5px;
+    }
+
+    /* AcData */
+
+    .acdata_ison {
+        height: 20%;
+        font-size: 0.6rem;
+    }
+
+    .acdata_sub_container {
+        height: 80%;
+    }
+
+    .acdata_p_container {
+        height: 20%;
+    }
+
+    .acdata_p_container p {
+        font-size: 0.45rem;
+    }
+
+    .acdata_p_container p:first-child {
+        margin-left: 5px;
+        margin-right: 0.25rem;
+    }
+}

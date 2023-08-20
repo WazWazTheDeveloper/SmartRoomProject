@@ -62,7 +62,11 @@ router.get('/getData', async (req: Request, res: Response) => {
     // try {
         let device: Device = appdata.getDeviceById(uuidString);
         res.status(200);
-        res.json(device.getAsJsonForArduino(0));
+        // TODO: add device at to queery
+        let data = device.getAsJsonForArduino(0)
+        res.json({
+            data:data
+        });
         // console.log(device.getAsJsonForArduino(0))
     // }catch {
     //     res.status(400);
@@ -94,32 +98,33 @@ router.get('/getTopic', async (req: Request, res: Response) => {
 })
 
 router.get('/test', async (req: Request, res: Response) => {
-    let uuid = req.query.uuid;
+    let deviceType = [0];
+    let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
 
-    // TODO: change to convertor
-    let uuidString = "969041c7-3f80-4d28-b4d1-56fae78b802f"
+    console.log(deviceType[0])
+    // check if deviceType is array of numbers
+    for (let index = 0; index < deviceType.length; index++) {
+        const element = deviceType[index];
+        if(isNaN(element)) {
+            res.status(400);
+            res.send();
+            return;
+        }
+        
+    }
 
-    await appdata.getDeviceById(uuidString).setData(0, {
-        "isOn": true,
-        "temp": 21,
-        "mode": 1,
-        "speed": 0,
-        "swing1": true,
-        "swing2": false,
-        "timer": 0,
-        "isStrong": false,
-        "isFeeling": false,
-        "isSleep": false,
-        "isScreen": true,
-        "isHealth": false
-    });
-
-    res.setHeader("Content-Type", "application/json");
-    // TODO: add try as deviceType can be somting non existen;
-
-    res.status(200);
-    res.send("pubSubData");
+    try{
+        await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
+        let newDevice: Device = appdata.getDeviceById(newUUID);
+        res.status(200);
+        WebSocketServerHandler.updateAppdata();
+        res.send(newUUID);
+    }catch(err) {
+        res.status(400);
+        res.send();
+        return;
+    }
 })
 
 export { router as deviceRouter };

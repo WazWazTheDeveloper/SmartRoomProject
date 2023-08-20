@@ -306,11 +306,12 @@ class Task implements TaskType {
     }
 
     // HACK: I really dont like how this work
+    // probaby want to change this to Appdata.getDeviceById
     getDeviceFromId(uuid: string): Device {
         for (let index = 0; index < Task.deviceList.length; index++) {
             const device = Task.deviceList[index];
             if (device.getUUID() == uuid) {
-                return device;
+                return device
             }
         }
         throw new Error("device not found")
