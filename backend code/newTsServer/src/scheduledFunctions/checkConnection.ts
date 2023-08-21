@@ -1,8 +1,8 @@
 import { AppData } from "../appData";
-import { DataPacket } from "../classes/dataPacket";
-import { Device } from "../classes/device";
-import { GeneralTopic } from "../classes/generalData";
-import { Task } from "../classes/task";
+import { DataPacket } from "../models/dataPacket";
+import { Device } from "../models/device";
+import { GeneralTopic } from "../models/generalData";
+import { Task } from "../models/task";
 import { MqttClient } from "../mqtt_client";
 
 let checkConnectionObject: CheckConnection;
@@ -75,17 +75,6 @@ class CheckConnection {
             }
         }
     }
-
-    // DEL: unneccecery
-    // static async updateDevicesToCheck() {
-    //     let appData = await AppData.getAppDataInstance();
-    //     let task = appData.getTaskById(CheckConnection.TASKID)
-    //     task.emptyTodoTask()
-    //     for (let index = 0; index < appData.getDeviceList().length; index++) {
-    //         const device = appData.getDeviceList()[index];
-    //         task.addTodoTask(device.getUUID(), -1, "isConnectedCheck", false);
-    //     }
-    // }
 
     async updater(): Promise<void> {
         console.log("starting connection check")

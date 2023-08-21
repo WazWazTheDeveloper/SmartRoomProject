@@ -1,6 +1,6 @@
-import { Device } from "./classes/device";
-import { GeneralData, getGeneralDataInstance } from "./classes/generalData";
-import { Task } from "./classes/task";
+import { Device } from "./models/device";
+import { GeneralData, getGeneralDataInstance } from "./models/generalData";
+import { Task } from "./models/task";
 import { WebSocketServerHandler } from "./handlers/WebSocketServerHandler";
 import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";

@@ -1,5 +1,5 @@
-import { DataPacket } from "./classes/dataPacket";
-import { Device } from "./classes/device";
+import { DataPacket } from "./models/dataPacket";
+import { Device } from "./models/device";
 import { MqttHandler } from "./handlers/mqtt_handler";
 
 interface SubType {

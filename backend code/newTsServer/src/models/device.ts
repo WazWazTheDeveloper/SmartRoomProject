@@ -161,25 +161,6 @@ class Device {
     }
 
     public getAsJsonForArduino(dataAt: number) {
-        // DEL
-        // let deviceDataJsonArr: Array<DeviceDataType> = [];
-        // for (let index = 0; index < this.deviceData.length; index++) {
-        //     const device = this.deviceData[index];
-        //     let DeviceDataTypeJson: any = device.data.getAsJson();
-        //     deviceDataJsonArr.push(DeviceDataTypeJson);
-        // }
-
-        // let dataJson: any = {
-        //     // deviceName: this.deviceName,
-        //     // uuid: this.uuid,
-        //     // topicPath: this.topicPath,
-        //     deviceData: deviceDataJsonArr,
-        //     // isConnected: this.isConnected,
-        //     // isConnectedCheck: this.isConnectedCheck,
-        //     // isAccepted: this.isAccepted
-
-        // }
-
         const data = this.deviceData[dataAt].data.getAsJson();
         let dataJson: any = {
             data:data
