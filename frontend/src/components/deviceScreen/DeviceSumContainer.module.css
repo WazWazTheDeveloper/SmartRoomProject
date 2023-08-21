@@ -55,9 +55,11 @@
 }
 
 .setting_icon {
-    margin-right: 10px;
-    fill: var(--on-surface);
-    transition: 0.2s;
+    margin-right: 10px!important;
+    fill: var(--on-surface) !important;
+    transition: 0.2s!important;
+    height: 40px!important;
+    width: 40px!important;
 }
 
 .setting_icon:hover {
@@ -117,65 +119,8 @@
     height: 125px;
 }
 
-/* AcData */
-
-.acdata_container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.acdata_container p {
-    position: relative;
-    color: var(--on-surface);
-}
-
-.acdata_ison {
-    position: relative;
-    width: 100%;
-    height: 20%;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.acdata_sub_container {
-    position: relative;
-    width: 50%;
-    height: 80%;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: top;
-}
-
-.acdata_p_container {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    align-content: center;
-}
-
-.acdata_p_container p {
-    position: relative;
-    display: inline-block;
-    font-size: 0.9rem;
-}
-
-.acdata_p_container p:first-child {
-    margin-left: 10px;
-    margin-right: 0.5rem;
-}
-
-.red {
-    color: red !important;
-}
-
-.green {
-    color: rgb(0, 255, 0) !important;
-}
-
 /* TODO: add media querrys */
+/* https://www.freecodecamp.org/news/css-media-queries-breakpoints-media-types-standard-resolutions-and-more/ */
 
 @media screen and (max-width: 480px) {
     .device_container {
@@ -196,10 +141,12 @@
     }
 
     .setting_icon {
-        width: 40px;
-        margin-right: 5px;
-        fill: white;
-        transition: 0.2s;
+        width: 40px !important;
+        margin-right: 5px !important;
+        fill: white !important;
+        transition: 0.2s !important;
+        width: 20px !important;
+        height: 20px !important;
     }
 
     .setting_icon:hover {

@@ -3,6 +3,9 @@ import styles from './DeviceSumScreen.module.css'
 import DeviceSumContainer from './DeviceSumContainer';
 
 // TODO: add type
+interface props {
+
+}
 function DeviceListScreen(props: any) {
     let _deviceList = [];
 

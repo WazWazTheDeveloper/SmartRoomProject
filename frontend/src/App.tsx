@@ -2,11 +2,15 @@ import styles from './App.module.css';
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   createBrowserRouter,
+  Link,
+  Route,
   RouterProvider,
+  Routes,
 } from "react-router-dom";
-import DeviceListScreen from './components/DeviceSumScreen';
+import DeviceListScreen from './components/deviceScreen/DeviceSumScreen';
 
-import {DevicesOther, AccessTime,Settings } from '@mui/icons-material';
+import { DevicesOther, AccessTime, Settings } from '@mui/icons-material';
+import TaskListContainer from './components/TaskListContainer';
 const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';
 
 function App() {
@@ -31,15 +35,15 @@ function App() {
     // }
   }, [])
 
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <DeviceListScreen appdata={appdata} />,
-    }, {
-      path: "/1",
-      element: <div>Hello wo111rld!</div>,
-    },
-  ]);
+  // const router = createBrowserRouter([
+  //   {
+  //     path: "/",
+  //     element: <DeviceListScreen appdata={appdata} />,
+  //   }, {
+  //     path: "/1",
+  //     element: <TaskListContainer appdata={appdata} />,
+  //   },
+  // ]);
 
   return (
     <div className={styles.App}>
@@ -49,16 +53,29 @@ function App() {
       <div className={styles.lower_container}>
         <div className={styles.side_bar}>
           <div className={styles.side_bar_item}>
-            <DevicesOther className={styles.icon} />
+            <Link to={'/'}>
+              <DevicesOther className={styles.icon} />
+            </Link>
           </div>
           <div className={styles.side_bar_item}>
-            <AccessTime className={styles.icon} />
+            {/* chage path */}
+            <Link to={'/scheduled_tasks'}>
+              <AccessTime className={styles.icon} />
+            </Link>
           </div>
           <div className={styles.side_bar_item}>
-            <Settings  className={styles.icon} />
+            <Link to={'/settings'}>
+              <Settings className={styles.icon} />
+            </Link>
           </div>
         </div>
-        <div className={styles.main}><RouterProvider router={router} /></div>
+        <div className={styles.main}>
+          <Routes>
+            <Route path={'/'} element={<DeviceListScreen appdata={appdata} />} />
+            <Route path={'/scheduled_tasks'} element={<TaskListContainer appdata={appdata} />} />
+
+          </Routes>
+        </div>
       </div>
 
 

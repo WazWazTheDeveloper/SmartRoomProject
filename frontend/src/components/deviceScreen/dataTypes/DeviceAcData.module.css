@@ -1,0 +1,79 @@
+.acdata_container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.acdata_container p {
+    position: relative;
+    color: var(--on-surface);
+}
+
+.acdata_ison {
+    position: relative;
+    width: 100%;
+    height: 20%;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.acdata_sub_container {
+    position: relative;
+    width: 50%;
+    height: 80%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: top;
+}
+
+.acdata_p_container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+.acdata_p_container p {
+    position: relative;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.acdata_p_container p:first-child {
+    margin-left: 10px;
+    margin-right: 0.5rem;
+}
+
+.red {
+    color: red !important;
+}
+
+.green {
+    color: rgb(0, 255, 0) !important;
+}
+
+@media screen and (max-width: 480px) {
+    .acdata_ison {
+        height: 20%;
+        font-size: 0.6rem;
+    }
+
+    .acdata_sub_container {
+        height: 80%;
+    }
+
+    .acdata_p_container {
+        height: 20%;
+    }
+
+    .acdata_p_container p {
+        font-size: 0.45rem;
+    }
+
+    .acdata_p_container p:first-child {
+        margin-left: 5px;
+        margin-right: 0.25rem;
+    }
+}
