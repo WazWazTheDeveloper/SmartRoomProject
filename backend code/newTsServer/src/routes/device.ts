@@ -1,13 +1,12 @@
 import express, { Request, Response } from "express"
 import * as deviceController from '../controllers/deviceController'
+import { verifyJWT } from "../middleware/verifyJWT";
 
 
 
 const router: express.Router = express.Router();
 
-router.use((req: Request, res: Response, next) => {
-    next()
-});
+// router.use(verifyJWT);
 
 router.route('/registerNewDevice')
     .post(deviceController.createNewDevice)

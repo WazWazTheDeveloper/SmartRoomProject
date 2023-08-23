@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './DeviceSumScreen.module.css'
 import DeviceSumContainer from './DeviceSumContainer';
 
@@ -30,8 +30,7 @@ function DeviceListScreen(props: any) {
         }
 
         let numOfTiles = 6;
-        console.log(window.screen.width < 480)
-        if(window.screen.width < 480) {
+        if (window.screen.width < 480) {
             numOfTiles = 2
         }
         for (let index = count % numOfTiles; index < numOfTiles; index++) {

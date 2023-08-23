@@ -83,35 +83,36 @@ const getTopic = async (req: Request, res: Response) => {
 }
 
 const test = async (req: Request, res: Response) => {
-    // let deviceType = [0];
-    // let newUUID = uuidv4();
-    // let appdata = await AppData.getAppDataInstance();
+    let deviceType = [0];
+    let newUUID = uuidv4();
+    let appdata = await AppData.getAppDataInstance();
 
-    // console.log(deviceType[0])
-    // // check if deviceType is array of numbers
-    // for (let index = 0; index < deviceType.length; index++) {
-    //     const element = deviceType[index];
-    //     if(isNaN(element)) {
-    //         res.status(400);
-    //         res.send();
-    //         return;
-    //     }
+    console.log(deviceType[0])
+    // check if deviceType is array of numbers
+    for (let index = 0; index < deviceType.length; index++) {
+        const element = deviceType[index];
+        if(isNaN(element)) {
+            res.status(400);
+            res.send();
+            return;
+        }
 
-    // }
+    }
 
-    // try{
-    //     await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
-    //     let newDevice: Device = appdata.getDeviceById(newUUID);
-    //     res.status(200);
-    //     WebSocketServerHandler.updateAppdata();
-    //     res.send(newUUID);
-    // }catch(err) {
-    //     res.status(400);
-    //     res.send();
-    //     return;
-    // }
-
-    User.createNewUser("test2", "123");
+    try{
+        await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
+        let newDevice: Device = appdata.getDeviceById(newUUID);
+        res.status(200);
+        WebSocketServerHandler.updateAppdata();
+        res.send(newUUID);
+    }catch(err) {
+        res.status(400);
+        res.send();
+        return;
+    }
+    // console.log(req.query)
+    // res.send("ter")
+    // User.createNewUser("test2", "123");
 }
 
 export { createNewDevice, getData, getTopic, test }

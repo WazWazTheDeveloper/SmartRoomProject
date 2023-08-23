@@ -10,7 +10,8 @@ import {
 import DeviceListScreen from './components/deviceScreen/DeviceSumScreen';
 
 import { DevicesOther, AccessTime, Settings } from '@mui/icons-material';
-import TaskListContainer from './components/TaskListContainer';
+import TaskListContainer from './components/taskScreen/TaskListContainer';
+import { useAuth } from './hooks/useAuth';
 const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';
 
 function App() {
@@ -35,16 +36,7 @@ function App() {
     // }
   }, [])
 
-  // const router = createBrowserRouter([
-  //   {
-  //     path: "/",
-  //     element: <DeviceListScreen appdata={appdata} />,
-  //   }, {
-  //     path: "/1",
-  //     element: <TaskListContainer appdata={appdata} />,
-  //   },
-  // ]);
-
+  const [userdata, login, logout,updateUserData] = useAuth();
   return (
     <div className={styles.App}>
       <div className={styles.top}>
@@ -54,7 +46,7 @@ function App() {
         <div className={styles.side_bar}>
           <div className={styles.side_bar_item}>
             <Link to={'/'}>
-              <DevicesOther className={styles.icon} />
+              <DevicesOther className={styles.icon} onClick={() => {login("test2","123")}}/>
             </Link>
           </div>
           <div className={styles.side_bar_item}>

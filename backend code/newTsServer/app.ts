@@ -7,11 +7,13 @@ import { MqttClient } from './src/mqtt_client';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
 import { AppdataEvent } from './src/interfaces/appData.interface';
 import { DataPacket } from './src/models/dataPacket';
+const cookieParser = require('cookie-parser')
 
 
 const app: express.Application = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cookieParser())
 app.use('/', router);
 
 async function startServer(): Promise<void> {

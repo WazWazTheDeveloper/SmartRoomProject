@@ -89,7 +89,7 @@ class User {
 
     // IMPLEMENT
     getPermissions() {
-        
+        return this.permission;
     }
 
     getSettings():Settings{

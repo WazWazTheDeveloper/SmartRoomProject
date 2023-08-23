@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styles from './DeviceSumContainer.module.css'
-import {Settings } from '@mui/icons-material';
+import { Settings } from '@mui/icons-material';
 import AcData from './dataTypes/DeviceAcData';
 import { StringMappingType } from 'typescript';
+import { AuthContext, ContextType} from '../providers/authProvider';
+import { useAuth } from '../../hooks/useAuth';
 
 // TODO: finalize this
 interface Data {
   isConnected: boolean
   deviceName: string
-  data:{
-    dataType:number
-    data:{}
+  data: {
+    dataType: number
+    data: {}
   }
 }
 

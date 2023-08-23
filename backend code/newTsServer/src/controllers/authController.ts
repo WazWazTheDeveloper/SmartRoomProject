@@ -13,12 +13,12 @@ const login = asyncHandler(async (req: Request, res: Response) => {
     }
 
     // TODO: add find user
-    const foundUser= await User.getUser(username)
+    const foundUser = await User.getUser(username)
 
 
     if (!foundUser || !foundUser.getIsActive()) {
         res.status(401).json('Unauthorized')
-    return
+        return
     }
 
     const match = await bcrypt.compare(password, foundUser.getPassword())
@@ -30,14 +30,13 @@ const login = asyncHandler(async (req: Request, res: Response) => {
     const accessToken = jwt.sign(
         {
             userInfo: {
-                userName: foundUser.getUsername(),
+                username: foundUser.getUsername(),
                 permission: foundUser.getPermissions()
             }
         },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '10s' }
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '1000s' }
     )
-        console.log("asdasdasd")
     const refreshToken = jwt.sign(
         { "username": foundUser.getUsername },
         process.env.REFRESH_TOKEN_SECRET,
@@ -47,7 +46,8 @@ const login = asyncHandler(async (req: Request, res: Response) => {
     // Create secure cookie with refresh token 
     res.cookie('jwt', refreshToken, {
         httpOnly: true, //accessible only by web server 
-        secure: true, //https
+        //TODO: change this to true
+        secure: false, //https
         maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
     })
 
@@ -71,12 +71,7 @@ const refresh = (req: Request, res: Response) => {
                 return
             }
 
-            // find info
-            // const foundUser = await User.findOne({ username: decoded.username }).exec()
-            // TODO: add find user
-            const foundUser: any = {}
-            foundUser.isActive = false;
-            foundUser.password = "false";
+            const foundUser = await User.getUser((decoded as any).username)
 
             if (!foundUser) {
                 res.status(401).json({ message: 'Unauthorized' })
@@ -86,7 +81,7 @@ const refresh = (req: Request, res: Response) => {
             const accessToken = jwt.sign(
                 {
                     "UserInfo": {
-                        "username": foundUser.username,
+                        "username": foundUser.getUsername(),
                         "permission": foundUser.getPermissions()
                     }
                 },
@@ -106,7 +101,8 @@ const logout = (req: Request, res: Response) => {
     res.json({ message: 'Cookie cleared' })
 }
 
-export {   
+export {
     login,
     refresh,
-    logout }
+    logout
+}
