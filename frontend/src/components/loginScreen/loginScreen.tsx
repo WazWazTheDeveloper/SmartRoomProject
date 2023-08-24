@@ -24,11 +24,11 @@ function LoginScreen(props: any) {
     }
 
     function handleLogin(e:React.MouseEvent<HTMLButtonElement>) {
-        // console.log("Yeet")
         login(username,password)
     }
 
     function handleSignup(e:React.MouseEvent<HTMLButtonElement>) {
+        signup(username,password)
     }
 
     function handleForgotPassword(e:React.MouseEvent<HTMLButtonElement>) {

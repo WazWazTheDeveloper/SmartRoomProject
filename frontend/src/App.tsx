@@ -1,11 +1,10 @@
 import styles from './App.module.css';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  createBrowserRouter,
   Link,
   Route,
-  RouterProvider,
   Routes,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 import DeviceListScreen from './components/deviceScreen/DeviceSumScreen';
@@ -40,12 +39,15 @@ function App() {
 
   const [userdata, login, logout, signup, updateUserData, isError, error] = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (userdata.token == "") {
+    if (userdata.token == "" && location.pathname != "/login") {
       navigate("/login")
     }
-  }, [userdata])
+  },[location])
+
+  
   return (
     <div className={styles.App}>
       <div className={styles.top}>
@@ -72,7 +74,10 @@ function App() {
             </div>
           </div>
           <div className={styles.side_bar_item}>
-            <Logout className={styles.icon}  onClick={() => { logout() }}/>
+            {userdata.token != "" ?
+              <Logout className={styles.icon} onClick={() => { logout() }} /> :
+              <></>
+            }
           </div>
         </div>
         <div className={styles.main}>

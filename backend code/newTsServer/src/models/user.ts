@@ -42,6 +42,8 @@ class User {
         let newUser = new User(uuid,username,hashedPassword,[],new Settings(),true);
 
         await newUser.saveData();
+
+        return newUser
     }
 
     public static async getUser(username:string) {

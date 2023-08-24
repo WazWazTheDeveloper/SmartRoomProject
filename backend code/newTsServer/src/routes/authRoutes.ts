@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express"
-import {verifyJWT} from '../middleware/verifyJWT'
 import * as authController from '../controllers/authController'
 
 const router: express.Router = express.Router();
@@ -13,5 +12,8 @@ router.route('/refresh')
 
 router.route('/logout')
     .post(authController.logout)
+
+router.route('/signup')
+    .post( authController.signup)
 
 export {router as authRouter}

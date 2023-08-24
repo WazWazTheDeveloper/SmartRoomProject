@@ -1,8 +1,7 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect} from 'react';
 import { useApi } from '../../hooks/useApi';
 import { ApiService } from '../../services/apiService';
 import jwt_decode from "jwt-decode";
-import usePersist from '../../hooks/usePersist';
 // const jwt_decode = require('jwt-decode');
 
 type Props = {
@@ -26,6 +25,7 @@ export type ContextType = [
 
 export const AuthContext = createContext<ContextType | null>(null);
 
+// TODO: fix this claster-fuck :)
 function AuthProvider({ children }: Props) {
     const [token, setToken] = useState("");
     const [userName, setUserName] = useState("");
@@ -34,15 +34,34 @@ function AuthProvider({ children }: Props) {
     const [error, setError] = useState('');
     const [dataLogin, isLoadingLogin, isErrorLogin, errorLogin, fetchLogin, refreshToken] = useApi('/auth/', ApiService.REQUEST_POST);
     const [dataLogout, isLoadingLogout, isErrorLogout, errorLogout, fetchLogout] = useApi('/auth/logout', ApiService.REQUEST_POST);
-    const [persist, setPersist] = usePersist();
-    const [dataRefresh, isLoadingRefresh, isErrorRefresh, errorRefresh, fetchRefresh] = useApi('/auth/refresh', ApiService.REQUEST_POST);
+    const [dataSignup, isLoadingSignup, isErrorSignup, errorSignup, fetchSignup] = useApi('/auth/signup', ApiService.REQUEST_POST);
 
     useEffect(() => {
-        if (!token && persist) {
+        if (!token) {
             refreshToken()
-            console.log("asd")
         }
     }, [])
+
+    useEffect(() => {
+        if (!isLoadingSignup) {
+            if (isErrorSignup) {
+                setIsError(true)
+                setError(errorSignup)
+                console.log((errorSignup as any))
+            }
+            else {
+                let token = (dataSignup as any).accessToken
+                if (token) {
+                    let decoded: any = jwt_decode(token)
+                    setToken(token)
+                    setUserName(decoded.userInfo.username)
+                    setPermission(decoded.userInfo.permission)
+                    setIsError(false)
+                    setError("")
+                }
+            }
+        }
+    }, [isLoadingSignup, isErrorSignup, errorSignup])
 
 
     useEffect(() => {
@@ -61,7 +80,6 @@ function AuthProvider({ children }: Props) {
                     setPermission(decoded.userInfo.permission)
                     setIsError(false)
                     setError("")
-                    // setPersist(token);
                 }
             }
         }
@@ -70,28 +88,22 @@ function AuthProvider({ children }: Props) {
     useEffect(() => {
         if (!isLoadingLogout) {
             if (isErrorLogout) {
-                // console.log(dataLogout)
-                // console.log(isErrorLogout)
-                // console.log(errorLogout)
-                // setIsError(true)
-                // setError(errorLogin)
                 console.log((errorLogin as any))
             }
             else {
-                // let token = (dataLogin as any).accessToken
-                // if (token) {
                 setToken("")
                 setUserName("")
                 setPermission([])
                 setIsError(false)
                 setError("")
-                // }
             }
         }
     }, [isLoadingLogout, isErrorLogout, errorLogout])
 
     const updateUserData = (newUserData: UserDataType) => {
-        return
+        setToken(newUserData.token)
+        setUserName(newUserData.userName)
+        setPermission(newUserData.permission)
     }
 
     const login = (username: string, password: string) => {
@@ -113,7 +125,7 @@ function AuthProvider({ children }: Props) {
             username: username,
             password: password
         }
-        fetchLogin(token, body)
+        fetchSignup(token, body)
     }
 
     let userdata: UserDataType = {

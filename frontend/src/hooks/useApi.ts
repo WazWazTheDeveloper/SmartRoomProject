@@ -1,6 +1,4 @@
-import { error } from "console";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { ApiContext } from "../components/providers/apiProvider";
+import { useState } from "react";
 import { ApiService } from "../services/apiService";
 
 // function useApi(_token: string) {
