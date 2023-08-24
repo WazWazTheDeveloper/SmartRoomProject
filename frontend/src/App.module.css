@@ -56,6 +56,9 @@
   background: var(--surface);
   width: var(--side-bar-width);
   height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
 }
 
 .side_bar_item {
@@ -87,10 +90,15 @@
   height: 70% !important;
 }
 
+.side_bar_icons {
+  position: relative;
+  background: var(--surface);
+  width: 100%;
+}
+
 .main {
   position: relative;
   width: calc(100% - var(--side-bar-width));
-  height: 100%;
   overflow: hidden;
   /* background: red; */
 }

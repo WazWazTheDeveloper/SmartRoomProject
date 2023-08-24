@@ -11,7 +11,7 @@ export type ApiContextType = [
     isLoading: boolean,
     isError: boolean,
     error: string,
-    fetch: (relativPath: string, metod: string, token: string, payload: {}) => void,
+    fetch: (relativPath: string, metod: string, token: string, payload: {}) => void
 ]
 
 
@@ -22,7 +22,7 @@ function ApiProvider({ children }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState("");
-    const [userdata, login, logout, updateUserData] = useAuth();
+    const [userdata, login, logout, signup, updateUserData, authIsError, authError] = useAuth();
 
     const fetchWithReAuth = async (relativPath: string, metod: string, token: string, payload: {}): Promise<void> => {
         setIsLoading(true);
@@ -33,7 +33,7 @@ function ApiProvider({ children }: Props) {
         if (response) {
             if (response.status === 403) {
                 console.log('sending refresh token')
-                const refreshResponse = await ApiService.basicHttpRequest('/auth/refresh', ApiService.REQUEST_GET, token)
+                const refreshResponse = await ApiService.refreshToken()
                 if (refreshResponse.status == 200) {
                     let responseJson = await refreshResponse.json()
                     updateUserData({

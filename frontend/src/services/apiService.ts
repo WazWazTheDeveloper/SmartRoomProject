@@ -6,7 +6,7 @@ class ApiService {
     public static readonly REQUEST_PUT = 'PUT'
     public static readonly REQUEST_DELETE = 'DELETE'
     public static async basicHttpRequest(relativPath: string, metod: string, token: string, payload: {}={}){
-        let baseUrl = 'http://localhost:3000'
+        let baseUrl = 'http://10.0.0.12:3000'
         let url = baseUrl + relativPath
 
         let request:any = {
@@ -25,8 +25,12 @@ class ApiService {
             request.body = JSON.stringify(payload);
         }
 
-        let response = await fetch(url, request)
+        let response = await fetch(relativPath, request)
         return response
+    }
+
+    public static async refreshToken() {
+        return await ApiService.basicHttpRequest('/auth/refresh', ApiService.REQUEST_GET, "")
     }
 }
 

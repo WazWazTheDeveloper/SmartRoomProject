@@ -57,15 +57,41 @@ const useApi = (relativPath: string, metod: string) => {
                 setIsLoading(false);
                 setData(dataJson)
             }
-            if(response.status === 403) {
-                setIsLoading(true);
+            else if(response.status === 403) {
+                setIsLoading(false);
                 setIsError(true);
                 setError("Your login has expired. ")
+            }else if(response.status === 204) {
+                setIsLoading(false);
+                setIsError(false);
+                setData("no data")
             }
         }
     }
 
-    return [data, isLoading, isError, error,fetch] as const
+    const refreshToken = async (): Promise<void> => {
+        setIsLoading(true);
+        setData({});
+        setIsError(false);
+        setError("");
+        let response = await ApiService.refreshToken()
+        if (response) {
+            if (response.status === 403) {
+                console.log("yeet")
+                // refreshResponse.body.message = "Your login has expired. "
+                setIsLoading(false);
+                setIsError(true);
+                setError("Your login has expired. ")
+            }
+            if (response.status === 200) {
+                let dataJson = await response.json()
+                setIsLoading(false);
+                setData(dataJson)
+            }
+        }
+    }
+
+    return [data, isLoading, isError, error,fetch,refreshToken] as const
 };
 
 export { useApi }

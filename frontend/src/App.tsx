@@ -6,12 +6,14 @@ import {
   Route,
   RouterProvider,
   Routes,
+  useNavigate,
 } from "react-router-dom";
 import DeviceListScreen from './components/deviceScreen/DeviceSumScreen';
 
-import { DevicesOther, AccessTime, Settings } from '@mui/icons-material';
+import { DevicesOther, AccessTime, Settings, Logout } from '@mui/icons-material';
 import TaskListContainer from './components/taskScreen/TaskListContainer';
 import { useAuth } from './hooks/useAuth';
+import LoginScreen from './components/loginScreen/loginScreen';
 const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';
 
 function App() {
@@ -36,7 +38,14 @@ function App() {
     // }
   }, [])
 
-  const [userdata, login, logout,updateUserData] = useAuth();
+  const [userdata, login, logout, signup, updateUserData, isError, error] = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userdata.token == "") {
+      navigate("/login")
+    }
+  }, [userdata])
   return (
     <div className={styles.App}>
       <div className={styles.top}>
@@ -44,27 +53,33 @@ function App() {
       </div>
       <div className={styles.lower_container}>
         <div className={styles.side_bar}>
-          <div className={styles.side_bar_item}>
-            <Link to={'/'}>
-              <DevicesOther className={styles.icon} onClick={() => {login("test2","123")}}/>
-            </Link>
+          <div className={styles.side_bar_icons}>
+            <div className={styles.side_bar_item}>
+              <Link to={'/'}>
+                <DevicesOther className={styles.icon} />
+              </Link>
+            </div>
+            <div className={styles.side_bar_item}>
+              {/* chage path */}
+              <Link to={'/scheduled_tasks'}>
+                <AccessTime className={styles.icon} />
+              </Link>
+            </div>
+            <div className={styles.side_bar_item}>
+              <Link to={'/settings'}>
+                <Settings className={styles.icon} />
+              </Link>
+            </div>
           </div>
           <div className={styles.side_bar_item}>
-            {/* chage path */}
-            <Link to={'/scheduled_tasks'}>
-              <AccessTime className={styles.icon} />
-            </Link>
-          </div>
-          <div className={styles.side_bar_item}>
-            <Link to={'/settings'}>
-              <Settings className={styles.icon} />
-            </Link>
+            <Logout className={styles.icon}  onClick={() => { logout() }}/>
           </div>
         </div>
         <div className={styles.main}>
           <Routes>
             <Route path={'/'} element={<DeviceListScreen appdata={appdata} />} />
             <Route path={'/scheduled_tasks'} element={<TaskListContainer appdata={appdata} />} />
+            <Route path={'/login'} element={<LoginScreen />} />
 
           </Routes>
         </div>

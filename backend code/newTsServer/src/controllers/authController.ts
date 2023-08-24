@@ -12,8 +12,13 @@ const login = asyncHandler(async (req: Request, res: Response) => {
         return
     }
 
-    // TODO: add find user
-    const foundUser = await User.getUser(username)
+    let foundUser: User
+    try {
+        foundUser = await User.getUser(username)
+    } catch (err) {
+        res.status(400).json('Invalid username or password')
+        return
+    }
 
 
     if (!foundUser || !foundUser.getIsActive()) {
@@ -38,7 +43,7 @@ const login = asyncHandler(async (req: Request, res: Response) => {
         { expiresIn: '1000s' }
     )
     const refreshToken = jwt.sign(
-        { "username": foundUser.getUsername },
+        { "username": foundUser.getUsername() },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '7d' }
     )
@@ -47,7 +52,7 @@ const login = asyncHandler(async (req: Request, res: Response) => {
     res.cookie('jwt', refreshToken, {
         httpOnly: true, //accessible only by web server 
         //TODO: change this to true
-        secure: false, //https
+        secure: true, //https
         maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
     })
 
@@ -71,7 +76,19 @@ const refresh = (req: Request, res: Response) => {
                 return
             }
 
-            const foundUser = await User.getUser((decoded as any).username)
+            let foundUser: User
+            try {
+                foundUser = await User.getUser((decoded as any).username)
+            } catch (err) {
+                res.status(400).json('Invalid username or password')
+                return
+            }
+
+
+            if (!foundUser || !foundUser.getIsActive()) {
+                res.status(401).json('Unauthorized')
+                return
+            }
 
             if (!foundUser) {
                 res.status(401).json({ message: 'Unauthorized' })
@@ -80,7 +97,7 @@ const refresh = (req: Request, res: Response) => {
 
             const accessToken = jwt.sign(
                 {
-                    "UserInfo": {
+                    "userInfo": {
                         "username": foundUser.getUsername(),
                         "permission": foundUser.getPermissions()
                     }
@@ -96,6 +113,7 @@ const refresh = (req: Request, res: Response) => {
 
 const logout = (req: Request, res: Response) => {
     const cookies = req.cookies
+    console.log(cookies)
     if (!cookies?.jwt) return res.sendStatus(204) //No content
     res.clearCookie('jwt', { httpOnly: true, secure: true })
     res.json({ message: 'Cookie cleared' })
