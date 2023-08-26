@@ -21,6 +21,10 @@
   padding: 0;
 }
 
+h1 {
+  all:unset
+}
+
 .App {
   position: relative;
   width: 100%;

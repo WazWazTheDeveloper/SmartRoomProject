@@ -337,8 +337,8 @@ class AirconditionerData implements IDeviceData {
                     if (newMode < 0) {
                         this.mode = 0;
                     }
-                    if (newMode > 3) {
-                        this.mode = 3
+                    if (newMode > 4) {
+                        this.mode = 4
                     }
                     else {
                         // @ts-ignore

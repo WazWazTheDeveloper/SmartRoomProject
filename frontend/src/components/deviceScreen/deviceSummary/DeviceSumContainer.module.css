@@ -5,9 +5,6 @@
     background: var(--surface);
     border-radius: 40px;
     border: white solid 1px;
-    display: flex;
-    flex-wrap: wrap;
-    overflow: hidden;
     transition: 0.1s;
 }
 

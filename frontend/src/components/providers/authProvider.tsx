@@ -27,7 +27,7 @@ export const AuthContext = createContext<ContextType | null>(null);
 
 // TODO: fix this claster-fuck :)
 function AuthProvider({ children }: Props) {
-    const [token, setToken] = useState("");
+    const [token, setToken] = useState("-1");
     const [userName, setUserName] = useState("");
     const [permission, setPermission] = useState<Array<string>>([]);
     const [isError, setIsError] = useState(false);
@@ -37,10 +37,14 @@ function AuthProvider({ children }: Props) {
     const [dataSignup, isLoadingSignup, isErrorSignup, errorSignup, fetchSignup] = useApi('/auth/signup', ApiService.REQUEST_POST);
 
     useEffect(() => {
-        if (!token) {
+        if (token == "-1") {
             refreshToken()
         }
     }, [])
+
+    useEffect(() => {
+        console.log(token)
+    }, [token])
 
     useEffect(() => {
         if (!isLoadingSignup) {
@@ -91,7 +95,7 @@ function AuthProvider({ children }: Props) {
                 console.log((errorLogin as any))
             }
             else {
-                setToken("")
+                setToken("-1")
                 setUserName("")
                 setPermission([])
                 setIsError(false)

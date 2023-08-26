@@ -1,16 +1,16 @@
 import { useContext} from "react";
-import { AuthContext } from "../components/providers/authProvider";
+import { AppdataContext } from "../components/providers/appdataProvider";
 
-const useAuth = () => {
-    const currentAuthContext = useContext(AuthContext);
+const useAppdata = () => {
+    const currentAuthContext = useContext(AppdataContext);
 
     if (!currentAuthContext) {
         throw new Error(
             "useCurrentUser has to be used within <CurrentUserContext.Provider>"
         );
+        return
     }
-
     return currentAuthContext;
 };
 
-export { useAuth }
+export { useAppdata }

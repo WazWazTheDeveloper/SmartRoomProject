@@ -6,7 +6,7 @@ class ApiService {
     public static readonly REQUEST_PUT = 'PUT'
     public static readonly REQUEST_DELETE = 'DELETE'
     public static async basicHttpRequest(relativPath: string, metod: string, token: string, payload: {}={}){
-        let baseUrl = 'http://10.0.0.12:3000'
+        let baseUrl = 'https://10.0.0.12:3000'
         let url = baseUrl + relativPath
 
         let request:any = {

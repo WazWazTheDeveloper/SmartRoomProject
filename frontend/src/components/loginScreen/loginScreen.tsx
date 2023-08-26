@@ -35,7 +35,7 @@ function LoginScreen(props: any) {
     }
 
     useEffect(() =>{
-        if(userdata.token != "") {
+        if(userdata.token != "-1") {
             navigate("/")
         }
     },[userdata])

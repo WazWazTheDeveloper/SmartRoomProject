@@ -21,6 +21,9 @@ router.route('/test')
     .post(deviceController.test)
     .get(deviceController.test)
 
+router.route('/update_device')
+    .post(deviceController.update_device)
+
 // TODO: add update and stuff
 
 export { router as deviceRouter };

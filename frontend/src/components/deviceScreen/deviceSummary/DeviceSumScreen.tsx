@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import styles from './DeviceSumScreen.module.css'
 import DeviceSumContainer from './DeviceSumContainer';
+import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import DeviceDetailsContainer from '../deviceDetails/deviceDetailContainer';
 
 // TODO: add type
 interface props {
 
 }
 function DeviceListScreen(props: any) {
-    let _deviceList = [];
+  const navigate = useNavigate();
+  let _deviceList = [];
 
     if (Object.keys(props.appdata).length != 0) {
         let count = 0;
@@ -22,7 +25,7 @@ function DeviceListScreen(props: any) {
                 const data = device.deviceData[index2];
                 let element =
                     <div className={styles.device_sum_warper}>
-                        <DeviceSumContainer deviceName={device.deviceName} isConnected={device.isConnected} data={data} />
+                        <DeviceSumContainer deviceName={device.deviceName} isConnected={device.isConnected} data={data} onClick={() => {navigate(`/${device.uuid}/${index2}`)}}/>
                     </div>
                 _deviceList.push(element)
                 count++;
@@ -40,11 +43,12 @@ function DeviceListScreen(props: any) {
             _deviceList.push(element)
         }
     }
+
     return (
         <>
-            <div className={styles.device_sum_container}>
-                {_deviceList}
-            </div>
+                    <div className={styles.device_sum_container}>
+                        {_deviceList}
+                    </div>
         </>
     )
 }

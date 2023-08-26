@@ -57,6 +57,7 @@ async function setup(): Promise<void> {
   });
 
   appData.on(AppData.ON_DATA_CHANGE, async (eventData: AppdataEvent) => {
+    console.log("asd")
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
     let device = appData.getDeviceById(eventData.deviceUUID)

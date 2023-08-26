@@ -7,47 +7,30 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import DeviceListScreen from './components/deviceScreen/DeviceSumScreen';
+import DeviceListScreen from './components/deviceScreen/deviceSummary/DeviceSumScreen';
 
 import { DevicesOther, AccessTime, Settings, Logout } from '@mui/icons-material';
 import TaskListContainer from './components/taskScreen/TaskListContainer';
 import { useAuth } from './hooks/useAuth';
 import LoginScreen from './components/loginScreen/loginScreen';
+import DeviceDetailsContainer from './components/deviceScreen/deviceDetails/deviceDetailContainer';
+import { useAppdata } from './hooks/useAppdata';
 const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';
 
 function App() {
-
-  const [appdata, setAppdata] = useState(Object);
-
-  useEffect(() => {
-    const websocket = new WebSocket(socketUrl);
-
-    websocket.onopen = () => {
-      console.log('connected');
-    }
-
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setAppdata(data);
-      // console.log(JSON.parse(event.data))
-    }
-
-    // return () => {
-    //   websocket.close()
-    // }
-  }, [])
-
+  const appdata = useAppdata();
   const [userdata, login, logout, signup, updateUserData, isError, error] = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // TODO: take a look at this
   useEffect(() => {
-    if (userdata.token == "" && location.pathname != "/login") {
+    if (userdata.token == "-1" && location.pathname != "/login") {
       navigate("/login")
     }
-  },[location])
+  }, [location, userdata.token])
 
-  
+
   return (
     <div className={styles.App}>
       <div className={styles.top}>
@@ -82,30 +65,17 @@ function App() {
         </div>
         <div className={styles.main}>
           <Routes>
-            <Route path={'/'} element={<DeviceListScreen appdata={appdata} />} />
+            <Route path='/'>
+              <Route index element={<DeviceListScreen appdata={appdata} />} />
+              <Route path=':id/:dataat' element={<DeviceDetailsContainer />} />
+            </Route>
             <Route path={'/scheduled_tasks'} element={<TaskListContainer appdata={appdata} />} />
             <Route path={'/login'} element={<LoginScreen />} />
+            <Route path={'/test'} element={<DeviceDetailsContainer />} />
 
           </Routes>
         </div>
       </div>
-
-
-      {/* <DeviceSumContainer /> */}
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
     </div>
   );
 }

@@ -3,8 +3,8 @@ import styles from './DeviceSumContainer.module.css'
 import { Settings } from '@mui/icons-material';
 import AcData from './dataTypes/DeviceAcData';
 import { StringMappingType } from 'typescript';
-import { AuthContext, ContextType} from '../providers/authProvider';
-import { useAuth } from '../../hooks/useAuth';
+import { AuthContext, ContextType} from '../../providers/authProvider';
+import { useAuth } from '../../../hooks/useAuth';
 
 // TODO: finalize this
 interface Data {
@@ -14,12 +14,13 @@ interface Data {
     dataType: number
     data: {}
   }
+  onClick:Function
 }
 
 function DeviceSumContainer(props: Data) {
   let isConnectedDotClass = props.isConnected ? styles.green_dot : styles.gray_dot
   return (
-    <div className={styles.device_container}>
+    <div className={styles.device_container} onClick={() => {props.onClick()}}>
       <div className={styles.device_sub_container}>
         <div className={styles.device_device_name_container}>
           <p>{props.deviceName}</p>

@@ -115,4 +115,32 @@ const test = async (req: Request, res: Response) => {
     // User.createNewUser("test2", "123");
 }
 
-export { createNewDevice, getData, getTopic, test }
+const update_device = async (req: Request, res: Response) => {
+    const {dataAt,data,targetDevice} = req.body;
+        // console.log("asdasdasd")
+        console.log(data)
+    // console.log(!data)
+    // console.log(!targetDevice)
+    if ((!dataAt && dataAt !== 0) || !data || !targetDevice) {
+        res.status(400).json('invalid data')
+        return
+    }
+    
+    let appdata = await AppData.getAppDataInstance()
+
+    let foundDevice: Device;
+    try {
+        foundDevice = await appdata.getDeviceById(targetDevice);
+    }catch(err) {
+        res.status(401).json('Device does not exist')
+        return
+    }
+    
+    await foundDevice.setData(dataAt,data)
+    
+    console.log("data")
+
+    res.status(200).json('success')
+
+}
+export { createNewDevice, getData, getTopic, test ,update_device}
