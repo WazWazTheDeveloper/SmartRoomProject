@@ -15,6 +15,7 @@ export type DataType = [
 export const AppdataContext = createContext<any | null>(null);
 
 // TODO: fix this claster-fuck :)
+// TODO: use appdata service.ts
 function AppdataProvider({ children }: Props) {
     const [appdata, setAppdata] = useState(Object);
 

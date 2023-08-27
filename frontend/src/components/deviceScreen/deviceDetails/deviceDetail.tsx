@@ -11,12 +11,12 @@ function DeviceDetails(props: any) {
     let details = <></>
     let deviceName = "a"
 
+    // TODO: swap this to use appdata service
     function findDeviceByUUID(deviceId: string) {
         if (!appdata) {
             return 
         }
-        // return appdata
-        // TODO: fix this
+        // TODO: take a look at this
         if (!appdata.deviceList) {
             return 
         }

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 
 import styles from './TaskListItem.module.css'
 import { Settings, DeleteForever } from '@mui/icons-material';
-import SwitchButton from '../switchButton';
+import SwitchButton from '../../switchButton';
 
 function TaskListItem(props: any) {
     const [isClicked, setIsClicked] = useState(false);
 
-    function onButtonStateChange(e: React.MouseEvent<HTMLInputElement>) {
+    function onButtonStateChange(e: React.ChangeEvent<HTMLInputElement>) {
         setIsClicked(!isClicked)
     }
 

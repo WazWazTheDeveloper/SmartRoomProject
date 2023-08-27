@@ -1,8 +1,6 @@
-import React, { createContext, useState, useEffect} from 'react';
-import { useApi } from '../../hooks/useApi';
+import React, { createContext, useState, useEffect } from 'react';
 import { ApiService } from '../../services/apiService';
 import jwt_decode from "jwt-decode";
-// const jwt_decode = require('jwt-decode');
 
 type Props = {
     children: JSX.Element
@@ -27,17 +25,21 @@ export const AuthContext = createContext<ContextType | null>(null);
 
 // TODO: fix this claster-fuck :)
 function AuthProvider({ children }: Props) {
-    const [token, setToken] = useState("-1");
+    const [token, setToken] = useState("");
     const [userName, setUserName] = useState("");
     const [permission, setPermission] = useState<Array<string>>([]);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState('');
-    const [dataLogin, isLoadingLogin, isErrorLogin, errorLogin, fetchLogin, refreshToken] = useApi('/auth/', ApiService.REQUEST_POST);
-    const [dataLogout, isLoadingLogout, isErrorLogout, errorLogout, fetchLogout] = useApi('/auth/logout', ApiService.REQUEST_POST);
-    const [dataSignup, isLoadingSignup, isErrorSignup, errorSignup, fetchSignup] = useApi('/auth/signup', ApiService.REQUEST_POST);
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [data, setData] = useState({});
+    // DEL
+    // const [dataLogin, isLoadingLogin, isErrorLogin, errorLogin, fetchLogin, refreshToken] = useApi('/auth/', ApiService.REQUEST_POST);
+    // const [dataLogout, isLoadingLogout, isErrorLogout, errorLogout, fetchLogout] = useApi('/auth/logout', ApiService.REQUEST_POST);
+    // const [dataSignup, isLoadingSignup, isErrorSignup, errorSignup, fetchSignup] = useApi('/auth/signup', ApiService.REQUEST_POST);
 
     useEffect(() => {
-        if (token == "-1") {
+        if (token == "") {
             refreshToken()
         }
     }, [])
@@ -47,14 +49,9 @@ function AuthProvider({ children }: Props) {
     }, [token])
 
     useEffect(() => {
-        if (!isLoadingSignup) {
-            if (isErrorSignup) {
-                setIsError(true)
-                setError(errorSignup)
-                console.log((errorSignup as any))
-            }
-            else {
-                let token = (dataSignup as any).accessToken
+        if (!isLoading) {
+            if (!isError) {
+                let token = (data as any).accessToken
                 if (token) {
                     let decoded: any = jwt_decode(token)
                     setToken(token)
@@ -63,46 +60,76 @@ function AuthProvider({ children }: Props) {
                     setIsError(false)
                     setError("")
                 }
-            }
-        }
-    }, [isLoadingSignup, isErrorSignup, errorSignup])
-
-
-    useEffect(() => {
-        if (!isLoadingLogin) {
-            if (isErrorLogin) {
-                setIsError(true)
-                setError(errorLogin)
-                console.log((errorLogin as any))
-            }
-            else {
-                let token = (dataLogin as any).accessToken
-                if (token) {
-                    let decoded: any = jwt_decode(token)
-                    setToken(token)
-                    setUserName(decoded.userInfo.username)
-                    setPermission(decoded.userInfo.permission)
+                else {
+                    setToken("")
+                    setUserName("")
+                    setPermission([])
                     setIsError(false)
                     setError("")
                 }
             }
         }
-    }, [isLoadingLogin, isErrorLogin, errorLogin])
+    }, [isLoading, isError])
 
-    useEffect(() => {
-        if (!isLoadingLogout) {
-            if (isErrorLogout) {
-                console.log((errorLogin as any))
+    const refreshToken = async (): Promise<void> => {
+        setIsLoading(true);
+        setData({});
+        setIsError(false);
+        setError("");
+        let response = await ApiService.refreshToken()
+        if (response) {
+            if (response.status === 403) {
+                console.log("yeet")
+                // refreshResponse.body.message = "Your login has expired. "
+                setIsLoading(false);
+                setIsError(true);
+                setError("Your login has expired. ")
             }
-            else {
-                setToken("-1")
-                setUserName("")
-                setPermission([])
-                setIsError(false)
-                setError("")
+            if (response.status === 200) {
+                let dataJson = await response.json()
+                setIsLoading(false);
+                setData(dataJson)
             }
         }
-    }, [isLoadingLogout, isErrorLogout, errorLogout])
+    }
+
+
+    // DEL
+    // useEffect(() => {
+    //     if (!isLoadingLogin) {
+    //         if (isErrorLogin) {
+    //             setIsError(true)
+    //             setError(errorLogin)
+    //             console.log((errorLogin as any))
+    //         }
+    //         else {
+    //             let token = (dataLogin as any).accessToken
+    //             if (token) {
+    //                 let decoded: any = jwt_decode(token)
+    //                 setToken(token)
+    //                 setUserName(decoded.userInfo.username)
+    //                 setPermission(decoded.userInfo.permission)
+    //                 setIsError(false)
+    //                 setError("")
+    //             }
+    //         }
+    //     }
+    // }, [isLoadingLogin, isErrorLogin, errorLogin])
+
+    // useEffect(() => {
+    //     if (!isLoadingLogout) {
+    //         if (isErrorLogout) {
+    //             console.log((errorLogin as any))
+    //         }
+    //         else {
+    //             setToken("")
+    //             setUserName("")
+    //             setPermission([])
+    //             setIsError(false)
+    //             setError("")
+    //         }
+    //     }
+    // }, [isLoadingLogout, isErrorLogout, errorLogout])
 
     const updateUserData = (newUserData: UserDataType) => {
         setToken(newUserData.token)
@@ -115,13 +142,13 @@ function AuthProvider({ children }: Props) {
             username: username,
             password: password
         }
-        fetchLogin(token, body)
+        fetch('/auth/', ApiService.REQUEST_POST)
     }
 
     const logout = () => {
         let body = {
         }
-        fetchLogout(token, body)
+        fetch('/auth/logout', ApiService.REQUEST_POST)
     }
 
     const signup = (username: string, password: string) => {
@@ -129,7 +156,32 @@ function AuthProvider({ children }: Props) {
             username: username,
             password: password
         }
-        fetchSignup(token, body)
+        fetch('/auth/signup', ApiService.REQUEST_POST)
+    }
+
+
+    const fetch = async (relativPath: string, metod: string) => {
+        setIsLoading(true);
+        setData({})
+        setIsError(false);
+        setError("");
+        let response = await ApiService.basicHttpRequest(relativPath, metod, "", {})
+        if (response) {
+            if (response.status === 200) {
+                let dataJson = await response.json()
+                setIsLoading(false);
+                setData(dataJson)
+            }
+            else if (response.status === 403) {
+                setIsLoading(false);
+                setIsError(true);
+                setError("Your login has expired. ")
+            } else if (response.status === 204) {
+                setIsLoading(false);
+                setIsError(false);
+                setData("no data")
+            }
+        }
     }
 
     let userdata: UserDataType = {

@@ -6,7 +6,6 @@ import { StringMappingType } from 'typescript';
 import { AuthContext, ContextType} from '../../providers/authProvider';
 import { useAuth } from '../../../hooks/useAuth';
 
-// TODO: finalize this
 interface Data {
   isConnected: boolean
   deviceName: string

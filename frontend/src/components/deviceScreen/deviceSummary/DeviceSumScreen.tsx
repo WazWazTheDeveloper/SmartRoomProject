@@ -3,22 +3,25 @@ import styles from './DeviceSumScreen.module.css'
 import DeviceSumContainer from './DeviceSumContainer';
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import DeviceDetailsContainer from '../deviceDetails/deviceDetailContainer';
+import { useAppdata } from '../../../hooks/useAppdata';
 
 // TODO: add type
 interface props {
 
 }
-function DeviceListScreen(props: any) {
+function DeviceListScreen() {
+  const appdata = useAppdata();
   const navigate = useNavigate();
   let _deviceList = [];
 
-    if (Object.keys(props.appdata).length != 0) {
+//   TODO: undo this cluster fuck of code :)
+    if (Object.keys(appdata).length != 0) {
         let count = 0;
         _deviceList = [];
         //   @ts-ignore
-        for (let index = 0; index < props.appdata.deviceList.length; index++) {
+        for (let index = 0; index < appdata.deviceList.length; index++) {
             // @ts-ignore
-            const device = props.appdata.deviceList[index];
+            const device = appdata.deviceList[index];
             //@ts-ignore
             for (let index2 = 0; index2 < device.deviceData.length; index2++) {
                 //@ts-ignore

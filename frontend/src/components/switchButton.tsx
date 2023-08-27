@@ -3,7 +3,7 @@ import styles from './switchButton.module.css'
 
 type props = {
     state :boolean
-    stateChangeFunction : React.MouseEventHandler<HTMLInputElement>
+    stateChangeFunction : React.ChangeEventHandler<HTMLInputElement>
 }
 
 function SwitchButton(props: props) {
@@ -12,7 +12,7 @@ function SwitchButton(props: props) {
 
     return (
         <label className={styles.switch}>
-            <input checked={props.state} type="checkbox" onClick={props.stateChangeFunction} />
+            <input checked={props.state} type="checkbox" onChange={props.stateChangeFunction} />
             <div className={styles.slider}>
                 <div className={styles.circle}>
                     <svg className={styles.cross} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 365.696 365.696" y="0" x="0" height="6" width="6" version="1.1">

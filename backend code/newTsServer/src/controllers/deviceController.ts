@@ -48,7 +48,7 @@ const getData = async (req: Request, res: Response) => {
     // try {
     let device: Device = appdata.getDeviceById(uuidString);
     res.status(200);
-    // TODO: add device at to queery
+    // TODO: add "dataAt" to queery
     let data = device.getAsJsonForArduino(0)
     res.json({
         data: data
@@ -71,7 +71,7 @@ const getTopic = async (req: Request, res: Response) => {
     let uuidString = String(uuid)
 
     res.setHeader("Content-Type", "application/json");
-    // TODO: add try as deviceType can be somting non existent
+    // TODO: add try-catch as deviceType can be somting non existent
     let device: Device = appdata.getDeviceById(uuidString);
     let pubSubData = {
         topicPath: device.getTopicPath(),

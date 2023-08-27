@@ -6,7 +6,7 @@ const useAuth = () => {
 
     if (!currentAuthContext) {
         throw new Error(
-            "useCurrentUser has to be used within <CurrentUserContext.Provider>"
+            "useAuth has to be used within <AuthContext.Provider>"
         );
     }
 

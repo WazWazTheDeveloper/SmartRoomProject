@@ -1,65 +1,87 @@
 import { useState } from "react";
 import { ApiService } from "../services/apiService";
-
-// function useApi(_token: string) {
-//     const [token, setToken] = useState(_token);
-//     const [isLoading, setIsLoading] = useState(true);
-//     const [isSuccess, setIsSuccess] = useState(false);
-//     const [isError, setIsError] = useState(false);
-//     const [error, setError] = useState("");
-    
-//     let url = "";
-//     useEffect(() => {
-//         fetch(url, {
-//             method: "POST", // *GET, POST, PUT, DELETE, etc.
-//             credentials: "include", // include, *same-origin, omit
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "authorization" : token
-//                 // 'Content-Type': 'application/x-www-form-urlencoded',
-//             },
-//             // body: JSON.stringify(data), // body data type must match "Content-Type" header
-//         }).then((res:Response) => {
-
-//         }).catch((error) => {
-
-//         })
-//     }, [])
-// }
+import { useAuth } from "./useAuth";
 
 const useApi = (relativPath: string, metod: string) => {
-    // const currentAuthContext = useContext(ApiContext);
-
-    // if (!currentAuthContext) {
-    //     throw new Error(
-    //         "useCurrentUser has to be used within <CurrentUserContext.Provider>"
-    //     );
-    // }
-
-    // return currentAuthContext;
 
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({});
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState("");
+    const [userdata, login, logout, signup, updateUserData, authIsError, authError] = useAuth();
 
-    const fetch = async(token: string, payload: {} = {}) => {
+    const fetchWithReauth = async (token: string, payload: {} = {}) => {
         setIsLoading(true);
         setData({})
         setIsError(false);
         setError("");
-        let response = await ApiService.basicHttpRequest(relativPath,metod,token,payload)
+        let response = await ApiService.basicHttpRequest(relativPath, metod, token, payload)
         if (response) {
             if (response.status === 200) {
                 let dataJson = await response.json()
                 setIsLoading(false);
                 setData(dataJson)
             }
-            else if(response.status === 403) {
+            else if (response.status === 403) {
+                let refreshResponse = await ApiService.refreshToken()
+                if (refreshResponse) {
+                    if (refreshResponse.status === 200) {
+                        let dataJson = await refreshResponse.json()
+                        updateUserData(dataJson)
+
+                        let response = await ApiService.basicHttpRequest(relativPath, metod, dataJson.token, payload)
+                        if (response) {
+                            if (response.status === 200) {
+                                let dataJson = await response.json()
+                                setIsLoading(false);
+                                setData(dataJson)
+                            }
+                            else if (response.status === 403) {
+                                setIsLoading(false);
+                                setIsError(true);
+                                setError("Your login has expired. ")
+                            } else if (response.status === 204) {
+                                setIsLoading(false);
+                                setIsError(false);
+                                setData("no data")
+                            }
+                        }
+                    }
+                    else if (refreshResponse.status === 403) {
+                        setIsLoading(false);
+                        setIsError(true);
+                        setError("Your login has expired. ")
+                    } else if (refreshResponse.status === 204) {
+                        setIsLoading(false);
+                        setIsError(false);
+                        setData("no data")
+                    }
+                }
+            } else if (response.status === 204) {
+                setIsLoading(false);
+                setIsError(false);
+                setData("no data")
+            }
+        }
+    }
+
+    const fetch = async (token: string, payload: {} = {}) => {
+        setIsLoading(true);
+        setData({})
+        setIsError(false);
+        setError("");
+        let response = await ApiService.basicHttpRequest(relativPath, metod, token, payload)
+        if (response) {
+            if (response.status === 200) {
+                let dataJson = await response.json()
+                setIsLoading(false);
+                setData(dataJson)
+            }
+            else if (response.status === 403) {
                 setIsLoading(false);
                 setIsError(true);
                 setError("Your login has expired. ")
-            }else if(response.status === 204) {
+            } else if (response.status === 204) {
                 setIsLoading(false);
                 setIsError(false);
                 setData("no data")
@@ -89,7 +111,7 @@ const useApi = (relativPath: string, metod: string) => {
         }
     }
 
-    return [data, isLoading, isError, error,fetch,refreshToken] as const
+    return [data, isLoading, isError, error, fetchWithReauth, refreshToken] as const
 };
 
 export { useApi }

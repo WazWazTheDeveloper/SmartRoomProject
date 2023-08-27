@@ -52,7 +52,7 @@ interface props {
 function DeviceAcDataDetail(props: props) {
     const deviceData = props.data
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetch, refreshToken] = useApi("/device/update_device", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/device/update_device", ApiService.REQUEST_POST);
     const [isOn, setIsOn] = useState(deviceData.isOn as boolean);
     const [temp, setTemp] = useState(deviceData.temp);
     const [tempCommit, setTempCommit] = useState(false);
@@ -84,7 +84,7 @@ function DeviceAcDataDetail(props: props) {
                 isHealth: isHealth,
             }
         }
-        fetch(userdata.token, body)
+        fetchWithReauth(userdata.token, body)
     },[isOn,tempCommit,mode,speed,swing1,swing2,timer,isStrong,isFeeling,isSleep,isHealth])
 
      function sendUpdateToServer() {
@@ -105,28 +105,28 @@ function DeviceAcDataDetail(props: props) {
                 isHealth: isHealth,
             }
         }
-        fetch(userdata.token, body)
+        fetchWithReauth(userdata.token, body)
     }
 
-    function onButtonStateChange(e: React.MouseEvent<HTMLElement>) {
+    function onButtonStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsOn(!isOn)
     }
-    function onSwing1StateChange(e: React.MouseEvent<HTMLElement>) {
+    function onSwing1StateChange(e: React.ChangeEvent<HTMLElement>) {
         setSwing1(!swing1)
     }
-    function onSwing2StateChange(e: React.MouseEvent<HTMLElement>) {
+    function onSwing2StateChange(e: React.ChangeEvent<HTMLElement>) {
         setSwing2(!swing2)
     }
     function onIsStrongStateChange(e: React.MouseEvent<HTMLElement>) {
         setIsStrong(!isStrong)
     }
-    function onIsFeelingStateChange(e: React.MouseEvent<HTMLElement>) {
+    function onIsFeelingStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsFeeling(!isFeeling)
     }
-    function onIsSleepStateChange(e: React.MouseEvent<HTMLElement>) {
+    function onIsSleepStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsSleep(!isSleep)
     }
-    function onIsHealthStateChange(e: React.MouseEvent<HTMLElement>) {
+    function onIsHealthStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsHealth(!isHealth)
     }
     function onTempCommitStateChange(event: React.SyntheticEvent | Event, newValue: number | Array<number>) {
