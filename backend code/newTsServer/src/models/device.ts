@@ -233,7 +233,6 @@ class Device {
     }
 
     async setData(dataAt: number, newContent: any) {
-        console.log("asdaaaa")
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
             event: AppData.ON_DATA_CHANGE,

@@ -27,9 +27,9 @@ const useApi = (relativPath: string, metod: string) => {
                 if (refreshResponse) {
                     if (refreshResponse.status === 200) {
                         let dataJson = await refreshResponse.json()
-                        updateUserData(dataJson)
+                        updateUserData(dataJson.accessToken)
 
-                        let response = await ApiService.basicHttpRequest(relativPath, metod, dataJson.token, payload)
+                        let response = await ApiService.basicHttpRequest(relativPath, metod, dataJson.accessToken, payload)
                         if (response) {
                             if (response.status === 200) {
                                 let dataJson = await response.json()

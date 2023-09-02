@@ -15,6 +15,7 @@ interface callback {
 
 class AppData {
     //on change listeners
+    // TODO: take a look at the listeners
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
     public static readonly ON_DEVICE_DATA_CHANGE = "deviceDataChange";
     public static readonly ON_DATA_CHANGE = "dataChange";
@@ -71,11 +72,11 @@ class AppData {
             }
 
             appDataInstance = newAppDataInstance;
-            Task.initDeviceList(devices)
+            Task.initDeviceList(devices);
 
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
-                appDataInstance.on(this.ON_DEVICE_DATA_CHANGE, task.onUpdateData);
+                appDataInstance.on(this.ON_DATA_CHANGE, task.onUpdateData.bind(task));
             }
         }
     }
@@ -198,8 +199,9 @@ class AppData {
         this.generalData.addTask(taskId)
         this.taskList.push(task)
 
-        appDataInstance.on(AppData.ON_DEVICE_DATA_CHANGE, task.onUpdateData);
+        appDataInstance.on(AppData.ON_DATA_CHANGE, task.onUpdateData.bind(task));
 
+        // TODO: add triggerCall
         console.log("Created new task: " + task.taskName)
     }
     async removeTask(taskId: string) {
@@ -228,9 +230,7 @@ class AppData {
         throw new Error("task not found: " + taskId)
     }
 
-    public getDeviceById(deviceId: string): Device {
-        // console.log(this.deviceList)
-        
+    public getDeviceById(deviceId: string): Device {        
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
             if (device.getUUID() == deviceId) {

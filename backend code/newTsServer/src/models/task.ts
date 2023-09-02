@@ -151,6 +151,21 @@ class Task implements TaskType {
         return dataJson;
     }
 
+    async updateData(newData: TaskType) {
+        if (newData.taskName != undefined) {
+            this.taskName = newData.taskName
+        }
+        if (newData.isOn != undefined) {
+            this.setIsOn(newData.isOn)
+        }
+        if (newData.isRepeating != undefined) {
+            this.isRepeating = newData.isRepeating
+        }
+        // todo: add more to this
+
+        await this.saveData();
+    }
+
     async saveData(): Promise<void> {
         let dataJson: TaskType = this.getAsJson()
 
@@ -212,6 +227,7 @@ class Task implements TaskType {
             return
         }
 
+        // console.log(this);
         let isAllTrue = true;
         for (let index = 0; index < this.varCheckList.length; index++) {
             const varCheck = this.varCheckList[index];
@@ -238,9 +254,18 @@ class Task implements TaskType {
         }
 
         if (isAllTrue) {
+            //resetting part
+            if (!this.isRepeating) {
+                this.isOn = false;
+                this.stopAllTimedTasks();
+            }
+
+            this.setAllTimerCheck(false);
+
             // update part 
             for (let index = 0; index < this.toDoTaskList.length; index++) {
                 const task = this.toDoTaskList[index];
+                console.log(task)
                 let device = this.getDeviceFromId(task.deviceId);
                 // -1 means for change the device itself
                 if (task.dataAt == -1) {
@@ -251,14 +276,6 @@ class Task implements TaskType {
             }
 
             this.callbackOnComplate();
-
-            //resetting part
-            if (!this.isRepeating) {
-                this.isOn = false;
-                this.stopAllTimedTasks();
-            }
-
-            this.setAllTimerCheck(false);
 
             console.log("task: '" + this.taskName + "' executed")
         }
@@ -317,6 +334,7 @@ class Task implements TaskType {
         throw new Error("device not found")
     }
 
+    // TODO: add trigger update
     async addVarCheck(deviceId: string, dataIndex: number, varName: string, checkType: number, valueToCompareTo: any): Promise<void> {
         let newVarCheck = new VarCheck(deviceId, dataIndex, varName, checkType, valueToCompareTo, false);
         this.varCheckList.push(newVarCheck);
@@ -325,7 +343,7 @@ class Task implements TaskType {
     }
 
     async removeVarCheck(indexOfVarCheck: number): Promise<void> {
-        this.varCheckList.slice(indexOfVarCheck, 1);
+        this.varCheckList.splice(indexOfVarCheck, 1);
         await this.saveData()
         this.onUpdateData()
     }
@@ -338,13 +356,12 @@ class Task implements TaskType {
     }
 
     async removeTodoTask(indexOfTodoTask: number): Promise<void> {
-        this.toDoTaskList.slice(indexOfTodoTask, 1);
+        this.toDoTaskList.splice(indexOfTodoTask, 1);
         await this.saveData()
         this.onUpdateData()
     }
 
     async emptyTodoTask(): Promise<void> {
-        console.log("imhere")
         this.toDoTaskList.splice(0, this.toDoTaskList.length);
         await this.saveData()
         this.onUpdateData()
@@ -359,9 +376,9 @@ class Task implements TaskType {
     }
 
     async removeTimedCheck(indexOfTimedCheck: number): Promise<void> {
-        this.timedCheckList.slice(indexOfTimedCheck, 1);
+        this.timedCheckList.splice(indexOfTimedCheck, 1);
         this.timedTasks[indexOfTimedCheck].stop();
-        this.timedTasks.slice(indexOfTimedCheck, 1);
+        this.timedTasks.splice(indexOfTimedCheck, 1);
         await this.saveData()
         // this.onUpdateData()
     }
@@ -370,7 +387,7 @@ class Task implements TaskType {
         this.callbackOnComplate = callback;
     }
     removeCallbackOnComplate(callback: Function): void {
-        this.callbackOnComplate = () => {};
+        this.callbackOnComplate = () => { };
     }
 
     async setIsOn(isOn: boolean) {
@@ -413,4 +430,4 @@ class Task implements TaskType {
     }
 }
 
-export {Task}
+export { Task }

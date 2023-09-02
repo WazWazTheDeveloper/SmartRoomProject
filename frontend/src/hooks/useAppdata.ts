@@ -6,9 +6,8 @@ const useAppdata = () => {
 
     if (!currentAuthContext) {
         throw new Error(
-            "useCurrentUser has to be used within <CurrentUserContext.Provider>"
+            "useAppdata has to be used within <AppdataContext.Provider>"
         );
-        return
     }
     return currentAuthContext;
 };

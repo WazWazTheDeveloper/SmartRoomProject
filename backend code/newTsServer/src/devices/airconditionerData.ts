@@ -298,7 +298,6 @@ class AirconditionerData implements IDeviceData {
 
     setData(newData : any) {
         let keys: Array<string> = Object.keys(newData)
-
         keys.forEach(key => {
             let newVal = JSON.parse(JSON.stringify(newData))[key]
             try {

@@ -6,39 +6,22 @@ import { useAppdata } from '../../../hooks/useAppdata';
 
 
 function DeviceDetails(props: any) {
-    const appdata = useAppdata()
+    const [appdata, isAppdata] = useAppdata()
     const params = useParams();
+
     let details = <></>
-    let deviceName = "a"
+    let deviceName = ""
 
-    // TODO: swap this to use appdata service
-    function findDeviceByUUID(deviceId: string) {
-        if (!appdata) {
-            return 
-        }
-        // TODO: take a look at this
-        if (!appdata.deviceList) {
-            return 
-        }
-        for (let index = 0; index < appdata.deviceList.length; index++) {
-            const device = appdata.deviceList[index];
-            if (device.uuid == deviceId) {
-                return device
-            }
-        }
-        throw new Error("device not found")
-    }
-    
-    if(appdata) {
-        if(appdata.deviceList) {
-            let device = findDeviceByUUID(String(params.id))
-        details = <DeviceAcDataDetail
-            targetDevice={String(params.id)}
-            dataAt={Number(params.dataat)}
-            data={device.deviceData[Number(params.dataat)].data}
-        />
+    if (isAppdata) {
+        let device = appdata.getDeviceByUUID(String(params.id))
+        if (device) {
+            details = <DeviceAcDataDetail
+                targetDevice={String(params.id)}
+                dataAt={Number(params.dataat)}
+                data={device.deviceData[Number(params.dataat)].data}
+            />
 
-        deviceName = device.deviceName;
+            deviceName = device.deviceName;
         }
     }
 

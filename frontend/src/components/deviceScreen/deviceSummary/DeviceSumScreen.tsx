@@ -10,21 +10,17 @@ interface props {
 
 }
 function DeviceListScreen() {
-  const appdata = useAppdata();
+  const [appdata, isAppdata] = useAppdata();
   const navigate = useNavigate();
   let _deviceList = [];
 
 //   TODO: undo this cluster fuck of code :)
-    if (Object.keys(appdata).length != 0) {
+    if (isAppdata) {
         let count = 0;
         _deviceList = [];
-        //   @ts-ignore
-        for (let index = 0; index < appdata.deviceList.length; index++) {
-            // @ts-ignore
-            const device = appdata.deviceList[index];
-            //@ts-ignore
+        for (let index = 0; index < appdata.getDeviceList().length; index++) {
+            const device = appdata.getDeviceList()[index];
             for (let index2 = 0; index2 < device.deviceData.length; index2++) {
-                //@ts-ignore
                 const data = device.deviceData[index2];
                 let element =
                     <div className={styles.device_sum_warper}>

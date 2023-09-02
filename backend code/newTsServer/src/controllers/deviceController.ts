@@ -91,7 +91,7 @@ const test = async (req: Request, res: Response) => {
     // check if deviceType is array of numbers
     for (let index = 0; index < deviceType.length; index++) {
         const element = deviceType[index];
-        if(isNaN(element)) {
+        if (isNaN(element)) {
             res.status(400);
             res.send();
             return;
@@ -99,13 +99,13 @@ const test = async (req: Request, res: Response) => {
 
     }
 
-    try{
+    try {
         await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
         let newDevice: Device = appdata.getDeviceById(newUUID);
         res.status(200);
         WebSocketServerHandler.updateAppdata();
         res.send(newUUID);
-    }catch(err) {
+    } catch (err) {
         res.status(400);
         res.send();
         return;
@@ -116,31 +116,24 @@ const test = async (req: Request, res: Response) => {
 }
 
 const update_device = async (req: Request, res: Response) => {
-    const {dataAt,data,targetDevice} = req.body;
-        // console.log("asdasdasd")
-        console.log(data)
-    // console.log(!data)
-    // console.log(!targetDevice)
+    const { dataAt, data, targetDevice } = req.body;
     if ((!dataAt && dataAt !== 0) || !data || !targetDevice) {
         res.status(400).json('invalid data')
         return
     }
-    
+
     let appdata = await AppData.getAppDataInstance()
 
     let foundDevice: Device;
     try {
         foundDevice = await appdata.getDeviceById(targetDevice);
-    }catch(err) {
+    } catch (err) {
         res.status(401).json('Device does not exist')
         return
     }
-    
-    await foundDevice.setData(dataAt,data)
-    
-    console.log("data")
+
+    await foundDevice.setData(dataAt, data)
 
     res.status(200).json('success')
-
 }
-export { createNewDevice, getData, getTopic, test ,update_device}
+export { createNewDevice, getData, getTopic, test, update_device }

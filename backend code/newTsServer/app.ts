@@ -7,6 +7,7 @@ import { MqttClient } from './src/mqtt_client';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
 import { AppdataEvent } from './src/interfaces/appData.interface';
 import { DataPacket } from './src/models/dataPacket';
+import { updateWebSocket } from './src/middleware/updateWebSocket';
 const cookieParser = require('cookie-parser')
 
 
@@ -14,6 +15,9 @@ const app: express.Application = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
+
+app.use(updateWebSocket)
+
 app.use('/', router);
 
 async function startServer(): Promise<void> {
@@ -57,7 +61,6 @@ async function setup(): Promise<void> {
   });
 
   appData.on(AppData.ON_DATA_CHANGE, async (eventData: AppdataEvent) => {
-    console.log("asd")
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
     let device = appData.getDeviceById(eventData.deviceUUID)

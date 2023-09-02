@@ -1,14 +1,38 @@
 import React from 'react';
 import TaskListItem from './TaskListItem';
 import styles from './TaskListContainer.module.css'
-import {Add} from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
+import { useAppdata } from '../../../hooks/useAppdata';
+import { ReactJSXElement } from '@emotion/react/types/jsx-namespace';
+import { useApi } from '../../../hooks/useApi';
+import { ApiService } from '../../../services/apiService';
+import { useAuth } from '../../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 function TaskListContainer(props: any) {
+    const [appdata, isAppdata] = useAppdata()
+    const [userdata] = useAuth();
+    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/create-task", ApiService.REQUEST_POST);
+
+    let _taskList:ReactJSXElement[] = [];
+    if (isAppdata) {
+        _taskList = [];
+        let taskList = appdata.getTaskList()
+        for (let index = 0; index < taskList.length; index++) {
+            const taskId = taskList[index].taskId;
+            _taskList.push(<TaskListItem taskId={taskId}/>)
+        }
+    }
+
+    function onAddClick (e:React.MouseEvent<HTMLElement>) {
+        fetchWithReauth(userdata.token);
+    }
+
     return (
         <div className={styles.task_container}>
             <div className={styles.container_item}>
                 <div className={styles.task_bar_container}>
-                    <div className={styles.icon_warper}>
+                    <div className={styles.icon_warper} onClick={onAddClick}>
                         <Add className={styles.icon}/>
                     </div>
                 </div>
@@ -16,15 +40,7 @@ function TaskListContainer(props: any) {
 
             <div className={styles.container_item}>
                 <div className={styles.task_list}>
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
-                    <TaskListItem />
+                    {_taskList}
                 </div>
             </div>
         </div>

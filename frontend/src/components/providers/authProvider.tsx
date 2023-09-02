@@ -131,10 +131,11 @@ function AuthProvider({ children }: Props) {
     //     }
     // }, [isLoadingLogout, isErrorLogout, errorLogout])
 
-    const updateUserData = (newUserData: UserDataType) => {
-        setToken(newUserData.token)
-        setUserName(newUserData.userName)
-        setPermission(newUserData.permission)
+    const updateUserData = (newToken:string) => {
+        let decoded: any = jwt_decode(newToken)
+        setToken(newToken)
+        setUserName(decoded.userName)
+        setPermission(decoded.permission)
     }
 
     const login = (username: string, password: string) => {
@@ -142,7 +143,7 @@ function AuthProvider({ children }: Props) {
             username: username,
             password: password
         }
-        fetch('/auth/', ApiService.REQUEST_POST)
+        fetch('/auth/', ApiService.REQUEST_POST,body)
     }
 
     const logout = () => {
@@ -156,16 +157,17 @@ function AuthProvider({ children }: Props) {
             username: username,
             password: password
         }
-        fetch('/auth/signup', ApiService.REQUEST_POST)
+        fetch('/auth/signup', ApiService.REQUEST_POST,body)
     }
 
 
-    const fetch = async (relativPath: string, metod: string) => {
+    const fetch = async (relativPath: string, metod: string, payload = {}) => {
         setIsLoading(true);
         setData({})
         setIsError(false);
         setError("");
-        let response = await ApiService.basicHttpRequest(relativPath, metod, "", {})
+        console.log(payload)
+        let response = await ApiService.basicHttpRequest(relativPath, metod, "", payload)
         if (response) {
             if (response.status === 200) {
                 let dataJson = await response.json()
