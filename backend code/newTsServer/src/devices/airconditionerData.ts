@@ -44,43 +44,43 @@ class AirconditionerData implements IDeviceData {
         isScreen?: Boolean,
         isHealth?: Boolean) {
 
-        if (isOn) {
+        if (typeof isOn !== 'undefined') {
             this.isOn = isOn
         }
         else {
             this.isOn = false
         }
-        if (temp) {
+        if (typeof temp !== 'undefined') {
             this.temp = temp
         }
         else {
             this.temp = 24
         }
-        if (mode) {
+        if (typeof mode !== 'undefined') {
             this.mode = mode
         }
         else {
             this.mode = this.MODE_AUTO
         }
-        if (speed) {
+        if (typeof speed !== 'undefined') {
             this.speed = speed
         }
         else {
             this.speed = this.SPEED_AUTO
         }
-        if (swing1) {
+        if (typeof swing1 !== 'undefined') {
             this.swing1 = swing1
         }
         else {
             this.swing1 = false
         }
-        if (swing2) {
+        if (typeof swing2 !== 'undefined') {
             this.swing2 = swing2
         }
         else {
             this.swing2 = false
         }
-        if (timer) {
+        if (typeof timer !== 'undefined') {
             this.timer = timer
             // this.fullhours = 0
             // this.isHalfHour = false
@@ -90,7 +90,7 @@ class AirconditionerData implements IDeviceData {
             // this.fullhours = 0
             // this.isHalfHour = false
         }
-        if (isStrong) {
+        if (typeof isStrong !== 'undefined') {
             this.isStrong = isStrong
 
         }
@@ -98,7 +98,7 @@ class AirconditionerData implements IDeviceData {
             this.isStrong = false
 
         }
-        if (isFeeling) {
+        if (typeof isFeeling !== 'undefined') {
             this.isFeeling = isFeeling
 
         }
@@ -106,7 +106,7 @@ class AirconditionerData implements IDeviceData {
             this.isFeeling = false
 
         }
-        if (isSleep) {
+        if (typeof isSleep !== 'undefined') {
             this.isSleep = isSleep
 
         }
@@ -114,7 +114,7 @@ class AirconditionerData implements IDeviceData {
             this.isSleep = false
 
         }
-        if (isScreen) {
+        if (typeof isScreen !== 'undefined') {
             this.isScreen = isScreen
 
         }
@@ -122,7 +122,7 @@ class AirconditionerData implements IDeviceData {
             this.isScreen = true
 
         }
-        if (isHealth) {
+        if (typeof isHealth !== 'undefined') {
             this.isHealth = isHealth
 
         }

@@ -1,7 +1,7 @@
 import express = require('express');
 import bodyParser from 'body-parser';
 import { router } from './src/router';
-import { WebSocketServerHandler } from './src/handlers/WebSocketServerHandler';
+import { WebSocketServerHandler } from './src/handlers/webSocketServerHandler';
 import { AppData } from './src/appData';
 import { MqttClient } from './src/mqtt_client';
 import { CheckConnection } from './src/scheduledFunctions/checkConnection';
@@ -83,7 +83,6 @@ function startListeningToReqests(): void {
   server.on('upgrade', (req, socket, head) => {
     wbserver.handleUpgrade(req, socket, head, (ws) => {
       if (req.url == "/appdata/websocket") {
-        console.log("req.url")
         wbserver.emit('connection', ws, req)
       }
     })

@@ -1,5 +1,6 @@
 import * as data from '../handlers/file_handler'
 import { DeviceListItemType, GeneralDataType, GeneralTaskType, GeneralTopicType } from '../interfaces/generalData.interface';
+import { User } from './user';
 var GeneralDataInstance: GeneralData;
 
 class GeneralTask implements GeneralTaskType {
@@ -58,6 +59,66 @@ class GeneralData implements GeneralDataType {
             "taskList": this.taskList
         }
 
+        return json
+    }
+
+    // TODO: refactor 
+    public getAppdataOfUser(user: User) {
+        if (user.hasPermission("*")) {
+            return this.getAsJson();
+        }
+
+        let _deviceJson : DeviceListItem[] = []
+        let _taskJson : GeneralTask[] = []
+
+        if (user.hasPermission("device.*") ||
+        user.hasPermission("device.*.read") ||
+        user.hasPermission("device.*.edit") ||
+        user.hasPermission("device.*.delete")) {
+
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const device = this.deviceList[index];
+            _deviceJson = this.deviceList;
+        }
+    } else {
+        let permissions = user.getPermissions()
+        for (let index = 0; index < permissions.length; index++) {
+            const permission = permissions[index].name.split(".");
+            if (permission[0] == "device") {
+                const device_id = permission[1];
+                let device = this.getDeviceById(device_id);
+                _deviceJson.push(device)
+            }
+        }
+    }
+
+    if (user.hasPermission("task.*") ||
+        user.hasPermission("task.*.read") ||
+        user.hasPermission("task.*.edit") ||
+        user.hasPermission("task.*.delete")) {
+
+        for (let index = 0; index < this.taskList.length; index++) {
+            const task = this.taskList[index];
+            _taskJson = this.taskList
+        }
+    }
+    else {
+        let permissions = user.getPermissions()
+        for (let index = 0; index < permissions.length; index++) {
+            const permission = permissions[index].name.split(".");
+            if (permission[0] == "task") {
+                    const task_id = permission[1];
+                    let task = this.getTaskById(task_id);
+                    _taskJson.push(task)
+            }
+        }
+    }
+
+        let json = {
+            "topicList": this.topicList,
+            "deviceList": _deviceJson,
+            "taskList": _taskJson
+        }
         return json
     }
 
@@ -167,6 +228,26 @@ class GeneralData implements GeneralDataType {
         for (let index = 0; index < this.topicList.length; index++) {
             const element = this.topicList[index];
             if (element.topicName == topicName) {
+                return element
+            }
+        }
+        throw new Error("general topic not found")
+    }
+
+    getDeviceById(deviceID: string) {
+        for (let index = 0; index < this.deviceList.length; index++) {
+            const element = this.deviceList[index];
+            if (element.UUID == deviceID) {
+                return element
+            }
+        }
+        throw new Error("general topic not found")
+    }
+
+    getTaskById(taskID: string) {
+        for (let index = 0; index < this.taskList.length; index++) {
+            const element = this.taskList[index];
+            if (element.taskId == taskID) {
                 return element
             }
         }

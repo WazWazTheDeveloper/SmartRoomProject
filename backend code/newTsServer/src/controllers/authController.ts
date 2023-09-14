@@ -113,18 +113,15 @@ const refresh = (req: Request, res: Response) => {
 
 const logout = (req: Request, res: Response) => {
     const cookies = req.cookies
-    console.log(cookies)
-    // if (!cookies?.jwt) return res.sendStatus(204) //No content
+    if (!cookies?.jwt) return res.sendStatus(204) //No content
     res.clearCookie('jwt', { httpOnly: true, secure: false })
     res.json({ message: 'Cookie cleared' })
 }
 
 const signup = async (req: Request, res: Response) => {
     const { username, password } = req.body;
-    console.log(req.body)
     if (!username || !password) {
         res.status(400).json('All fields are required')
-        console.log(password)
         return
     }
 

@@ -106,6 +106,7 @@ interface TaskType {
 }
 
 class Task implements TaskType {
+    // TODO: add is visable property
     private static deviceList: Array<Device> = [];
     taskId: string
     taskName: string
@@ -358,7 +359,7 @@ class Task implements TaskType {
     async removeTodoTask(indexOfTodoTask: number): Promise<void> {
         this.toDoTaskList.splice(indexOfTodoTask, 1);
         await this.saveData()
-        this.onUpdateData()
+        this.onUpdateData();
     }
 
     async emptyTodoTask(): Promise<void> {
@@ -430,4 +431,4 @@ class Task implements TaskType {
     }
 }
 
-export { Task }
+export { Task , TaskType }

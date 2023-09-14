@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express"
-import { WebSocketServerHandler } from "../handlers/WebSocketServerHandler";
+import { WebSocketServerHandler } from "../handlers/webSocketServerHandler";
 import { v4 as uuidv4 } from 'uuid';
 import { AppData } from "../appData";
 import { Device } from "../models/device";

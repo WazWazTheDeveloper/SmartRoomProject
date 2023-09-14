@@ -2,7 +2,7 @@ import styles from './DeviceAcDataDetail.module.css'
 import { AcUnit, Air, AirlineSeatFlatAngled, DeviceThermostat, Dry, EmojiEmotions, FastForward, Favorite, HdrAuto, LocalFireDepartment, ModeFanOff, PowerSettingsNew, Swipe, SwipeVertical, Timer } from '@mui/icons-material';
 import SwitchButton from '../../../switchButton';
 import { Button, Slider } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useApi } from '../../../../hooks/useApi';
 import { ApiService } from '../../../../services/apiService';
@@ -141,6 +141,7 @@ function DeviceAcDataDetail(props: props) {
     function onSpeedStateChange(newMode: number) {
         setSpeed(newMode)
     }
+
 
     return (
         <>

@@ -131,7 +131,7 @@ class Device {
                 return _device;
             }
             // TODO: add device Types
-
+            
         }
     }
 

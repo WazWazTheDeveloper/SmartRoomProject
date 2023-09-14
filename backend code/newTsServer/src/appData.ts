@@ -1,9 +1,10 @@
 import { Device } from "./models/device";
 import { GeneralData, getGeneralDataInstance } from "./models/generalData";
 import { Task } from "./models/task";
-import { WebSocketServerHandler } from "./handlers/WebSocketServerHandler";
+import { WebSocketServerHandler } from "./handlers/webSocketServerHandler";
 import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";
+import { User } from "./models/user";
 
 var appDataInstance: AppData;
 
@@ -58,6 +59,82 @@ class AppData {
         return json
     }
 
+    public getAppdataOfUser(user: User) {
+        let taskJson = []
+        let deviceJson = []
+
+        if (user.hasPermission("*")) {
+            return this.getAsJson();
+        }
+
+        console.log(user.getPermissions())
+
+        if (user.hasPermission("device.*") ||
+            user.hasPermission("device.*.read") ||
+            user.hasPermission("device.*.edit") ||
+            user.hasPermission("device.*.delete")) {
+
+            for (let index = 0; index < this.deviceList.length; index++) {
+                const device = this.deviceList[index];
+                deviceJson.push(device.getAsJson())
+            }
+        } else {
+            let permissions = user.getPermissions()
+            for (let index = 0; index < permissions.length; index++) {
+                const permission = permissions[index].name.split(".");
+                if (permission[0] == "device") {
+                    const device_id = permission[1];
+                    let device = this.getDeviceById(device_id);
+                    deviceJson.push(device.getAsJson())
+                }
+            }
+        }
+        console.log("json0")
+
+        if (user.hasPermission("task.*") ||
+            user.hasPermission("task.*.read") ||
+            user.hasPermission("task.*.edit") ||
+            user.hasPermission("task.*.delete")) {
+
+            for (let index = 0; index < this.taskList.length; index++) {
+                const task = this.taskList[index];
+                taskJson.push(task.getAsJson())
+            }
+        }
+        else {
+            let permissions = user.getPermissions()
+            for (let index = 0; index < permissions.length; index++) {
+                const permission = permissions[index].name.split(".");
+                if (permission[0] == "task") {
+                    const task_id = permission[1];
+                    let task = this.getTaskById(task_id);
+                    // TODO: add check if task.isVisable()
+                    taskJson.push(task.getAsJson())
+                }
+            }
+        }
+        console.log("json1")
+
+        // for (let index = 0; index < this.taskList.length; index++) {
+        //     const task = this.taskList[index];
+        //     taskJson.push(task.getAsJson())
+        // }
+
+        // for (let index = 0; index < this.deviceList.length; index++) {
+        //     const device = this.deviceList[index];
+        //     deviceJson.push(device.getAsJson())
+        // }
+
+        let json = {
+            "taskList": taskJson,
+            "generalData": this.generalData.getAppdataOfUser(user),
+            "deviceList": deviceJson
+        }
+
+        console.log("json2")
+        return json;
+    }
+
     public static async init(): Promise<void> {
         if (!appDataInstance) {
             let generalData = await getGeneralDataInstance();
@@ -68,7 +145,7 @@ class AppData {
             for (let index = 0; index < newAppDataInstance.getDeviceList().length; index++) {
                 const device = newAppDataInstance.getDeviceList()[index];
                 device.setDallbackOnChange(newAppDataInstance.triggerCallbacks)
-                
+
             }
 
             appDataInstance = newAppDataInstance;
@@ -151,12 +228,12 @@ class AppData {
         console.log(`Created new device ${uuid}`)
 
 
-        let eventData : AppdataEvent = {
-            deviceUUID:newDevice.getUUID(),
+        let eventData: AppdataEvent = {
+            deviceUUID: newDevice.getUUID(),
             event: AppData.ON_DEVICE_ADDED,
-            dataType : -1,
-            dataAt : -1,
-            oldTopic : "",
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: "",
         }
 
         this.triggerCallbacks(eventData)
@@ -167,10 +244,10 @@ class AppData {
 
         let topic: string = ""
         //TODO: add type errr of stuff
-        try{
-            topic= this.getDeviceById(uuid).getTopicPath();
-        }catch(err) {
-            
+        try {
+            topic = this.getDeviceById(uuid).getTopicPath();
+        } catch (err) {
+
         }
 
         for (let i = this.deviceList.length - 1; i >= 0; i--) {
@@ -183,12 +260,12 @@ class AppData {
         removeFile(`devices/${uuid}`)
         console.log(`Removed device ${uuid} from appData`)
 
-        let eventData : AppdataEvent = {
-            deviceUUID:uuid,
+        let eventData: AppdataEvent = {
+            deviceUUID: uuid,
             event: AppData.ON_DEVICE_REMOVED,
-            dataType : -1,
-            dataAt : -1,
-            oldTopic : topic,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: topic,
         }
 
         this.triggerCallbacks(eventData)
@@ -230,7 +307,7 @@ class AppData {
         throw new Error("task not found: " + taskId)
     }
 
-    public getDeviceById(deviceId: string): Device {        
+    public getDeviceById(deviceId: string): Device {
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
             if (device.getUUID() == deviceId) {
@@ -267,7 +344,7 @@ class AppData {
 
     removeGeneralTopic(topicName: string): void {
         this.generalData.removeTopic(topicName);
-        console.log("removed generalTopic {TopicName: "+topicName+"}")
+        console.log("removed generalTopic {TopicName: " + topicName + "}")
     }
 
     triggerCallbacks(eventData: AppdataEvent): void {
@@ -301,19 +378,19 @@ class AppData {
         }
     }
 
-    updateDevice(receiver : string, dataType : number,dataAt : number, data: any) {
-        let device : Device
-        try{
+    updateDevice(receiver: string, dataType: number, dataAt: number, data: any) {
+        let device: Device
+        try {
             device = this.getDeviceById(receiver)
-        }catch(err) {
+        } catch (err) {
             return;
         }
-        if( dataType == -1) {
+        if (dataType == -1) {
             device.setDeviceData(data);
         }
         else {
-            if(device.getDeviceData()[dataAt].dataType == dataType) {
-                device.setData(dataAt,data);
+            if (device.getDeviceData()[dataAt].dataType == dataType) {
+                device.setData(dataAt, data);
             }
         }
     }
