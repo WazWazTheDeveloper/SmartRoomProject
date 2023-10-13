@@ -14,7 +14,6 @@ import TaskListContainer from './components/taskScreen/taskList/TaskListContaine
 import { useAuth } from './hooks/useAuth';
 import LoginScreen from './components/loginScreen/loginScreen';
 import DeviceDetailsContainer from './components/deviceScreen/deviceDetails/deviceDetailContainer';
-import { useAppdata } from './hooks/useAppdata';
 import useDidMount from './hooks/useDidMount';
 import TaskDetailsContainer from './components/taskScreen/taskDetails/taskDetailsContainer';
 const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';

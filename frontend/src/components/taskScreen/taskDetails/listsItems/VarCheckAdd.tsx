@@ -211,7 +211,7 @@ interface props {
 
 function VarCheckAdd(props: props) {
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/add-var-check", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
 
     const [selectedId, setSekectedId] = useState("please select device");
     const [selectedAt, setSelectedAt] = useState("please select data at");
@@ -232,7 +232,7 @@ function VarCheckAdd(props: props) {
             checkType:checkType,
             valueToCompareTo:compatreTo
         }
-        fetchWithReauth(userdata.token,body)
+        fetchWithReauth("/task/add-var-check", ApiService.REQUEST_POST,userdata.token,body)
         props.onDeleteFunction()
     }
     return (

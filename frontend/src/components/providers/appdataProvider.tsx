@@ -33,7 +33,7 @@ function AppdataProvider({ children }: Props) {
     websocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const appdata = Appdata.createAppdataFromFetch(data)
-      console.log(appdata)
+      // console.log(appdata)
       setAppdata(appdata);
       // console.log(JSON.parse(event.data))
     }

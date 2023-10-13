@@ -7,9 +7,6 @@ type props = {
 }
 
 function SwitchButton(props: props) {
-    // TODO get state from parent element and function
-    // const [isClicked, setIsClicked] = useState(false);
-
     return (
         <label className={styles.switch}>
             <input checked={props.state} type="checkbox" onChange={props.stateChangeFunction} />

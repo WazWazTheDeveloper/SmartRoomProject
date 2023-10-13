@@ -8,7 +8,6 @@ import useDidMount from '../../../hooks/useDidMount';
 import { useAuth } from '../../../hooks/useAuth';
 import { useApi } from '../../../hooks/useApi';
 import { ApiService } from '../../../services/apiService';
-import { Button, Menu, MenuItem } from '@mui/material';
 import TimeChackAdd from './listsItems/timeCheckAdd';
 import VarCheckAdd from './listsItems/varCheckAdd';
 import TodoTaskAdd from './listsItems/todoTaskAdd';
@@ -18,10 +17,11 @@ import TodoTask from './listsItems/todoTask';
 
 function TaskDetails(props: any) {
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/update-task", ApiService.REQUEST_POST);
-    const [removeVarData, removeVarIsLoading, removeVarIsError, removeVarError, removeVarFetchWithReauth] = useApi("/task/remove-var-check", ApiService.REQUEST_POST);
-    const [removeTimeData, removeTimeIsLoading, removeTimeIsError, removeTimeError, removeTimeFetchWithReauth] = useApi("/task/remove-time-check", ApiService.REQUEST_POST);
-    const [removeTodoData, removeTodoIsLoading, removeTodoIsError, removeTodoError, removeTodoFetchWithReauth] = useApi("/task/remove-todo", ApiService.REQUEST_POST);
+    // const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/update-task", ApiService.REQUEST_POST);
+    // const [removeVarData, removeVarIsLoading, removeVarIsError, removeVarError, removeVarFetchWithReauth] = useApi("/task/remove-var-check", ApiService.REQUEST_POST);
+    // const [removeTimeData, removeTimeIsLoading, removeTimeIsError, removeTimeError, removeTimeFetchWithReauth] = useApi("/task/remove-time-check", ApiService.REQUEST_POST);
+    // const [removeTodoData, removeTodoIsLoading, removeTodoIsError, removeTodoError, removeTodoFetchWithReauth] = useApi("/task/remove-todo", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
 
     const { taskid } = useParams();
     const [appdata, isAppdata] = useAppdata()
@@ -46,7 +46,7 @@ function TaskDetails(props: any) {
             targetTask: taskid,
             indexOfVarCheck: indexOfVarCheck
         }
-        removeVarFetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/remove-var-check", ApiService.REQUEST_POST,userdata.token, body)
     }
 
     function onRemoveTimeCheck(indexOfVarCheck: number) {
@@ -55,7 +55,7 @@ function TaskDetails(props: any) {
             indexOfTimeCheck: indexOfVarCheck
         }
         console.log(indexOfVarCheck)
-        removeTimeFetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/remove-time-check", ApiService.REQUEST_POST,userdata.token, body)
     }
 
     function onRemoveTodo(indexOfVarCheck: number) {
@@ -63,7 +63,7 @@ function TaskDetails(props: any) {
             targetTask: taskid,
             indexOfTodoTask: indexOfVarCheck
         }
-        removeTodoFetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/remove-todo", ApiService.REQUEST_POST,userdata.token, body)
     }
     function onButtonStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsOn(!isOn)
@@ -121,7 +121,7 @@ function TaskDetails(props: any) {
                 isRepeating: isRepeating
             }
         }
-        fetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/update-task", ApiService.REQUEST_POST,userdata.token, body)
     }, [triggerupdate])
 
     function onEditTitleClick() {

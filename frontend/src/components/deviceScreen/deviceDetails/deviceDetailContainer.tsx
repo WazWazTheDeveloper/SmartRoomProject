@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import styles from './deviceDetailContainer.module.css'
 import DeviceDetails from './deviceDetail';
 

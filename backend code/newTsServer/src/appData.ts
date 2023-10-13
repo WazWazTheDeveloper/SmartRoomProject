@@ -62,11 +62,12 @@ class AppData {
     public getAppdataOfUser(user: User) {
         let taskJson = []
         let deviceJson = []
-
+        
+        
         if (user.hasPermission("*")) {
             return this.getAsJson();
         }
-
+        
         console.log(user.getPermissions())
 
         if (user.hasPermission("device.*") ||
@@ -81,15 +82,19 @@ class AppData {
         } else {
             let permissions = user.getPermissions()
             for (let index = 0; index < permissions.length; index++) {
-                const permission = permissions[index].name.split(".");
+                const permission = permissions[index].split(".");
                 if (permission[0] == "device") {
                     const device_id = permission[1];
-                    let device = this.getDeviceById(device_id);
-                    deviceJson.push(device.getAsJson())
+                    try {
+                        let device = this.getDeviceById(device_id);
+                        deviceJson.push(device.getAsJson())
+                    }
+                    catch (err) {
+                        throw new Error("device dosen't exist")
+                    }
                 }
             }
         }
-        console.log("json0")
 
         if (user.hasPermission("task.*") ||
             user.hasPermission("task.*.read") ||
@@ -104,7 +109,7 @@ class AppData {
         else {
             let permissions = user.getPermissions()
             for (let index = 0; index < permissions.length; index++) {
-                const permission = permissions[index].name.split(".");
+                const permission = permissions[index].split(".");
                 if (permission[0] == "task") {
                     const task_id = permission[1];
                     let task = this.getTaskById(task_id);
@@ -113,17 +118,6 @@ class AppData {
                 }
             }
         }
-        console.log("json1")
-
-        // for (let index = 0; index < this.taskList.length; index++) {
-        //     const task = this.taskList[index];
-        //     taskJson.push(task.getAsJson())
-        // }
-
-        // for (let index = 0; index < this.deviceList.length; index++) {
-        //     const device = this.deviceList[index];
-        //     deviceJson.push(device.getAsJson())
-        // }
 
         let json = {
             "taskList": taskJson,
@@ -205,6 +199,14 @@ class AppData {
         return this.deviceList;
     }
 
+    public async addUser(UUID: string) {
+        await this.generalData.addUser(UUID);
+    }
+
+    public async removeUser(UUID: string) {
+        await this.generalData.removeUser(UUID);
+    }
+
     // change to createDevice
     public async createNewDevice(deviceName: string, uuid: string, deviceType: Array<number>, topic: string): Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
@@ -269,6 +271,16 @@ class AppData {
         }
 
         this.triggerCallbacks(eventData)
+    }
+
+    async removeDevicePermissionsOfDevice(uuid: string) {
+        let usernamesList = this.generalData.getUsernameList();
+
+        for (let index = 0; index < usernamesList.length; index++) {
+            const username = usernamesList[index];
+            const user = await User.getUser(username);
+            user.removeDevicePermission(uuid);
+        }
     }
 
     async createTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void> {

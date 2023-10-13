@@ -11,7 +11,7 @@ interface props {
 }
 function TimeChackAdd(props: props) {
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/add-time-check", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
 
     const [timingData, setTimingData] = useState<any>();
 
@@ -24,7 +24,7 @@ function TimeChackAdd(props: props) {
             targetTask: props.id,
             timingData: timingData
         }
-        fetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/add-time-check", ApiService.REQUEST_POST,userdata.token, body)
         props.onDeleteFunction()
     }
     

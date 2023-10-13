@@ -43,20 +43,23 @@ class GeneralData implements GeneralDataType {
 
     topicList: Array<GeneralTopic>;
     deviceList: Array<DeviceListItem>;
-    taskList: Array<GeneralTask>
+    taskList: Array<GeneralTask>;
+    usernameList: Array<string>;
 
 
-    private constructor(deviceList: Array<DeviceListItemType>, topics: Array<GeneralTopic>, taskList: Array<GeneralTask>) {
+    private constructor(deviceList: Array<DeviceListItemType>, topics: Array<GeneralTopic>, taskList: Array<GeneralTask>, usernameList: Array<string>) {
         this.deviceList = deviceList;
         this.topicList = topics;
         this.taskList = taskList;
+        this.usernameList = usernameList;
     }
 
     getAsJson() {
         let json = {
             "topicList": this.topicList,
             "deviceList": this.deviceList,
-            "taskList": this.taskList
+            "taskList": this.taskList,
+            "usernameList": this.usernameList
         }
 
         return json
@@ -68,51 +71,51 @@ class GeneralData implements GeneralDataType {
             return this.getAsJson();
         }
 
-        let _deviceJson : DeviceListItem[] = []
-        let _taskJson : GeneralTask[] = []
+        let _deviceJson: DeviceListItem[] = []
+        let _taskJson: GeneralTask[] = []
 
         if (user.hasPermission("device.*") ||
-        user.hasPermission("device.*.read") ||
-        user.hasPermission("device.*.edit") ||
-        user.hasPermission("device.*.delete")) {
+            user.hasPermission("device.*.read") ||
+            user.hasPermission("device.*.edit") ||
+            user.hasPermission("device.*.delete")) {
 
-        for (let index = 0; index < this.deviceList.length; index++) {
-            const device = this.deviceList[index];
-            _deviceJson = this.deviceList;
-        }
-    } else {
-        let permissions = user.getPermissions()
-        for (let index = 0; index < permissions.length; index++) {
-            const permission = permissions[index].name.split(".");
-            if (permission[0] == "device") {
-                const device_id = permission[1];
-                let device = this.getDeviceById(device_id);
-                _deviceJson.push(device)
+            for (let index = 0; index < this.deviceList.length; index++) {
+                const device = this.deviceList[index];
+                _deviceJson = this.deviceList;
+            }
+        } else {
+            let permissions = user.getPermissions()
+            for (let index = 0; index < permissions.length; index++) {
+                const permission = permissions[index].split(".");
+                if (permission[0] == "device") {
+                    const device_id = permission[1];
+                    let device = this.getDeviceById(device_id);
+                    _deviceJson.push(device)
+                }
             }
         }
-    }
 
-    if (user.hasPermission("task.*") ||
-        user.hasPermission("task.*.read") ||
-        user.hasPermission("task.*.edit") ||
-        user.hasPermission("task.*.delete")) {
+        if (user.hasPermission("task.*") ||
+            user.hasPermission("task.*.read") ||
+            user.hasPermission("task.*.edit") ||
+            user.hasPermission("task.*.delete")) {
 
-        for (let index = 0; index < this.taskList.length; index++) {
-            const task = this.taskList[index];
-            _taskJson = this.taskList
+            for (let index = 0; index < this.taskList.length; index++) {
+                const task = this.taskList[index];
+                _taskJson = this.taskList
+            }
         }
-    }
-    else {
-        let permissions = user.getPermissions()
-        for (let index = 0; index < permissions.length; index++) {
-            const permission = permissions[index].name.split(".");
-            if (permission[0] == "task") {
+        else {
+            let permissions = user.getPermissions()
+            for (let index = 0; index < permissions.length; index++) {
+                const permission = permissions[index].split(".");
+                if (permission[0] == "task") {
                     const task_id = permission[1];
                     let task = this.getTaskById(task_id);
                     _taskJson.push(task)
+                }
             }
         }
-    }
 
         let json = {
             "topicList": this.topicList,
@@ -128,6 +131,7 @@ class GeneralData implements GeneralDataType {
             let _topicList: Array<GeneralTopic> = []
             let _taskList: Array<GeneralTask> = []
             let _deviceList: Array<DeviceListItem> = []
+            let _userIdList: Array<string> = []
 
             for (let index = 0; index < generalData.topicList.length; index++) {
                 const element = generalData.topicList[index];
@@ -147,11 +151,16 @@ class GeneralData implements GeneralDataType {
                 _deviceList.push(newDevice)
             }
 
-            let generalDataObj = new GeneralData(_deviceList, _topicList, _taskList);
+            for (let index = 0; index < generalData.usernameList.length; index++) {
+                const newUser = generalData.usernameList[index];
+                _userIdList.push(newUser)
+            }
+
+            let generalDataObj = new GeneralData(_deviceList, _topicList, _taskList,_userIdList);
             return generalDataObj
         } catch (err) {
             console.log("File read failed:", err);
-            let generalDataObj = new GeneralData([], [], []);
+            let generalDataObj = new GeneralData([], [], [],[]);
             await generalDataObj.saveData();
             return generalDataObj
         }
@@ -162,10 +171,37 @@ class GeneralData implements GeneralDataType {
         let dataJson: GeneralDataType = {
             topicList: this.topicList,
             deviceList: this.deviceList,
-            taskList: this.taskList
+            taskList: this.taskList,
+            usernameList: this.usernameList
         }
 
         await data.writeFile<GeneralDataType>(`${GeneralData.GENERAL_DATA_FILE_NAME}`, dataJson)
+    }
+
+    public async addUser(username: string) {
+        for (let index = 0; index < this.usernameList.length; index++) {
+            const element = this.usernameList[index];
+            if (element == username) {
+                throw new Error("user with same name already exist")
+            }
+
+        }
+
+        this.usernameList.push(username);
+        await this.saveData();
+        console.log("added general user: '" + username + "'")
+    }
+
+    public async removeUser(username: string) {
+        for (let i = this.usernameList.length - 1; i >= 0; i--) {
+            const element = this.usernameList[i];
+            if (username == element) {
+                this.usernameList.splice(i, 1)
+                console.log("removed general user: '" + username + "'")
+            }
+        }
+
+        await this.saveData();
     }
 
     public async addTopic(topicName: string, topicPath: string, isVisible: boolean): Promise<void> {
@@ -223,6 +259,11 @@ class GeneralData implements GeneralDataType {
     public getTaskList(): Array<GeneralTask> {
         return this.taskList;
     }
+
+    public getUsernameList(): Array<string> {
+        return this.usernameList;
+    }
+
 
     getTopicByName(topicName: string) {
         for (let index = 0; index < this.topicList.length; index++) {

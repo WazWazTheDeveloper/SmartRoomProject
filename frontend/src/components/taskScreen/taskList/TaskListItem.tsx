@@ -15,8 +15,9 @@ interface Props {
 
 function TaskListItem(props: Props) {
     const [userdata] = useAuth();
-    const [updateData, updateIsLoading, updateIsError, updateError, updateFetchWithReauth] = useApi("/task/update-task", ApiService.REQUEST_POST);
-    const [deleteData, deleteIsLoading, deleteIsError, deleteError, deleteFetchWithReauth] = useApi("/task/delete-task", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
+    // const [updateData, updateIsLoading, updateIsError, updateError, updateFetchWithReauth] = useApi("/task/update-task", ApiService.REQUEST_POST);
+    // const [deleteData, deleteIsLoading, deleteIsError, deleteError, deleteFetchWithReauth] = useApi("/task/delete-task", ApiService.REQUEST_POST);
     const [appdata, isAppdata] = useAppdata()
     const [isOn, setIsOn] = useState(false);
     const [taskName, setTaskName] = useState("");
@@ -37,7 +38,7 @@ function TaskListItem(props: Props) {
         let body = {
             targetTask: props.taskId,
         }
-        deleteFetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/delete-task", ApiService.REQUEST_POST,userdata.token, body)
     }
 
     useEffect(()=> {
@@ -56,7 +57,7 @@ function TaskListItem(props: Props) {
                 isOn: isOn
             }
         }
-        updateFetchWithReauth(userdata.token, body)
+        fetchWithReauth("/task/update-task", ApiService.REQUEST_POST,userdata.token, body)
     },[triggerUpdate])
 
 

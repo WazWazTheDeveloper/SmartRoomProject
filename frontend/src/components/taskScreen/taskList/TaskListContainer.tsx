@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 function TaskListContainer(props: any) {
     const [appdata, isAppdata] = useAppdata()
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/create-task", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
 
     let _taskList:ReactJSXElement[] = [];
     if (isAppdata) {
@@ -25,7 +25,7 @@ function TaskListContainer(props: any) {
     }
 
     function onAddClick (e:React.MouseEvent<HTMLElement>) {
-        fetchWithReauth(userdata.token);
+        fetchWithReauth("/task/create-task", ApiService.REQUEST_POST,userdata.token);
     }
 
     return (

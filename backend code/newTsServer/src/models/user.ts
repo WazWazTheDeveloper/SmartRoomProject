@@ -3,6 +3,7 @@ import { PermissionRole } from "./permissionRole";
 import { Settings, SettingsType } from "./settings";
 import data = require('../handlers/file_handler')
 import { v4 as uuidv4 } from 'uuid';
+import { AppData } from "../appData";
 const bcrypt = require('bcrypt');
 
 interface permissionData {
@@ -14,7 +15,7 @@ interface UserType {
     uuid: string;
     username: string;
     password: string;
-    permission: Array<permissionData>;
+    permission: Array<string>;
     settings: SettingsType;
     isActive: boolean;
 }
@@ -23,11 +24,12 @@ class User {
     private uuid: string;
     private username: string;
     private password: string;
-    private permission: Array<permissionData>;
+    private permission: Array<string>;
+    // TODO: add permission group as welll as add them to all the check functions
     private settings: Settings;
     private isActive: boolean;
 
-    constructor(uuid: string, username: string, password: string, permission: Array<permissionData>, settings: Settings, isActive: boolean) {
+    constructor(uuid: string, username: string, password: string, permission: Array<string>, settings: Settings, isActive: boolean) {
         this.uuid = uuid;
         this.username = username;
         this.password = password;
@@ -41,6 +43,8 @@ class User {
         let hashedPassword = await this.getHashedPassword(password);
         let newUser = new User(uuid, username, hashedPassword, [], new Settings(), true);
 
+        let appDataInstance = await AppData.getAppDataInstance();
+        appDataInstance.addUser(username)
         await newUser.saveData();
 
         return newUser
@@ -82,14 +86,30 @@ class User {
 
     // IMPLEMENT
     addPermission() {
-
+        // add check for correct format
     }
-    // IMPLEMENT
-    removePermission() {
-
+    
+    removePermission(permission : string) {
+        for (let index = 0; index < this.permission.length; index++) {
+            const element = this.permission[index];
+            if(element == permission) {
+                this.permission.splice(index, 1)
+                console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
+            }
+        }
     }
 
-    // IMPLEMENT
+    removeDevicePermission(deviceID: string) {
+        for (let index = 0; index < this.permission.length; index++) {
+            const element = this.permission[index];
+            const permission = element.split(".");
+            if(permission[0] == 'device' && permission[1] == deviceID) {
+                this.permission.splice(index, 1)
+                console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
+            }
+        }
+    }
+
     getPermissions() {
         return this.permission;
     }
@@ -97,7 +117,7 @@ class User {
     hasPermission(premission : string) {
         for (let index = 0; index < this.permission.length; index++) {
             const permission = this.permission[index];
-            if(permission.name == premission) {
+            if(permission == premission) {
                 return true;
             }
         }

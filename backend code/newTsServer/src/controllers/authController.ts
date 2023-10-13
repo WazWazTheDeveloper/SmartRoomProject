@@ -40,7 +40,7 @@ const login = asyncHandler(async (req: Request, res: Response) => {
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1000s' }
+        { expiresIn: '1s' }
     )
     const refreshToken = jwt.sign(
         { "username": foundUser.getUsername() },

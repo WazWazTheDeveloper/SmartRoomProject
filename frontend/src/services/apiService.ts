@@ -1,4 +1,3 @@
-import { AnyCnameRecord, AnyMxRecord } from "dns"
 
 class ApiService {
     public static readonly REQUEST_GET = 'GET'

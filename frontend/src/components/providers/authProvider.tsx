@@ -33,11 +33,7 @@ function AuthProvider({ children }: Props) {
 
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({});
-    // DEL
-    // const [dataLogin, isLoadingLogin, isErrorLogin, errorLogin, fetchLogin, refreshToken] = useApi('/auth/', ApiService.REQUEST_POST);
-    // const [dataLogout, isLoadingLogout, isErrorLogout, errorLogout, fetchLogout] = useApi('/auth/logout', ApiService.REQUEST_POST);
-    // const [dataSignup, isLoadingSignup, isErrorSignup, errorSignup, fetchSignup] = useApi('/auth/signup', ApiService.REQUEST_POST);
-
+    
     useEffect(() => {
         if (token == "") {
             refreshToken()
@@ -92,44 +88,6 @@ function AuthProvider({ children }: Props) {
             }
         }
     }
-
-
-    // DEL
-    // useEffect(() => {
-    //     if (!isLoadingLogin) {
-    //         if (isErrorLogin) {
-    //             setIsError(true)
-    //             setError(errorLogin)
-    //             console.log((errorLogin as any))
-    //         }
-    //         else {
-    //             let token = (dataLogin as any).accessToken
-    //             if (token) {
-    //                 let decoded: any = jwt_decode(token)
-    //                 setToken(token)
-    //                 setUserName(decoded.userInfo.username)
-    //                 setPermission(decoded.userInfo.permission)
-    //                 setIsError(false)
-    //                 setError("")
-    //             }
-    //         }
-    //     }
-    // }, [isLoadingLogin, isErrorLogin, errorLogin])
-
-    // useEffect(() => {
-    //     if (!isLoadingLogout) {
-    //         if (isErrorLogout) {
-    //             console.log((errorLogin as any))
-    //         }
-    //         else {
-    //             setToken("")
-    //             setUserName("")
-    //             setPermission([])
-    //             setIsError(false)
-    //             setError("")
-    //         }
-    //     }
-    // }, [isLoadingLogout, isErrorLogout, errorLogout])
 
     const updateUserData = (newToken:string) => {
         let decoded: any = jwt_decode(newToken)

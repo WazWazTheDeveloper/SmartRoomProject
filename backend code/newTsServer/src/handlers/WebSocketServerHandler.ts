@@ -15,11 +15,7 @@ const wsServer = new WebSocketServer({ noServer: true });
 class WebSocketServerHandler {
     public static init(): void {
         wsServer.on('connection', async (socket : CostumWebsocket) => {
-            let appData = await AppData.getAppDataInstance();
-
-            // TODO: delete this after implementin the uniq users
-            // socket.send(JSON.stringify(appData.getAsJson()));
-
+            
             console.log("connected new ws")
             socket.on('message', (message: RawData) => {
 

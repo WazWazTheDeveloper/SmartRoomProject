@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import styles from './deviceDetail.module.css'
 import DeviceAcDataDetail from './dataTypes/DeviceAcDataDetail';
 import { useParams } from 'react-router-dom';

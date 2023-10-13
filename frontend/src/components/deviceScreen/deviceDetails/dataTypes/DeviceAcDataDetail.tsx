@@ -52,7 +52,7 @@ interface props {
 function DeviceAcDataDetail(props: props) {
     const deviceData = props.data
     const [userdata] = useAuth();
-    const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/device/update_device", ApiService.REQUEST_POST);
+    const [data, isLoading, isError, error, fetchWithReauth] = useApi();
     const [isOn, setIsOn] = useState(deviceData.isOn as boolean);
     const [temp, setTemp] = useState(deviceData.temp);
     const [tempCommit, setTempCommit] = useState(false);
@@ -65,7 +65,7 @@ function DeviceAcDataDetail(props: props) {
     const [isFeeling, setIsFeeling] = useState(deviceData.isFeeling as boolean);
     const [isSleep, setIsSleep] = useState(deviceData.isSleep as boolean);
     const [isHealth, setIsHealth] = useState(deviceData.isHealth as boolean);
-
+    
     useDidMount(()=> {
         let body = {
             targetDevice: props.targetDevice,
@@ -84,9 +84,10 @@ function DeviceAcDataDetail(props: props) {
                 isHealth: isHealth,
             }
         }
-        fetchWithReauth(userdata.token, body)
+        fetchWithReauth("/device/update_device",ApiService.REQUEST_POST,userdata.token, body)
     },[isOn,tempCommit,mode,speed,swing1,swing2,timer,isStrong,isFeeling,isSleep,isHealth])
 
+    // DEL: idk what it is
      function sendUpdateToServer() {
         let body = {
             targetDevice: "2f454d2b-38a9-4b56-a5d8-5c03d205970e",
@@ -105,7 +106,7 @@ function DeviceAcDataDetail(props: props) {
                 isHealth: isHealth,
             }
         }
-        fetchWithReauth(userdata.token, body)
+        fetchWithReauth("/device/update_device",ApiService.REQUEST_POST,userdata.token, body)
     }
 
     function onButtonStateChange(e: React.ChangeEvent<HTMLElement>) {

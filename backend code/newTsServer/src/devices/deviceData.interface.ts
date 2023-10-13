@@ -6,7 +6,7 @@ interface IDeviceData {
     getAsJson:Function
     getVar:Function
     // createFromJson:Function
-    // TODO: delete this as it is unused
+    // DEL: delete this as it is unused
     // loadFromFile: Function
 }
 

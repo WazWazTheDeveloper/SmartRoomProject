@@ -2,6 +2,7 @@ interface GeneralDataType {
     topicList : Array<GeneralTopicType>
     deviceList : Array<DeviceListItemType>
     taskList : Array<GeneralTaskType>
+    usernameList: Array<string>
 }
 
 interface GeneralTopicType {
