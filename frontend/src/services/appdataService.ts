@@ -53,7 +53,6 @@ class Appdata {
         this.deviceList = deviceList;
     }
 
-    // TODO: add data
     public static createAppdataFromFetch(data: any) {
         let newAppdata = new Appdata(data.taskList, data.deviceList)
         return newAppdata;

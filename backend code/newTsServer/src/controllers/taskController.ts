@@ -4,7 +4,6 @@ import { Task } from "../models/task";
 import { v4 as uuidv4 } from 'uuid';
 
 const createNewTask = async (req: Request, res: Response) => {
-    // TODO move this inside of the createTask :0
     let taskId = uuidv4();
     const appdata = await AppData.getAppDataInstance();
     appdata.createTask(taskId, "newTask", false, false);

@@ -16,10 +16,6 @@ router.route('/getData')
 router.route('/getTopic')
 .get(deviceController.getTopic)
 
-router.route('/test')
-.post(deviceController.test)
-.get(deviceController.test)
-
 router.use(verifyJWT);
 
 router.route('/update_device')

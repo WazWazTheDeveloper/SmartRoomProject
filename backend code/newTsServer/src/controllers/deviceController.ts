@@ -5,12 +5,13 @@ import { AppData } from "../appData";
 import { Device } from "../models/device";
 import { User } from "../models/user";
 
+
 const createNewDevice = async (req: Request, res: Response) => {
     let deviceType = req.body.deviceType;
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
 
-    console.log(deviceType[0])
+    console.log(deviceType)
     // check if deviceType is array of numbers
     for (let index = 0; index < deviceType.length; index++) {
         const element = deviceType[index];
@@ -29,7 +30,7 @@ const createNewDevice = async (req: Request, res: Response) => {
         WebSocketServerHandler.updateAppdata();
         res.send(newUUID);
     } catch (err) {
-        res.status(400);
+        res.status(404);
         res.send();
         return;
     }
@@ -38,27 +39,28 @@ const createNewDevice = async (req: Request, res: Response) => {
 
 const getData = async (req: Request, res: Response) => {
     let uuid = req.query.uuid;
+    let dataAtString = req.query.dataat;
+
     let appdata = await AppData.getAppDataInstance();
-    console.log(req.query)
+
     let uuidString = String(uuid)
+    if(!(dataAtString instanceof String)) {
+        dataAtString = "0"
+    }
+    let dataAt = Number(dataAtString);
 
     res.setHeader("Content-Type", "application/json");
 
-    // TODO: add try as deviceType can be somting non existent
-    // try {
-    let device: Device = appdata.getDeviceById(uuidString);
-    res.status(200);
-    // TODO: add "dataAt" to queery
-    let data = device.getAsJsonForArduino(0)
-    res.json({
-        data: data
-    });
-    // console.log(device.getAsJsonForArduino(0))
-    // }catch {
-    //     res.status(400);
-    // }
-
-
+    try {
+        let device: Device = appdata.getDeviceById(uuidString);
+        res.status(200);
+        let data = device.getAsJsonForArduino(dataAt)
+        res.json({
+            data: data
+        });
+    } catch {
+        res.status(404);
+    }
 
     res.send();
 }
@@ -67,52 +69,23 @@ const getTopic = async (req: Request, res: Response) => {
     let uuid = req.query.uuid;
     let appdata = await AppData.getAppDataInstance();
 
-    // TODO: change to convertor
     let uuidString = String(uuid)
 
     res.setHeader("Content-Type", "application/json");
-    // TODO: add try-catch as deviceType can be somting non existent
-    let device: Device = appdata.getDeviceById(uuidString);
-    let pubSubData = {
-        topicPath: device.getTopicPath(),
-    }
-
-    res.status(200);
-    res.json(pubSubData);
-    res.send();
-}
-
-const test = async (req: Request, res: Response) => {
-    let deviceType = [0];
-    let newUUID = uuidv4();
-    let appdata = await AppData.getAppDataInstance();
-
-    console.log(deviceType[0])
-    // check if deviceType is array of numbers
-    for (let index = 0; index < deviceType.length; index++) {
-        const element = deviceType[index];
-        if (isNaN(element)) {
-            res.status(400);
-            res.send();
-            return;
+    try{
+        let device: Device = appdata.getDeviceById(uuidString);
+        let pubSubData = {
+            topicPath: device.getTopicPath(),
         }
-
-    }
-
-    try {
-        await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
-        let newDevice: Device = appdata.getDeviceById(newUUID);
         res.status(200);
-        WebSocketServerHandler.updateAppdata();
-        res.send(newUUID);
-    } catch (err) {
-        res.status(400);
-        res.send();
-        return;
+        res.json(pubSubData);
+
+    }catch(err) {
+        console.log("topic not found")
+        res.status(404);
     }
-    // console.log(req.query)
-    // res.send("ter")
-    // User.createNewUser("test2", "123");
+
+    res.send();
 }
 
 const update_device = async (req: Request, res: Response) => {
@@ -136,4 +109,4 @@ const update_device = async (req: Request, res: Response) => {
 
     res.status(200).json('success')
 }
-export { createNewDevice, getData, getTopic, test, update_device }
+export { createNewDevice, getData, getTopic, update_device }

@@ -181,9 +181,6 @@ void loop()
         isResetPressed = true;
         clearUUID();
         setRedLed(true);
-        const char *empty = "";
-        strcpy(uuid, empty);
-        Serial.println(uuid);
         state = DV_NO_DEVICE;
     }
     if (digitalRead(RESET_EEPROM_PIN) == HIGH)
@@ -302,7 +299,8 @@ void clearUUID()
         EEPROM.write(i, 0);
     }
     EEPROM.end();
-    // TODO: clear uuid var
+    const char *empty = "";
+    strcpy(uuid, empty);
     Serial.println("cleared eeprom");
 }
 
@@ -333,7 +331,7 @@ bool sendHttpGetRequest(char *path, bool addUUID, char *extraPathVariables)
         strcat(tempString, " HTTP/1.1");
 
         wifiClient.println(tempString);
-        // TODO: change this
+        // TODO: change this to use variables
         wifiClient.println(("Host: 10.0.0.12:5000"));
         wifiClient.println(("Connection: close"));
         wifiClient.println(("Accept: */*"));
@@ -357,7 +355,7 @@ bool sendHttpPostRequest(char *path, char *json)
         strcat(tempString, " HTTP/1.1");
 
         wifiClient.println(tempString);
-        // TODO: change this
+        // TODO: change this to use variables
         wifiClient.println(("Host: 10.0.0.12:5000"));
         wifiClient.println(("Connection: close"));
         wifiClient.println(("Accept: */*"));

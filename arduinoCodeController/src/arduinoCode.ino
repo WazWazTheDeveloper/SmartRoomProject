@@ -10,7 +10,6 @@
 // #include "DeviceData.h"
 // #include "AcDataType.h"
 
-// // TODO: i think i can delete this
 // DeviceData *acRemoteType(new AcDataType(0, 0));
 
 // // device type list
@@ -30,7 +29,6 @@
 // const int DV_IS_DEVICE = 2;
 // int state = DV_NO_DEVICE;
 
-// // TODO: delete this
 // char uuid[37] = {'\0'};
 
 // const int DEVICE_TOPIC_CHANGE = 0;
@@ -202,7 +200,6 @@
 //         EEPROM.write(i, 0);
 //     }
 //     EEPROM.end();
-//     // TODO: clear uuid var
 //     Serial.println("cleared eeprom");
 // }
 

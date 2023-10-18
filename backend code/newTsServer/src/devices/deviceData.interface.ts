@@ -1,13 +1,10 @@
 interface IDeviceData {
     setVar:Function
     setData:Function
-    // TODO: probably dont need it as you always want to send full data
     getData:Function
     getAsJson:Function
     getVar:Function
-    // createFromJson:Function
-    // DEL: delete this as it is unused
-    // loadFromFile: Function
+
 }
 
 interface AirconditionerDataType {

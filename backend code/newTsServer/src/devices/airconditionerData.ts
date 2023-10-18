@@ -204,7 +204,6 @@ class AirconditionerData implements IDeviceData {
         });
     }
 
-    // TODO: probably dont need it as you always want to send full data
     getData(event: string) {
         if (event.substring(0, 4).includes("data")) {
             return this.getAsJson()

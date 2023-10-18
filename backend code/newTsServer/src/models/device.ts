@@ -240,7 +240,6 @@ class Device {
             dataAt: dataAt,
             oldTopic: ""
         }
-
         this.deviceData[dataAt].data.setData(newContent);
         this.saveData();
         this.callbackOnChange(eventData);
@@ -257,7 +256,7 @@ class Device {
 
         switch (varName) {
 
-            //TODO:  add all other cases
+            //TODO:  add more type cases
             case Device.DEVICE_NAME:
                 this.deviceName = String(newContent)
                 await this.saveData();
@@ -274,7 +273,7 @@ class Device {
                     }
                     break;
                 }
-                // TODO: may be needed to add the topic change
+                // TODO: may need to add the topic change
             case Device.isConnectedCheck:
                 this.isConnectedCheck = newContent == true ? true : false;
                 break;
@@ -282,9 +281,6 @@ class Device {
             default:
                 break;
         }
-
-        // TODO: make this go only once
-        // this.saveData();
     }
 
     

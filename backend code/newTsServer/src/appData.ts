@@ -5,6 +5,7 @@ import { WebSocketServerHandler } from "./handlers/webSocketServerHandler";
 import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";
 import { User } from "./models/user";
+import { DataPacket } from "./models/dataPacket";
 
 var appDataInstance: AppData;
 
@@ -62,12 +63,12 @@ class AppData {
     public getAppdataOfUser(user: User) {
         let taskJson = []
         let deviceJson = []
-        
-        
+
+
         if (user.hasPermission("*")) {
             return this.getAsJson();
         }
-        
+
         console.log(user.getPermissions())
 
         if (user.hasPermission("device.*") ||
@@ -113,7 +114,7 @@ class AppData {
                 if (permission[0] == "task") {
                     const task_id = permission[1];
                     let task = this.getTaskById(task_id);
-                    // TODO: add check if task.isVisable()
+                    // TODO: add check if task.isVisable() after inplementing isVisable
                     taskJson.push(task.getAsJson())
                 }
             }
@@ -245,11 +246,10 @@ class AppData {
         await this.generalData.removeDevice(uuid);
 
         let topic: string = ""
-        //TODO: add type errr of stuff
         try {
             topic = this.getDeviceById(uuid).getTopicPath();
         } catch (err) {
-
+            console.log("topic doesnt exist")
         }
 
         for (let i = this.deviceList.length - 1; i >= 0; i--) {
@@ -390,22 +390,26 @@ class AppData {
         }
     }
 
-    updateDevice(receiver: string, dataType: number, dataAt: number, data: any) {
+    updateDevice(topic: string, dataPacket: DataPacket) {
         let device: Device
+        console.log(dataPacket)
         try {
-            device = this.getDeviceById(receiver)
+            device = this.getDeviceById(dataPacket.sender)
         } catch (err) {
+            console.log("err")
             return;
         }
-        if (dataType == -1) {
-            device.setDeviceData(data);
+        if (dataPacket.dataType == -1) {
+            device.setDeviceData(dataPacket.data);
         }
         else {
-            if (device.getDeviceData()[dataAt].dataType == dataType) {
-                device.setData(dataAt, data);
+            if (device.getDeviceData()[dataPacket.dataAt].dataType == dataPacket.dataType) {
+                device.setData(dataPacket.dataAt, dataPacket.data);
             }
         }
     }
+
+    // TODO: add topic change to device
 }
 
 export { AppData }

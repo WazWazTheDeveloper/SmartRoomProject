@@ -86,29 +86,6 @@ function DeviceAcDataDetail(props: props) {
         }
         fetchWithReauth("/device/update_device",ApiService.REQUEST_POST,userdata.token, body)
     },[isOn,tempCommit,mode,speed,swing1,swing2,timer,isStrong,isFeeling,isSleep,isHealth])
-
-    // DEL: idk what it is
-     function sendUpdateToServer() {
-        let body = {
-            targetDevice: "2f454d2b-38a9-4b56-a5d8-5c03d205970e",
-            dataAt: 0,
-            data: {
-                isOn: isOn,
-                temp: temp,
-                mode: mode,
-                speed: speed,
-                swing1: swing1,
-                swing2: swing2,
-                timer: timer,
-                isStrong: isStrong,
-                isFeeling: isFeeling,
-                isSleep: isSleep,
-                isHealth: isHealth,
-            }
-        }
-        fetchWithReauth("/device/update_device",ApiService.REQUEST_POST,userdata.token, body)
-    }
-
     function onButtonStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsOn(!isOn)
     }
