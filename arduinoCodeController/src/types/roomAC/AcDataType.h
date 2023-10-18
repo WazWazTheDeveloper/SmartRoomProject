@@ -9,9 +9,6 @@ class AcDataType : public DeviceData {
         AcRemote *acRemote;
     public:
         AcDataType(int dataType, int dataAt);
-        int getDataType();
-        int getDataAt();
         bool setData(JsonObject &data);
-        void getData();
 };
 #endif

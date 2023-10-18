@@ -9,16 +9,6 @@ AcDataType::AcDataType(int _dataType, int _dataAt) : acRemote(new AcRemote())
     acRemote->begin();
 }
 
-int AcDataType::getDataAt()
-{
-    return dataAt;
-}
-
-int AcDataType::getDataType()
-{
-    return dataType;
-}
-
 bool AcDataType::setData(JsonObject &data)
 {
     bool isOn = data["isOn"];             // false
@@ -50,8 +40,4 @@ bool AcDataType::setData(JsonObject &data)
         .execute();
 
     return 1;
-}
-
-void AcDataType::getData() {
-
 }

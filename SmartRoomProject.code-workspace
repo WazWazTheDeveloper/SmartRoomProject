@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "SmartRoomProject",
+			"path": "."
+		},
+		{
+			"name": "arduinoCodeController",
+			"path": "arduinoCodeController"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"string_view": "cpp",
+			"ranges": "cpp",
+			"type_traits": "cpp",
+			"string": "cpp"
+		}
+	}
+}

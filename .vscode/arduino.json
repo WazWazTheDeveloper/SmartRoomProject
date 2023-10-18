@@ -2,5 +2,5 @@
     "sketch": "code\\sketch_may29a\\sketch_may29a.ino",
     "configuration": "xtal=80,vt=flash,exception=disabled,stacksmash=enabled,ssl=all,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=40,FlashMode=dout,eesz=1M64,led=2,sdk=nonosdk_190703,ip=lm2f,dbg=Disabled,lvl=None____,wipe=all,baud=115200",
     "board": "esp8266:esp8266:generic",
-    "port": "COM21"
+    "port": "COM8"
 }
