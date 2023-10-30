@@ -16,9 +16,13 @@ router.route('/getData')
 router.route('/getTopic')
 .get(deviceController.getTopic)
 
-router.use(verifyJWT);
+// TODO: uncomment
+// router.use(verifyJWT);
 
 router.route('/update_device')
     .post(deviceController.update_device)
+
+router.route('/delete_device')
+    .post(deviceController.delete_device)
 
 export { router as deviceRouter };

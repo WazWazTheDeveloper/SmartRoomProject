@@ -13,6 +13,12 @@ class Device {
     static readonly isConnected = "isConnected"
     static readonly isConnectedCheck = "isConnectedCheck"
 
+    // isAccepted
+    static readonly DEVICE_ACCEPTED_YES = 1
+    static readonly DEVICE_ACCEPTED_NO = -1
+    static readonly DEVICE_ACCEPTED_UNDEFINED = 0
+    
+
     // types
     static readonly AIRCONDITIONER_TYPE = 0;
     static readonly SWITCH_TYPE = 1;
@@ -23,7 +29,9 @@ class Device {
     private deviceData: Array<DeviceDataType>
     private isConnected: boolean
     private isConnectedCheck: boolean
-    private isAccepted: boolean
+    private isAccepted: -1 | 0 | 1
+    private isVisible: boolean
+    private isAdminOnly: boolean
 
     // this should be pointing to triggerCallbacks(event: string,uuid:string,dataAt:number) in appData 
     private callbackOnChange: Function
@@ -35,11 +43,15 @@ class Device {
         deviceData: Array<DeviceDataType>,
         isConnected: boolean,
         isConnectedCheck: boolean,
-        isAccepted: boolean,
-        callbackOnChange: Function = ()=>{}) {
+        isAccepted: -1 | 0 | 1, // -1 no | 0 not yet | 1 yes
+        isVisible: boolean,
+        isAdminOnly: boolean,
+        callbackOnChange: Function = () => { }) {
         this.deviceName = deviceName
         this.uuid = uuid
         this.isAccepted = isAccepted
+        this.isVisible = isVisible
+        this.isAdminOnly = isAdminOnly
         this.topicPath = topicPath
         this.isConnected = isConnected
         this.isConnectedCheck = isConnectedCheck
@@ -75,7 +87,7 @@ class Device {
             dataArr.push(deviceDataJson)
         }
 
-        let newDevice = new Device(deviceName, uuid, genetalTopic.topicPath, dataArr, false, false, false, callbackOnChange)
+        let newDevice = new Device(deviceName, uuid, genetalTopic.topicPath, dataArr, false, false, Device.DEVICE_ACCEPTED_UNDEFINED, true, false, callbackOnChange)
 
         await newDevice.saveData()
         return newDevice;
@@ -96,7 +108,7 @@ class Device {
         }
     }
 
-    public static async loadFromFile(uuid: string, deviceData: Array<number>, generalData: GeneralData, callbackOnChange: Function = ()=>{}): Promise<Device> {
+    public static async loadFromFile(uuid: string, deviceData: Array<number>, generalData: GeneralData, callbackOnChange: Function = () => { }): Promise<Device> {
         let deviceDataFromJson = await data.readFile<DeviceType>(`devices/${uuid}`);
         let deviceDataArr: Array<DeviceDataType> = [];
         for (let index = 0; index < deviceDataFromJson.deviceData.length; index++) {
@@ -114,6 +126,8 @@ class Device {
             deviceDataFromJson.isConnected,
             deviceDataFromJson.isConnectedCheck,
             deviceDataFromJson.isAccepted,
+            deviceDataFromJson.isVisible,
+            deviceDataFromJson.isAdminOnly,
             callbackOnChange
         )
 
@@ -131,7 +145,7 @@ class Device {
                 return _device;
             }
             // TODO: add device Types
-            
+
         }
     }
 
@@ -153,7 +167,9 @@ class Device {
             deviceData: deviceDataJsonArr,
             isConnected: this.isConnected,
             isConnectedCheck: this.isConnectedCheck,
-            isAccepted: this.isAccepted
+            isAccepted: this.isAccepted,
+            isVisible: this.isVisible,
+            isAdminOnly: this.isAdminOnly
 
         }
 
@@ -163,13 +179,13 @@ class Device {
     public getAsJsonForArduino(dataAt: number) {
         const data = this.deviceData[dataAt].data.getAsJson();
         let dataJson: any = {
-            data:data
+            data: data
         }
 
         return data
     }
 
-    setDallbackOnChange(newFucnction:Function) {
+    setCallbackOnChange(newFucnction: Function) {
         this.callbackOnChange = newFucnction
     }
 
@@ -208,13 +224,44 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    public getDeviceName() {
+    public getDeviceName() : string {
         return this.deviceName;
     }
 
     public setDeviceName(newDeviceName: string) {
-        this.saveData();
         this.deviceName = newDeviceName;
+        this.saveData();
+        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+    }
+
+    public getIsVisible() : boolean {
+        return this.isVisible;
+    }
+
+    public setIsVisible(_isVisible : boolean) {
+        this.isVisible = _isVisible;
+        this.saveData();
+        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+    }
+
+    public getIsAccepted() : -1 | 0 | 1 {
+        return this.isAccepted;
+    }
+
+    public setIsAccepted(_isAccepted : -1 | 0 | 1) {
+        this.isAccepted = _isAccepted;
+        this.saveData();
+        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+    }
+
+    public getIsAdminOnly() : boolean {
+        return this.isAdminOnly;
+    }
+
+    public setIsAdminOnly(_isAdminOnly : boolean) {
+        this.isAdminOnly = _isAdminOnly;
+        this.saveData();
+        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
     }
 
     async setVar(dataAt: number, varName: string, newContent: any) {
@@ -245,7 +292,7 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    async setDeviceVar(varName: string, newContent: any, toTrigger:boolean = true) {
+    async setDeviceVar(varName: string, newContent: any, toTrigger: boolean = true) {
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
@@ -260,7 +307,7 @@ class Device {
             case Device.DEVICE_NAME:
                 this.deviceName = String(newContent)
                 await this.saveData();
-                if(toTrigger) {
+                if (toTrigger) {
                     this.callbackOnChange(eventData);
                 }
                 break;
@@ -268,12 +315,15 @@ class Device {
                 if (this.isConnected != newContent) {
                     this.isConnected = newContent;
                     await this.saveData();
-                    if(toTrigger) {
+                    if (toTrigger) {
                         this.callbackOnChange(eventData);
                     }
                     break;
                 }
-                // TODO: may need to add the topic change
+            // TODO:add topic change
+            // TODO: add isVisible
+            // TODO: add isAccepted
+            // TODO: add isAdminOnly
             case Device.isConnectedCheck:
                 this.isConnectedCheck = newContent == true ? true : false;
                 break;
@@ -283,7 +333,7 @@ class Device {
         }
     }
 
-    
+
     async setDeviceData(newData: any) {
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
@@ -298,7 +348,7 @@ class Device {
         keys.forEach(key => {
             let newVal = JSON.parse(JSON.stringify(newData))[key]
             try {
-                this.setDeviceVar(key, newVal,false)
+                this.setDeviceVar(key, newVal, false)
             } catch (err) {
                 //its fine :)
             }

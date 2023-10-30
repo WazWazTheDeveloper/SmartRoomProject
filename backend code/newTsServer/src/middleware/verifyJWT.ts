@@ -24,6 +24,7 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
             }
             (req as any).user = decoded.userInfo.username;
             (req as any).roles = decoded.userInfo.permission;
+            // TODO: add is admin
             next()
         }
     )

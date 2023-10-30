@@ -267,12 +267,18 @@ class Task implements TaskType {
             for (let index = 0; index < this.toDoTaskList.length; index++) {
                 const task = this.toDoTaskList[index];
                 console.log(task)
-                let device = this.getDeviceFromId(task.deviceId);
-                // -1 means for change the device itself
-                if (task.dataAt == -1) {
-                    device.setDeviceVar(task.varName, task.newVarValue)
-                } else {
-                    device.setVar(task.dataAt, task.varName, task.newVarValue);
+                try{
+                    let device = this.getDeviceFromId(task.deviceId);
+                    // -1 means for change the device itself
+                    if (task.dataAt == -1) {
+                        device.setDeviceVar(task.varName, task.newVarValue)
+                    } else {
+                        device.setVar(task.dataAt, task.varName, task.newVarValue);
+                    }
+                }
+                catch(err) {
+                    console.log("task.ts onUpdateData()");
+                    console.log(err);
                 }
             }
 
@@ -402,6 +408,8 @@ class Task implements TaskType {
         }
 
         await this.saveData();
+
+        this.onUpdateData();
     }
 
     setAllTimerCheck(isTrue: boolean) {

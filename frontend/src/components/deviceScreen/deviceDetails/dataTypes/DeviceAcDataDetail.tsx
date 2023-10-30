@@ -2,7 +2,7 @@ import styles from './DeviceAcDataDetail.module.css'
 import { AcUnit, Air, AirlineSeatFlatAngled, DeviceThermostat, Dry, EmojiEmotions, FastForward, Favorite, HdrAuto, LocalFireDepartment, ModeFanOff, PowerSettingsNew, Swipe, SwipeVertical, Timer } from '@mui/icons-material';
 import SwitchButton from '../../../switchButton';
 import { Button, Slider } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useApi } from '../../../../hooks/useApi';
 import { ApiService } from '../../../../services/apiService';
@@ -35,18 +35,18 @@ interface props {
     targetDevice: string,
     dataAt: number,
     data: {
-        isOn: Boolean
+        isOn: boolean
         temp: number
         mode: number
         speed: number
-        swing1: Boolean
-        swing2: Boolean
+        swing1: boolean
+        swing2: boolean
         timer: number
-        isStrong: Boolean
-        isFeeling: Boolean
-        isSleep: Boolean
-        isScreen: Boolean
-        isHealth: Boolean
+        isStrong: boolean
+        isFeeling: boolean
+        isSleep: boolean
+        isScreen: boolean
+        isHealth: boolean
     }
 }
 function DeviceAcDataDetail(props: props) {
@@ -65,59 +65,87 @@ function DeviceAcDataDetail(props: props) {
     const [isFeeling, setIsFeeling] = useState(deviceData.isFeeling as boolean);
     const [isSleep, setIsSleep] = useState(deviceData.isSleep as boolean);
     const [isHealth, setIsHealth] = useState(deviceData.isHealth as boolean);
-    
-    useDidMount(()=> {
-        let body = {
-            targetDevice: props.targetDevice,
-            dataAt: props.dataAt,
-            data: {
-                isOn: isOn,
-                temp: temp,
-                mode: mode,
-                speed: speed,
-                swing1: swing1,
-                swing2: swing2,
-                timer: timer,
-                isStrong: isStrong,
-                isFeeling: isFeeling,
-                isSleep: isSleep,
-                isHealth: isHealth,
+
+    const toUpdate = useRef(false);
+
+    useEffect(() => {
+        setIsOn(deviceData.isOn);
+        setTemp(deviceData.temp);
+        setMode(deviceData.mode);
+        setSpeed(deviceData.speed);
+        setSwing1(deviceData.swing1);
+        setSwing2(deviceData.swing2);
+        setTimer(deviceData.timer);
+        setIsStrong(deviceData.isStrong);
+        setIsFeeling(deviceData.isFeeling);
+        setIsSleep(deviceData.isSleep);
+        setIsHealth(deviceData.isHealth);
+    },[props])
+    useDidMount(() => {
+        if (toUpdate.current) {
+            let body = {
+                targetDevice: props.targetDevice,
+                dataAt: props.dataAt,
+                data: {
+                    isOn: isOn,
+                    temp: temp,
+                    mode: mode,
+                    speed: speed,
+                    swing1: swing1,
+                    swing2: swing2,
+                    timer: timer,
+                    isStrong: isStrong,
+                    isFeeling: isFeeling,
+                    isSleep: isSleep,
+                    isHealth: isHealth,
+                }
             }
+            fetchWithReauth("/device/update_device", ApiService.REQUEST_POST, userdata.token, body)
+            toUpdate.current = false;
         }
-        fetchWithReauth("/device/update_device",ApiService.REQUEST_POST,userdata.token, body)
-    },[isOn,tempCommit,mode,speed,swing1,swing2,timer,isStrong,isFeeling,isSleep,isHealth])
+    }, [isOn, tempCommit, mode, speed, swing1, swing2, timer, isStrong, isFeeling, isSleep, isHealth])
     function onButtonStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsOn(!isOn)
+        toUpdate.current = true;
     }
     function onSwing1StateChange(e: React.ChangeEvent<HTMLElement>) {
         setSwing1(!swing1)
+        toUpdate.current = true;
     }
     function onSwing2StateChange(e: React.ChangeEvent<HTMLElement>) {
         setSwing2(!swing2)
+        toUpdate.current = true;
     }
     function onIsStrongStateChange(e: React.MouseEvent<HTMLElement>) {
         setIsStrong(!isStrong)
+        toUpdate.current = true;
     }
     function onIsFeelingStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsFeeling(!isFeeling)
+        toUpdate.current = true;
     }
     function onIsSleepStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsSleep(!isSleep)
+        toUpdate.current = true;
     }
     function onIsHealthStateChange(e: React.ChangeEvent<HTMLElement>) {
         setIsHealth(!isHealth)
+        toUpdate.current = true;
     }
     function onTempCommitStateChange(event: React.SyntheticEvent | Event, newValue: number | Array<number>) {
         setTempCommit(!tempCommit)
+        toUpdate.current = true;
     }
     function onTempStateChange(event: React.SyntheticEvent | Event, newValue: number | Array<number>) {
         setTemp(newValue as number)
     }
     function onModeStateChange(newMode: number) {
         setMode(newMode)
+        toUpdate.current = true;
     }
     function onSpeedStateChange(newMode: number) {
         setSpeed(newMode)
+        toUpdate.current = true;
     }
 
 

@@ -27,7 +27,6 @@ const createNewDevice = async (req: Request, res: Response) => {
         await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
         let newDevice: Device = appdata.getDeviceById(newUUID);
         res.status(200);
-        WebSocketServerHandler.updateAppdata();
         res.send(newUUID);
     } catch (err) {
         res.status(404);
@@ -44,7 +43,7 @@ const getData = async (req: Request, res: Response) => {
     let appdata = await AppData.getAppDataInstance();
 
     let uuidString = String(uuid)
-    if(!(dataAtString instanceof String)) {
+    if (!(dataAtString instanceof String)) {
         dataAtString = "0"
     }
     let dataAt = Number(dataAtString);
@@ -72,7 +71,7 @@ const getTopic = async (req: Request, res: Response) => {
     let uuidString = String(uuid)
 
     res.setHeader("Content-Type", "application/json");
-    try{
+    try {
         let device: Device = appdata.getDeviceById(uuidString);
         let pubSubData = {
             topicPath: device.getTopicPath(),
@@ -80,7 +79,7 @@ const getTopic = async (req: Request, res: Response) => {
         res.status(200);
         res.json(pubSubData);
 
-    }catch(err) {
+    } catch (err) {
         console.log("topic not found")
         res.status(404);
     }
@@ -109,4 +108,16 @@ const update_device = async (req: Request, res: Response) => {
 
     res.status(200).json('success')
 }
-export { createNewDevice, getData, getTopic, update_device }
+
+const delete_device = async (req: Request, res: Response) => {
+    // TODO: add verification for permissions
+    let uuid = req.query.uuid;
+    let appdata = await AppData.getAppDataInstance();
+
+    let uuidString = String(uuid)
+
+    await appdata.removeDevice(uuidString);
+    res.status(200).json('success');
+}
+
+export { createNewDevice, getData, getTopic, update_device, delete_device }

@@ -18,6 +18,7 @@ interface UserType {
     permission: Array<string>;
     settings: SettingsType;
     isActive: boolean;
+    isAdmin : boolean;
 }
 
 class User {
@@ -28,20 +29,22 @@ class User {
     // TODO: add permission group as welll as add them to all the check functions
     private settings: Settings;
     private isActive: boolean;
+    private isAdmin: boolean;
 
-    constructor(uuid: string, username: string, password: string, permission: Array<string>, settings: Settings, isActive: boolean) {
+    constructor(uuid: string, username: string, password: string, permission: Array<string>, settings: Settings, isActive: boolean , isAdmin:boolean) {
         this.uuid = uuid;
         this.username = username;
         this.password = password;
         this.permission = permission;
         this.settings = settings;
         this.isActive = isActive;
+        this.isAdmin = isAdmin;
     }
 
-    static async createNewUser(username: string, password: string) {
+    static async createNewUser(username: string, password: string,isAdmin:boolean = false) {
         let uuid = uuidv4();
         let hashedPassword = await this.getHashedPassword(password);
-        let newUser = new User(uuid, username, hashedPassword, [], new Settings(), true);
+        let newUser = new User(uuid, username, hashedPassword, [], new Settings(), true,isAdmin);
 
         let appDataInstance = await AppData.getAppDataInstance();
         appDataInstance.addUser(username)
@@ -52,7 +55,7 @@ class User {
 
     public static async getUser(username: string) {
         let _data: UserType = await data.readFile<UserType>(`users/${username}`)
-        let user = await new User(_data.uuid, _data.username, _data.password, _data.permission, Settings.getFromJson(_data.settings), _data.isActive);
+        let user = await new User(_data.uuid, _data.username, _data.password, _data.permission, Settings.getFromJson(_data.settings), _data.isActive,_data.isAdmin);
         return user;
     }
 
@@ -72,7 +75,8 @@ class User {
             password: this.password,
             permission: this.permission,
             settings: this.settings.getAsJson(),
-            isActive: this.isActive
+            isActive: this.isActive,
+            isAdmin: this.isAdmin
         }
 
         return dataJson
@@ -156,6 +160,15 @@ class User {
         this.isActive = _isActive;
         await this.saveData();
     }
+
+    getIsAdmin(): boolean {
+        return this.isAdmin;
+    }
+    async setIsAdmin(_isAdmin: boolean) {
+        this.isAdmin = _isAdmin;
+        await this.saveData();
+    }
+
 }
 
 export { User }

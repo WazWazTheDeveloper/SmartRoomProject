@@ -66,6 +66,7 @@ class CheckConnection {
         let deviceID = message.sender;
 
         if (deviceID != DataPacket.SENDER_SERVER) {
+            console.log(deviceID)
             try {
                 let _device = appData.getDeviceById(deviceID)
                 _device.setDeviceVar(Device.isConnectedCheck, true)

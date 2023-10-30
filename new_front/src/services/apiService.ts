@@ -25,7 +25,7 @@ class ApiService {
             request.body = JSON.stringify(payload);
         }
 
-        let response = await fetch(relativPath, request)
+        let response = await fetch("/api"+relativPath, request)
         return response
     }
 

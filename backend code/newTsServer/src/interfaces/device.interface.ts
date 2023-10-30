@@ -1,7 +1,9 @@
 interface DeviceType {
     deviceName:string
     uuid: string
-    isAccepted:boolean
+    isAccepted:-1 | 0 | 1
+    isVisible: boolean
+    isAdminOnly : boolean
     topicPath:string
     isConnected: boolean
     isConnectedCheck: boolean

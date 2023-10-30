@@ -17,10 +17,6 @@ import TodoTask from './listsItems/todoTask';
 
 function TaskDetails(props: any) {
     const [userdata] = useAuth();
-    // const [data, isLoading, isError, error, fetchWithReauth, refreshToken] = useApi("/task/update-task", ApiService.REQUEST_POST);
-    // const [removeVarData, removeVarIsLoading, removeVarIsError, removeVarError, removeVarFetchWithReauth] = useApi("/task/remove-var-check", ApiService.REQUEST_POST);
-    // const [removeTimeData, removeTimeIsLoading, removeTimeIsError, removeTimeError, removeTimeFetchWithReauth] = useApi("/task/remove-time-check", ApiService.REQUEST_POST);
-    // const [removeTodoData, removeTodoIsLoading, removeTodoIsError, removeTodoError, removeTodoFetchWithReauth] = useApi("/task/remove-todo", ApiService.REQUEST_POST);
     const [data, isLoading, isError, error, fetchWithReauth] = useApi();
 
     const { taskid } = useParams();
@@ -100,7 +96,7 @@ function TaskDetails(props: any) {
         if (isAppdata && taskid) {
             try {
                 let task = appdata.getTaskByUUID(taskid);
-                console.log(task);
+                console.log(task)
                 setTaskName(task.taskName)
                 setIsOn(task.isOn)
                 setIsRepeating(task.isRepeating)

@@ -5,7 +5,7 @@ import { User } from "../models/user";
 var jwt = require('jsonwebtoken');
 
 interface CostumWebsocket extends Websocket {
-    user? : User
+    user?: User
 }
 
 
@@ -14,8 +14,8 @@ const wsServer = new WebSocketServer({ noServer: true });
 
 class WebSocketServerHandler {
     public static init(): void {
-        wsServer.on('connection', async (socket : CostumWebsocket) => {
-            
+        wsServer.on('connection', async (socket: CostumWebsocket) => {
+
             console.log("connected new ws")
             socket.on('message', (message: RawData) => {
 
@@ -28,11 +28,11 @@ class WebSocketServerHandler {
     }
 
     public static updateAppdata() {
-        wsServer.clients.forEach(async (client : CostumWebsocket) => {
+        wsServer.clients.forEach(async (client: CostumWebsocket) => {
             // Check that connect are open and still alive to avoid socket error
             if (client.readyState === Websocket.OPEN) {
-                if(client.user) {
-                    let appData = await AppData.getAppDataInstance();   
+                if (client.user) {
+                    let appData = await AppData.getAppDataInstance();
                     // TODO: filler the data send :)
                     client.send(JSON.stringify(appData.getAppdataOfUser(client.user)));
                 }
@@ -51,9 +51,9 @@ class WebSocketServerHandler {
                 }
                 try {
                     socket.user = await User.getUser(decoded.userInfo.username);
-                    let appData = await AppData.getAppDataInstance();   
+                    let appData = await AppData.getAppDataInstance();
                     socket.send(JSON.stringify(appData.getAppdataOfUser(socket.user)));
-                }catch(err) {}
+                } catch (err) { }
             }
         )
     }

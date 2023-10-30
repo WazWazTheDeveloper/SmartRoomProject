@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './DeviceSumScreen.module.css'
 import DeviceSumContainer from './DeviceSumContainer';
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
@@ -10,11 +10,11 @@ interface props {
 
 }
 function DeviceListScreen() {
-  const [appdata, isAppdata] = useAppdata();
-  const navigate = useNavigate();
-  let _deviceList = [];
+    const [appdata, isAppdata] = useAppdata();
+    const navigate = useNavigate();
+    let _deviceList = [];
 
-//   TODO: undo this cluster fuck of code :)
+    //   TODO: undo this cluster fuck of code :)
     if (isAppdata) {
         let count = 0;
         _deviceList = [];
@@ -24,7 +24,7 @@ function DeviceListScreen() {
                 const data = device.deviceData[index2];
                 let element =
                     <div className={styles.device_sum_warper}>
-                        <DeviceSumContainer deviceName={device.deviceName} isConnected={device.isConnected} data={data} onClick={() => {navigate(`/${device.uuid}/${index2}`)}}/>
+                        <DeviceSumContainer uuid={device.uuid} deviceName={device.deviceName} isConnected={device.isConnected} data={data} onClick={() => { navigate(`/${device.uuid}/${index2}`) }} />
                     </div>
                 _deviceList.push(element)
                 count++;
@@ -45,9 +45,9 @@ function DeviceListScreen() {
 
     return (
         <>
-                    <div className={styles.device_sum_container}>
-                        {_deviceList}
-                    </div>
+            <div className={styles.device_sum_container}>
+                {_deviceList}
+            </div>
         </>
     )
 }

@@ -2,7 +2,6 @@ import styles from './DeviceAcData.module.css'
 
 // TODO: add type to props
 function AcData(props: any) {
-    // console.log(props.data)
     return (
         <div className={styles.data_container + " " + styles.acdata_container}>
             <p className={styles.acdata_ison}>{props.data.isOn ? "ON" : "OFF"}</p>

@@ -18,11 +18,13 @@ interface callback {
 class AppData {
     //on change listeners
     // TODO: take a look at the listeners
+    //TODO: add listeners for tasks (add/remove/change)
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
     public static readonly ON_DEVICE_DATA_CHANGE = "deviceDataChange";
     public static readonly ON_DATA_CHANGE = "dataChange";
     public static readonly ON_DEVICE_REMOVED = "deviceRemoved";
     public static readonly ON_DEVICE_ADDED = "deviceAdded";
+    public static readonly ON_ANY_CHANGE = "any";
 
     private taskList: Array<Task>
     private generalData: GeneralData;
@@ -126,7 +128,6 @@ class AppData {
             "deviceList": deviceJson
         }
 
-        console.log("json2")
         return json;
     }
 
@@ -139,7 +140,7 @@ class AppData {
 
             for (let index = 0; index < newAppDataInstance.getDeviceList().length; index++) {
                 const device = newAppDataInstance.getDeviceList()[index];
-                device.setDallbackOnChange(newAppDataInstance.triggerCallbacks)
+                device.setCallbackOnChange(newAppDataInstance.triggerCallbacks)
 
             }
 
@@ -270,6 +271,8 @@ class AppData {
             oldTopic: topic,
         }
 
+        this.removeDevicePermissionsOfDevice(uuid);
+
         this.triggerCallbacks(eventData)
     }
 
@@ -362,14 +365,10 @@ class AppData {
     triggerCallbacks(eventData: AppdataEvent): void {
         for (let index = 0; index < this.callbacks.length; index++) {
             const element = this.callbacks[index];
-            if (element.event == eventData.event) {
+            if (element.event == eventData.event || element.event == AppData.ON_ANY_CHANGE) {
                 element.callback(eventData);
-
             }
         }
-
-        // TODO: move this somwere alse:
-        WebSocketServerHandler.updateAppdata();
     }
 
     on(event: string, callback: Function): void {

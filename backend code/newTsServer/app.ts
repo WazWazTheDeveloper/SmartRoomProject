@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
 
-app.use(updateWebSocket)
+// app.use(updateWebSocket)
 
 app.use('/', router);
 
@@ -67,6 +67,10 @@ async function setup(): Promise<void> {
     let event = DataPacket.DATA_CHANGE;
     let massage: DataPacket = new DataPacket(DataPacket.SENDER_SERVER, eventData.deviceUUID, eventData.dataType, eventData.dataAt, event, device.getAsJsonForArduino(eventData.dataAt))
     client.sendMassage(device.getTopicPath(), massage);
+  });
+
+  appData.on(AppData.ON_ANY_CHANGE, async (eventData: AppdataEvent) => {
+    WebSocketServerHandler.updateAppdata();
   });
 
   // init scheduled functions
