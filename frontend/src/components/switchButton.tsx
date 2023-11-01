@@ -3,7 +3,7 @@ import styles from './switchButton.module.css'
 
 type props = {
     state :boolean
-    stateChangeFunction : React.ChangeEventHandler<HTMLInputElement>
+    stateChangeFunction : (React.ChangeEventHandler<HTMLInputElement>)
 }
 
 function SwitchButton(props: props) {

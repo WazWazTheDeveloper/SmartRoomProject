@@ -28,7 +28,8 @@ export default function DeviceSummary(props: Data) {
 
     function deleteDevice(e: React.MouseEvent<SVGSVGElement>) {
         console.log(props.uuid)
-        // e.stopPropagation();
+        e.stopPropagation();
+        console.log(props.uuid)
         // let delete_path = '/device/delete_device?uuid=' + props.uuid;
         // fetchWithReauth(delete_path, ApiService.REQUEST_POST, userdata.token)
     }
@@ -46,7 +47,7 @@ export default function DeviceSummary(props: Data) {
 
     let settingTile = 
     <div className="duration-200 hover:scale-105 w-6 h-6 md:h-10 md:w-10">
-        <Settings className="fill-on-surface h-full w-full" />
+        <Settings className="fill-on-surface h-full w-full"/>
     </div>
 
     return (

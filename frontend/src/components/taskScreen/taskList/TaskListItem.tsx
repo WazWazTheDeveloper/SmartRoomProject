@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import styles from './TaskListItem.module.css'
 import { Settings, DeleteForever } from '@mui/icons-material';
@@ -10,7 +10,7 @@ import { ApiService } from '../../../services/apiService';
 import { useAuth } from '../../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 interface Props {
-    taskId:string
+    taskId: string
 }
 
 function TaskListItem(props: Props) {
@@ -38,17 +38,17 @@ function TaskListItem(props: Props) {
         let body = {
             targetTask: props.taskId,
         }
-        fetchWithReauth("/task/delete-task", ApiService.REQUEST_POST,userdata.token, body)
+        fetchWithReauth("/task/delete-task", ApiService.REQUEST_POST, userdata.token, body)
     }
 
-    useEffect(()=> {
-        if(isAppdata) {
+    useEffect(() => {
+        if (isAppdata) {
             let task = appdata.getTaskByUUID(props.taskId)
             setTaskName(task.taskName)
             setIsOn(task.isOn);
             setIsRepeating(task.isRepeating);
         }
-    },[appdata])
+    }, [appdata])
 
     useDidMount(() => {
         let body = {
@@ -57,20 +57,20 @@ function TaskListItem(props: Props) {
                 isOn: isOn
             }
         }
-        fetchWithReauth("/task/update-task", ApiService.REQUEST_POST,userdata.token, body)
-    },[triggerUpdate])
+        fetchWithReauth("/task/update-task", ApiService.REQUEST_POST, userdata.token, body)
+    }, [triggerUpdate])
 
 
     return (
         <div className={styles.task_item_container}>
             <div className={styles.task_item_title_warper}>
-            <p className={styles.task_item_title}>{taskName}</p>
+                <p className={styles.task_item_title}>{taskName}</p>
             </div>
             <div className={styles.task_item_options}>
                 <p className={styles.task_item_is_repeating}>{isRepeating ? "repeating" : "once"}</p>
-                <SwitchButton state={isOn} stateChangeFunction={onButtonStateChange}/>
-                <Settings className={styles.icons} onClick={() => {onSettingsClick()}}/>
-                <DeleteForever className={styles.icons} onClick={() => {onDeleteClick()}}/>
+                <SwitchButton state={isOn} stateChangeFunction={onButtonStateChange} />
+                <Settings className={styles.icons} onClick={() => { onSettingsClick() }} />
+                <DeleteForever className={styles.icons} onClick={() => { onDeleteClick() }} />
             </div>
         </div>
     )

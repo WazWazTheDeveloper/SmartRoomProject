@@ -3,6 +3,8 @@ import TopBar from '@/components/navigation/topBar'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
+import './globals.css'
+import { useAuth } from '@/hooks/useAuth'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,7 +23,7 @@ export default function RootLayout({
       <body className='relative min-h-screen w-full h-full'>
         <Providers>
           <TopBar />
-          <div className='relative pl-24 pt-14'>
+          <div className='relative pl-11 pt-11 md:pl-24 md:pt-14'>
             {children}
           </div>
           <SideBar />

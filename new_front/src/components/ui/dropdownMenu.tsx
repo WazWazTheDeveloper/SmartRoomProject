@@ -5,6 +5,7 @@ import { Fragment } from "react"
 interface DropdownMenuProps {
     titleElement : React.ReactNode;
     menuItems: DropdownMenuItem[];
+    className? : string;
 }
 
 interface DropdownMenuItem {
@@ -32,10 +33,10 @@ export default function DropdownMenu(props: DropdownMenuProps) {
     }
 
     return (
-        <div className="md:mr-2.5 cursor-pointer mr-1">
+        <div className={"md:mr-2.5 cursor-pointer mr-1 relative " + props.className}>
             <Menu>
                 <div>
-                    <Menu.Button>
+                    <Menu.Button onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
                         {props.titleElement}
                     </Menu.Button>
                 </div>

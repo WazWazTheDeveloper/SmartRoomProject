@@ -20,7 +20,7 @@ interface ToDoTask {
 
 }
 
-interface Task {
+export interface Task {
     taskId: string
     taskName: string
     isOn: boolean
@@ -35,7 +35,7 @@ interface DeviceDataType {
     data: any
 }
 
-interface Device {
+export interface Device {
     deviceName: string
     uuid: string
     topicPath: string
@@ -44,7 +44,7 @@ interface Device {
     isConnectedCheck: boolean
     isAccepted: boolean
 }
-class Appdata {
+export default class Appdata {
     private taskList: Array<Task>
     private deviceList: Array<Device>;
 
@@ -100,4 +100,3 @@ class Appdata {
         return uuids
     }
 }
-export default Appdata

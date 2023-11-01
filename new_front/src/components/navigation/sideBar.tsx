@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { DevicesOther, AccessTime, Settings, Logout } from '@mui/icons-material';
+import { useAuth } from "@/hooks/useAuth";
 
 
 export default function SideBar() {
+    const {userdata, login, logout,signup, updateUserData, isError, error} = useAuth();
     return (
         <div className="fixed flex flex-wrap content-between top-11 left-0 bg-surface w-11 h-[calc(100%-44px)] md:w-24 md:h-[calc(100%-48px)] xl:top-12">
             <div className="">
                 <SideBarItem href="/devices">
                     <DevicesOther className="fill-white w-3/4 h-3/4" />
                 </SideBarItem>
-                <SideBarItem href="/scheduled_tasks">
+                <SideBarItem href="/tasks">
                     <AccessTime className="fill-white w-3/4 h-3/4" />
                 </SideBarItem>
                 <SideBarItem href="/settings">
@@ -19,7 +21,10 @@ export default function SideBar() {
                 </SideBarItem>
             </div>
             <div onClick={() => {}} className="w-11 h-11 md:w-24 md:h-24 flex justify-center items-center cursor-pointer duration-100 hover:scale-105">
-                <Logout className="fill-white w-3/4 h-3/4"/>
+                {userdata.token != "" ? 
+                <Logout className="fill-white w-3/4 h-3/4" onClick={() => {logout()}}/> : 
+                <></>
+                }
             </div>
         </div>
     )

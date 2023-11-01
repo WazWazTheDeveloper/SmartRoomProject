@@ -4,9 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import '../globals.css'
 import DeviceSummary from '@/components/devices/deviceSummary/deviceSummary';
 import { useAppdata } from '@/hooks/useAppdata';
+import { useRouter } from 'next/navigation';
 
 
 export default function Home() {
+    const router = useRouter()
     const [appdata, isAppdata] = useAppdata();
     let _deviceList = [];
 
@@ -20,7 +22,12 @@ export default function Home() {
                 const data = device.deviceData[index2];
                 let element =
                     <div key={index +","+ index2} className="relative h-60 w-1/2 md:w-1/3 xl:w-1/4 2xl:w-1/6 flex content-center justify-center">
-                        <DeviceSummary uuid={device.uuid} deviceName={device.deviceName} isConnected={device.isConnected} data={data} onClick={() => {}} />
+                        <DeviceSummary 
+                        uuid={device.uuid} 
+                        deviceName={device.deviceName} 
+                        isConnected={device.isConnected} 
+                        data={data} 
+                        onClick={() => {router.push(`/devices/${device.uuid}`)}} />
                     </div>
                 _deviceList.push(element)
                 count++;

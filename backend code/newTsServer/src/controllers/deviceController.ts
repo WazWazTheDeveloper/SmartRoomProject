@@ -104,6 +104,7 @@ const update_device = async (req: Request, res: Response) => {
         return
     }
 
+
     await foundDevice.setData(dataAt, data)
 
     res.status(200).json('success')

@@ -19,5 +19,11 @@
 h1,
 h2,
 input {
-  all: unset
+  all: unset;
+  margin: 0;
+  padding: 0;
+}
+
+div[contenteditable] {
+  outline: 0px solid transparent;
 }
