@@ -56,7 +56,7 @@ class Device {
         this.isConnected = isConnected
         this.isConnectedCheck = isConnectedCheck
         this.deviceData = deviceData
-        this.callbackOnChange = callbackOnChange
+        this.callbackOnChange = callbackOnChange 
     }
 
     public async saveData(): Promise<void> {

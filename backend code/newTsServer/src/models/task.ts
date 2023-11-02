@@ -1,6 +1,8 @@
 import { TimedTask } from "../handlers/timedTask_handler";
 import { Device } from "./device";
 import data = require('../handlers/file_handler')
+import { AppdataEvent } from "../interfaces/appData.interface";
+import { AppData } from "../appData";
 
 interface varCheck {
     deviceId: string
@@ -31,7 +33,6 @@ class VarCheck implements varCheck {
         this.checkType = checkType
         this.valueToCompareTo = valueToCompareTo
         this.isTrue = isTrue
-
     }
 
     getAsJson(): varCheck {
@@ -117,9 +118,10 @@ class Task implements TaskType {
     toDoTaskList: Array<ToDoTask>
     timedTasks: Array<TimedTask>
     callbackOnComplate: Function
+    callbackOnChange: Function
 
 
-    constructor(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>, callbackOnComplate: Function = () => { }) {
+    constructor(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean, varCheckList: Array<VarCheck>, timedCheckList: Array<TimeCheck>, toDoTaskList: Array<ToDoTask>, callbackOnComplate: Function = () => { },callbackOnChange: Function = () => { }) {
         this.taskId = taskId
         this.taskName = taskName
         this.isOn = isOn
@@ -129,6 +131,7 @@ class Task implements TaskType {
         this.toDoTaskList = toDoTaskList
         this.timedTasks = []
         this.callbackOnComplate = callbackOnComplate
+        this.callbackOnChange = callbackOnChange
 
         this.onUpdateData = this.onUpdateData.bind(this);
     }
@@ -347,12 +350,14 @@ class Task implements TaskType {
         this.varCheckList.push(newVarCheck);
         await this.saveData()
         this.onUpdateData()
+        this.callCallback()
     }
 
     async removeVarCheck(indexOfVarCheck: number): Promise<void> {
         this.varCheckList.splice(indexOfVarCheck, 1);
         await this.saveData()
         this.onUpdateData()
+        this.callCallback()
     }
 
     async addTodoTask(deviceId: string, dataIndex: number, varName: string, newVarValue: any): Promise<void> {
@@ -360,18 +365,21 @@ class Task implements TaskType {
         this.toDoTaskList.push(newTodoTask);
         await this.saveData()
         this.onUpdateData()
+        this.callCallback()
     }
 
     async removeTodoTask(indexOfTodoTask: number): Promise<void> {
         this.toDoTaskList.splice(indexOfTodoTask, 1);
         await this.saveData()
         this.onUpdateData();
+        this.callCallback()
     }
 
     async emptyTodoTask(): Promise<void> {
         this.toDoTaskList.splice(0, this.toDoTaskList.length);
         await this.saveData()
         this.onUpdateData()
+        this.callCallback()
     }
 
     async addTimedCheck(timingData: string): Promise<void> {
@@ -380,6 +388,7 @@ class Task implements TaskType {
         this.initTimedTask(newTimedCheck);
         await this.saveData()
         // this.onUpdateData()
+        this.callCallback()
     }
 
     async removeTimedCheck(indexOfTimedCheck: number): Promise<void> {
@@ -388,6 +397,7 @@ class Task implements TaskType {
         this.timedTasks.splice(indexOfTimedCheck, 1);
         await this.saveData()
         // this.onUpdateData()
+        this.callCallback()
     }
 
     setCallbackOnComplate(callback: Function): void {
@@ -436,6 +446,22 @@ class Task implements TaskType {
 
             timedTask.start()
         }
+    }
+
+    setCallbackOnChange(newFucnction: Function) {
+        this.callbackOnChange = newFucnction
+    }
+
+    callCallback() {
+        let eventData: AppdataEvent = {
+            deviceUUID: this.taskId,
+            event: AppData.ON_TASK_CHANGE,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: ""
+        }
+
+        this.callbackOnChange(eventData)
     }
 }
 

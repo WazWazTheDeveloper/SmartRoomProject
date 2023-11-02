@@ -24,6 +24,8 @@ class AppData {
     public static readonly ON_DATA_CHANGE = "dataChange";
     public static readonly ON_DEVICE_REMOVED = "deviceRemoved";
     public static readonly ON_DEVICE_ADDED = "deviceAdded";
+    public static readonly ON_TASK_CHANGE = "taskChange"
+    public static readonly ON_TASK_COMPLETE = "taskChange"
     public static readonly ON_ANY_CHANGE = "any";
 
     private taskList: Array<Task>
@@ -141,7 +143,11 @@ class AppData {
             for (let index = 0; index < newAppDataInstance.getDeviceList().length; index++) {
                 const device = newAppDataInstance.getDeviceList()[index];
                 device.setCallbackOnChange(newAppDataInstance.triggerCallbacks)
+            }
 
+            for (let index = 0; index < newAppDataInstance.getTaskList().length; index++) {
+                const task = newAppDataInstance.getTaskList()[index];
+                task.setCallbackOnChange(newAppDataInstance.triggerCallbacks)
             }
 
             appDataInstance = newAppDataInstance;

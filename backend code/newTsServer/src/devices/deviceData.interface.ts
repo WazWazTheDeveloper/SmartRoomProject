@@ -26,6 +26,8 @@ interface AirconditionerDataType {
 
 interface SwitchDataType {
     isOn: boolean
+    onName:string
+    offName:string
 }
 
 export {IDeviceData , AirconditionerDataType,SwitchDataType}

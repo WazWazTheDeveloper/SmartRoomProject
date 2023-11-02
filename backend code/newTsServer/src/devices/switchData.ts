@@ -4,6 +4,10 @@ import data = require('../handlers/file_handler')
 
 class SwitchData implements IDeviceData {
     isOn: boolean
+    onName:string
+    offName:string
+    // IMPLEMENT: isSetableByUser : boolean
+    // isSetableByUser : boolean
 
     constructor(isOn = false) {
         this.isOn = isOn
@@ -13,6 +17,9 @@ class SwitchData implements IDeviceData {
         this.getAsJson = this.getAsJson.bind(this);
         this.getData = this.getData.bind(this);
         this.getVar = this.getVar.bind(this);
+        // TODO: maybe add option to set this from the device it self
+        this.onName="on";
+        this.offName="off";
     }
 
     static createFromJson(data:SwitchDataType) : SwitchData {
