@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className='relative min-h-screen w-full h-full'>
         <Providers>
           <TopBar />
-          <div className='relative pl-11 pt-11 md:pl-24 md:pt-14'>
+          <div className='relative pl-11 pt-11 md:pl-24 md:pt-12'>
             {children}
           </div>
           <SideBar />

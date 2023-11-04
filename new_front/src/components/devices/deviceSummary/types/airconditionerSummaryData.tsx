@@ -1,4 +1,21 @@
-export default function AirconditionerSummaryData(props: any) {
+interface props {
+    data:{
+        isOn: boolean
+        temp: number
+        mode: number
+        speed: number
+        swing1: boolean
+        swing2: boolean
+        timer: number
+        isStrong: boolean
+        isFeeling: boolean
+        isSleep: boolean
+        isScreen: boolean
+        isHealth: boolean
+    }
+}
+
+export default function AirconditionerSummaryData(props: props) {
     return (
         <div className="relative flex flex-wrap w-full h-full text-on-surface">
             <p className="relative w-full h-1/5 text-center md:text-lg text-xs font-semibold">{props.data.isOn ? "ON" : "OFF"}</p>

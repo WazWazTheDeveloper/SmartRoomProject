@@ -1,5 +1,6 @@
 'use client';
 
+import AddToCheckListItem from "@/components/tasks/details/addToCheckListItem";
 import ViewToCheckListItem from "@/components/tasks/details/viewToCheckListItem";
 import ViewTodoListItem from "@/components/tasks/details/viewTotoListItem";
 import DropdownMenu from "@/components/ui/dropdownMenu";
@@ -104,6 +105,31 @@ export default function Page({ params }: { params: { id: string } }) {
         setIsAddTodoTask(false);
     }
 
+    function onRemoveVarCheck(indexOfVarCheck: number) {
+        let body = {
+            targetTask: params.id,
+            indexOfVarCheck: indexOfVarCheck
+        }
+        fetchWithReauth("/task/remove-var-check", ApiService.REQUEST_POST,userdata.token, body)
+    }
+
+    function onRemoveTimeCheck(indexOfVarCheck: number) {
+        let body = {
+            targetTask: params.id,
+            indexOfTimeCheck: indexOfVarCheck
+        }
+        console.log(indexOfVarCheck)
+        fetchWithReauth("/task/remove-time-check", ApiService.REQUEST_POST,userdata.token, body)
+    }
+
+    function onRemoveTodo(indexOfVarCheck: number) {
+        let body = {
+            targetTask: params.id,
+            indexOfTodoTask: indexOfVarCheck
+        }
+        fetchWithReauth("/task/remove-todo", ApiService.REQUEST_POST,userdata.token, body)
+    }
+
     useEffect(() => {
         if (isAppdata && params.id) {
             try {
@@ -143,7 +169,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 varName={check.varName}
                 checkType={check.checkType}
                 valueToCompareTo={check.valueToCompareTo}
-                onDeleteFunction={() => { }}
+                onDeleteFunction={() => {onRemoveVarCheck(index) }}
                 onEditFunction={() => { }}
                 key={index}
             />
@@ -206,7 +232,9 @@ export default function Page({ params }: { params: { id: string } }) {
             </SubMenu>
             {/* TODO: finish this */}
             {isAddVarCheck ?
-                <></> :
+                <AddToCheckListItem 
+                id={params.id}
+                onDeleteFunction={onUnclickAddVarCheck}/> :
                 <></>
             }
             {isAddTimeCheck ?

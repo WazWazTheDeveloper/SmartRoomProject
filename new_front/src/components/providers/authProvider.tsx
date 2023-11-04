@@ -9,7 +9,8 @@ type UserDataType = {
 
     token: string,
     userName: string,
-    permission: Array<string>
+    permission: Array<string>,
+    isAdmin : boolean
 }
 export type ContextType = {
     userdata: UserDataType,
@@ -27,6 +28,7 @@ function AuthProvider({ children }: Props) {
     const [token, setToken] = useState("");
     const [userName, setUserName] = useState("");
     const [permission, setPermission] = useState<Array<string>>([]);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState('');
 
@@ -52,6 +54,7 @@ function AuthProvider({ children }: Props) {
                     setToken(token)
                     setUserName(decoded.userInfo.username)
                     setPermission(decoded.userInfo.permission)
+                    setIsAdmin(decoded.userInfo.isAdmin)
                     setIsError(false)
                     setError("")
                 }
@@ -59,6 +62,7 @@ function AuthProvider({ children }: Props) {
                     setToken("")
                     setUserName("")
                     setPermission([])
+                    setIsAdmin(false)
                     setIsError(false)
                     setError("")
                 }
@@ -144,7 +148,7 @@ function AuthProvider({ children }: Props) {
     }
 
     let userdata: UserDataType = {
-        token, userName, permission
+        token, userName, permission, isAdmin
     }
 
     return (

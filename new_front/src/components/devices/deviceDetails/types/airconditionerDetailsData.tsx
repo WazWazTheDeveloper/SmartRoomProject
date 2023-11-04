@@ -54,9 +54,8 @@ interface props {
 
 export default function AirconditionerDetailsData(props: props) {
     const deviceData = props.data
-    console.log()
     const { userdata } = useAuth();
-    const { data, isLoading, isError, error, fetchWithReauth } = useApi();
+    const { fetchWithReauth } = useApi();
     const [isOn, setIsOn] = useState(deviceData.isOn as boolean);
     const [temp, setTemp] = useState(deviceData.temp);
     const [tempCommit, setTempCommit] = useState(false);

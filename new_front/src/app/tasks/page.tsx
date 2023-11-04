@@ -28,7 +28,7 @@ export default function Tasks() {
     }, [isAppdata, appdata])
 
     function onAddClick(e: React.MouseEvent<SVGSVGElement>) {
-        // fetchWithReauth("/task/create-task", ApiService.REQUEST_POST,userdata.token);
+        fetchWithReauth("/task/create-task", ApiService.REQUEST_POST,userdata.token);
     }
 
     return (

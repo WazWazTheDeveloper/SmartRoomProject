@@ -8,7 +8,7 @@ interface DropdownMenuProps {
     className? : string;
 }
 
-interface DropdownMenuItem {
+export interface DropdownMenuItem {
     itemTitle: string;
     onClick: React.MouseEventHandler;
 }
@@ -33,7 +33,7 @@ export default function DropdownMenu(props: DropdownMenuProps) {
     }
 
     return (
-        <div className={"md:mr-2.5 cursor-pointer mr-1 relative " + props.className}>
+        <div className={"md:mr-2.5 cursor-pointer mr-1 relative w-auto h-auto" + props.className}>
             <Menu>
                 <div>
                     <Menu.Button onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>

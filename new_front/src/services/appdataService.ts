@@ -70,7 +70,7 @@ export default class Appdata {
         return this.deviceList;
     }
 
-    getDeviceByUUID(deviceId : string) {
+    getDeviceByUUID(deviceId: string) {
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
             if (device.uuid == deviceId) {
@@ -80,7 +80,7 @@ export default class Appdata {
         throw new Error("device not found")
     }
 
-    getTaskByUUID(taskId : string) {
+    getTaskByUUID(taskId: string) {
         for (let index = 0; index < this.taskList.length; index++) {
             const task = this.taskList[index];
             if (task.taskId == taskId) {
@@ -99,4 +99,9 @@ export default class Appdata {
 
         return uuids
     }
+}
+
+export class DataType {
+    static readonly AIRCONDITIONER_TYPE = 0;
+    static readonly SWITCH_TYPE = 1;
 }

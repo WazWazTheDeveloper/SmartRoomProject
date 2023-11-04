@@ -26,7 +26,7 @@ function AppdataProvider({ children }: Props) {
   const [webSocket, setWebSocket] = useState(new WebSocket(socketUrl));
   
   useEffect(() => {
-    webSocket.onopen = () => {
+  webSocket.onopen = () => {
     webSocket.send(userdata.token)
       setWebSocketReady(true)
       console.log('connected');
@@ -35,6 +35,7 @@ function AppdataProvider({ children }: Props) {
     webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const appdata = Appdata.createAppdataFromFetch(data)
+      console.log(appdata);
       setAppdata(appdata);
     }
 
