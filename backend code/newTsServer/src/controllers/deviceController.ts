@@ -121,4 +121,28 @@ const delete_device = async (req: Request, res: Response) => {
     res.status(200).json('success');
 }
 
-export { createNewDevice, getData, getTopic, update_device, delete_device }
+const update_name = async (req:Request, res:Response) => {
+    const { targetDevice,newName } = req.body;
+    // TODO: maybe add max character limit or somting
+    if (!newName || !targetDevice) {
+        res.status(400).json('invalid data')
+        return
+    }
+
+    let appdata = await AppData.getAppDataInstance()
+
+    let foundDevice: Device;
+    try {
+        foundDevice = await appdata.getDeviceById(targetDevice);
+    } catch (err) {
+        res.status(401).json('Device does not exist')
+        return
+    }
+
+
+    await foundDevice.setDeviceName(newName);
+
+    res.status(200).json('success')
+}
+
+export { createNewDevice, getData, getTopic, update_device, delete_device,update_name }

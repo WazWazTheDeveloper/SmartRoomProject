@@ -231,7 +231,19 @@ class Device {
     public setDeviceName(newDeviceName: string) {
         this.deviceName = newDeviceName;
         this.saveData();
-        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+
+        console.log(newDeviceName)
+        console.log(this.deviceName)
+
+        let eventData: AppdataEvent = {
+            deviceUUID: this.uuid,
+            event: AppData.ON_DEVICE_DATA_CHANGE,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: ""
+        }
+
+        this.callbackOnChange(eventData);
     }
 
     public getIsVisible() : boolean {
@@ -241,7 +253,16 @@ class Device {
     public setIsVisible(_isVisible : boolean) {
         this.isVisible = _isVisible;
         this.saveData();
-        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+
+        let eventData: AppdataEvent = {
+            deviceUUID: this.uuid,
+            event: AppData.ON_DEVICE_DATA_CHANGE,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: ""
+        }
+
+        this.callbackOnChange(eventData);
     }
 
     public getIsAccepted() : -1 | 0 | 1 {
@@ -251,7 +272,16 @@ class Device {
     public setIsAccepted(_isAccepted : -1 | 0 | 1) {
         this.isAccepted = _isAccepted;
         this.saveData();
-        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+        
+        let eventData: AppdataEvent = {
+            deviceUUID: this.uuid,
+            event: AppData.ON_DEVICE_DATA_CHANGE,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: ""
+        }
+
+        this.callbackOnChange(eventData);
     }
 
     public getIsAdminOnly() : boolean {
@@ -261,7 +291,16 @@ class Device {
     public setIsAdminOnly(_isAdminOnly : boolean) {
         this.isAdminOnly = _isAdminOnly;
         this.saveData();
-        // TODO: add callback with "ON_DEVICE_DATA_CHANGE" event
+        
+        let eventData: AppdataEvent = {
+            deviceUUID: this.uuid,
+            event: AppData.ON_DEVICE_DATA_CHANGE,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: ""
+        }
+
+        this.callbackOnChange(eventData);
     }
 
     async setVar(dataAt: number, varName: string, newContent: any) {

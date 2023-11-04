@@ -269,6 +269,7 @@ class AppData {
         removeFile(`devices/${uuid}`)
         console.log(`Removed device ${uuid} from appData`)
 
+        // TODO: remove general topic associated with the device and also any task the contain the device(or at least add try catch in the task module :))
         let eventData: AppdataEvent = {
             deviceUUID: uuid,
             event: AppData.ON_DEVICE_REMOVED,

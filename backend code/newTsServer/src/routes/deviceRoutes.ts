@@ -25,4 +25,7 @@ router.route('/update_device')
 router.route('/delete_device')
     .post(deviceController.delete_device)
 
+router.route('/update_name')
+    .post(deviceController.update_name)
+
 export { router as deviceRouter };

@@ -9,7 +9,7 @@ class SwitchData implements IDeviceData {
     // IMPLEMENT: isSetableByUser : boolean
     // isSetableByUser : boolean
 
-    constructor(isOn = false) {
+    constructor(isOn = false,onName:string = "ON",offName:string ="OFF") {
         this.isOn = isOn
 
         this.setData = this.setData.bind(this);
@@ -18,13 +18,15 @@ class SwitchData implements IDeviceData {
         this.getData = this.getData.bind(this);
         this.getVar = this.getVar.bind(this);
         // TODO: maybe add option to set this from the device it self
-        this.onName="on";
-        this.offName="off";
+        this.onName=onName;
+        this.offName=offName;
     }
 
     static createFromJson(data:SwitchDataType) : SwitchData {
         let DeviceData = new SwitchData(
-            data.isOn)
+            data.isOn,
+            data.onName,
+            data.offName)
 
             return DeviceData;
     }
@@ -34,7 +36,9 @@ class SwitchData implements IDeviceData {
             data.readFile<DeviceType>(`devices/${uuid}`).then(acData => {
                 let data = acData.deviceData[dataPlace].data
                 let newAirconditionerDevice = new SwitchData(
-                    data.isOn
+                    data.isOn,
+                    data.onName,
+                    data.offName
                 )
 
                 resolve(newAirconditionerDevice)
@@ -51,6 +55,14 @@ class SwitchData implements IDeviceData {
             case ("isOn"): {
                 this.isOn = newValue == 1 ? true : false;
                 return "isOn"
+            }
+            case ("onName"): {
+                this.onName = newValue;
+                return "onName"
+            }
+            case ("offName"): {
+                this.offName = newValue;
+                return "offName"
             }
             default: {
                 throw new Error("variable not found")
@@ -79,11 +91,19 @@ class SwitchData implements IDeviceData {
             case("isOn"): {
                 return { "isOn": this.isOn };
             }
+            case("onName"): {
+                return { "onName": this.onName };
+            }
+            case("offName"): {
+                return { "offName": this.offName };
+            }
         }
     }
     getAsJson () {
         let json = {
-            "isOn": this.isOn
+            "isOn": this.isOn,
+            "onName": this.onName,
+            "offName": this.offName
         }
         return json;
     }

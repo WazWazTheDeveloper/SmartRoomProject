@@ -36,7 +36,8 @@ const login = asyncHandler(async (req: Request, res: Response) => {
         {
             userInfo: {
                 username: foundUser.getUsername(),
-                permission: foundUser.getPermissions()
+                permission: foundUser.getPermissions(),
+                isAdmin: foundUser.getIsAdmin()
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -145,7 +146,8 @@ const signup = async (req: Request, res: Response) => {
         {
             userInfo: {
                 username: foundUser.getUsername(),
-                permission: foundUser.getPermissions()
+                permission: foundUser.getPermissions(),
+                isAdmin: foundUser.getIsAdmin()
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
