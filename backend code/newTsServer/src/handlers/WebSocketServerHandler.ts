@@ -13,10 +13,13 @@ const wsServer = new WebSocketServer({ noServer: true });
 
 
 class WebSocketServerHandler {
+    
     public static init(): void {
         wsServer.on('connection', async (socket: CostumWebsocket) => {
 
             console.log("connected new ws")
+            // console.log(socket.url)
+            
             socket.on('message', (message: RawData) => {
 
                 WebSocketServerHandler.executeMessage(socket, message)
@@ -34,7 +37,8 @@ class WebSocketServerHandler {
                 if (client.user) {
                     let appData = await AppData.getAppDataInstance();
                     // TODO: filler the data send :)
-                    client.send(JSON.stringify(appData.getAppdataOfUser(client.user)));
+                    let json = await appData.getAppdataOfUser(client.user);
+                    client.send(JSON.stringify(json));
                 }
             }
         });
@@ -52,7 +56,9 @@ class WebSocketServerHandler {
                 try {
                     socket.user = await User.getUser(decoded.userInfo.username);
                     let appData = await AppData.getAppDataInstance();
-                    socket.send(JSON.stringify(appData.getAppdataOfUser(socket.user)));
+                    let json = await appData.getAppdataOfUser(socket.user);
+                    // console.log(json)
+                    socket.send(JSON.stringify(json));
                 } catch (err) { }
             }
         )

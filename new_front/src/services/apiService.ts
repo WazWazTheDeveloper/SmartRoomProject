@@ -20,7 +20,7 @@ class ApiService {
             // body: JSON.stringify(data), // body data type must match "Content-Type" header
         }
 
-        if (metod == ApiService.REQUEST_POST) {
+        if (metod == ApiService.REQUEST_POST || metod == ApiService.REQUEST_PUT|| metod == ApiService.REQUEST_DELETE) {
             request.headers['Content-Type'] = "application/json"
             request.body = JSON.stringify(payload);
         }

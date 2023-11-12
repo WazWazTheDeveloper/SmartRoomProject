@@ -42,28 +42,44 @@ export interface Device {
     deviceData: Array<DeviceDataType>
     isConnected: boolean
     isConnectedCheck: boolean
-    isAccepted: boolean
+    isAccepted: -1 | 0 | 1
+}
+
+export interface User {
+    uuid: string;
+    username: string;
+    password: string;
+    permission: Array<string>;
+    // settings: SettingsType;
+    isActive: boolean;
+    isAdmin : boolean;
 }
 export default class Appdata {
     private taskList: Array<Task>
     private deviceList: Array<Device>;
+    private userList: Array<User>;
 
-    constructor(taskList: Array<Task>, deviceList: Array<Device>) {
+    constructor(taskList: Array<Task>, deviceList: Array<Device>, userList: Array<User>) {
         this.taskList = taskList;
         this.deviceList = deviceList;
+        this.userList = userList;
     }
 
     public static createAppdataFromFetch(data: any) {
-        let newAppdata = new Appdata(data.taskList, data.deviceList)
+        let newAppdata = new Appdata(data.taskList, data.deviceList,data.userList)
         return newAppdata;
     }
 
     public static emptyAppdata() {
-        return new Appdata([], [])
+        return new Appdata([], [],[])
     }
 
     getTaskList() {
         return this.taskList;
+    }
+
+    getUserList() {
+        return this.userList;
     }
 
     getDeviceList() {
@@ -78,6 +94,16 @@ export default class Appdata {
             }
         }
         throw new Error("device not found")
+    }
+
+    getUserById(userId: string) {
+        for (let index = 0; index < this.userList.length; index++) {
+            const user = this.userList[index];
+            if (user.uuid == userId) {
+                return user
+            }
+        }
+        throw new Error("user not found")
     }
 
     getTaskByUUID(taskId: string) {
@@ -98,6 +124,16 @@ export default class Appdata {
         }
 
         return uuids
+    }
+
+    checkIfUserExist(uuid:string) {
+        for (let index = 0; index < this.userList.length; index++) {
+            const user = this.userList[index];
+            if(user.uuid == uuid) {
+                return true
+            }
+        }
+        return false
     }
 }
 

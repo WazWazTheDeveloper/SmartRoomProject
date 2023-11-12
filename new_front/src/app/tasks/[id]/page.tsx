@@ -164,7 +164,7 @@ export default function Page({ params }: { params: { id: string } }) {
         for (let index = 0; index < _toCheck.length; index++) {
             const check = _toCheck[index];
             let element = <ViewToCheckListItem
-                deviceId={task.taskId}
+                deviceId={check.deviceId}
                 dataIndex={check.dataIndex}
                 varName={check.varName}
                 checkType={check.checkType}

@@ -89,11 +89,14 @@ class User {
     }
 
     // IMPLEMENT
-    addPermission() {
-        // add check for correct format
+    async addPermission(newPermission : string) {
+        //TODO add check for correct format
+        this.permission.push(newPermission);
+        await this.saveData()
+        console.log("added permission: '"+newPermission +"' to user: '" + this.username + "'")
     }
     
-    removePermission(permission : string) {
+    async removePermission(permission : string) {
         for (let index = 0; index < this.permission.length; index++) {
             const element = this.permission[index];
             if(element == permission) {
@@ -101,6 +104,7 @@ class User {
                 console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
             }
         }
+        await this.saveData()
     }
 
     removeDevicePermission(deviceID: string) {
@@ -168,7 +172,6 @@ class User {
         this.isAdmin = _isAdmin;
         await this.saveData();
     }
-
 }
 
 export { User }

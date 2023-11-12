@@ -42,9 +42,16 @@ export default function AddToCheckListItem(props: AddToCheckListItemProps) {
         setCompateTo(e.target.value)
     }
 
+    let deviceName;
+    try{
+        deviceName = appdata.getDeviceByUUID(selectedId).deviceName;
+    }catch(err){
+        deviceName = "please select device"
+    }
+
     const selectIdTitle =
         (<div className="md:h-10 md:w-48 flex items-center justify-center ring-1">
-            {selectedId}
+            {deviceName}
         </div>);
 
     function createSelectIdTile() {
@@ -53,9 +60,8 @@ export default function AddToCheckListItem(props: AddToCheckListItemProps) {
             let _ids = appdata.getAllDeviceId();
             for (let index = 0; index < _ids.length; index++) {
                 const _id = _ids[index];
-                // TODO: chenge to device name *
                 _selectIdTiles.push({
-                    "itemTitle": _id,
+                    "itemTitle": appdata.getDeviceByUUID(_id).deviceName,
                     "onClick": () => { setSekectedId(_id) }
                 })
             }

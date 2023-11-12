@@ -13,7 +13,7 @@ export const useDevice = (_deviceId : string) => {
                 setDevice(_device)
             }
             catch (err) {
-                // TODO: add error of 404 or somting
+                // TODO: add error or somting
             }
         }
     }, [appdata, isAppdata, deviceId])

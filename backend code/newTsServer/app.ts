@@ -18,7 +18,7 @@ app.use(cookieParser())
 
 // app.use(updateWebSocket)
 
-app.use('/', router);
+app.use('/api', router);
 
 async function startServer(): Promise<void> {
   await AppData.init()
@@ -40,7 +40,6 @@ async function setup(): Promise<void> {
     client.subscribe(device.getTopicPath(), appData.updateDevice)
   }
 
-  //TODO: make this pretty
   appData.on(AppData.ON_DEVICE_ADDED, async (eventData: AppdataEvent) => {
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
@@ -81,7 +80,7 @@ function startListeningToReqests(): void {
   let server = app.listen(process.env.SERVER_PORT, () => {
     console.log(`listening on port ${process.env.SERVER_PORT}`)
   })
-
+  
   WebSocketServerHandler.init();
   let wbserver = WebSocketServerHandler.getWebSocketServer()
   server.on('upgrade', (req, socket, head) => {

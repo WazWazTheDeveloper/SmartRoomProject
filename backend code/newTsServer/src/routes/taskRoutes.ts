@@ -1,6 +1,7 @@
 import express from "express"
 import { verifyJWT } from "../middleware/verifyJWT";
 import * as taskController from "../controllers/taskController";
+// import * as userController from '../controllers/userController'
 
 
 
@@ -10,6 +11,7 @@ router.use(verifyJWT);
 
 router.route('/create-task')
     .post(taskController.createNewTask)
+    // .put(userController.setIsAdmin)
 
 router.route('/update-task')
     .post(taskController.updateTask)

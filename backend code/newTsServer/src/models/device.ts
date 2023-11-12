@@ -269,9 +269,9 @@ class Device {
         return this.isAccepted;
     }
 
-    public setIsAccepted(_isAccepted : -1 | 0 | 1) {
+    public async setIsAccepted(_isAccepted : -1 | 0 | 1) {
         this.isAccepted = _isAccepted;
-        this.saveData();
+        await this.saveData();
         
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
@@ -280,6 +280,7 @@ class Device {
             dataAt: -1,
             oldTopic: ""
         }
+
 
         this.callbackOnChange(eventData);
     }
@@ -304,6 +305,10 @@ class Device {
     }
 
     async setVar(dataAt: number, varName: string, newContent: any) {
+        if(this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
+            return
+        }
+
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
             event: AppData.ON_DATA_CHANGE,
@@ -319,6 +324,10 @@ class Device {
     }
 
     async setData(dataAt: number, newContent: any) {
+        if(this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
+            return
+        }
+
         let eventData: AppdataEvent = {
             deviceUUID: this.uuid,
             event: AppData.ON_DATA_CHANGE,

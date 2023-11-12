@@ -1,3 +1,4 @@
+import { useDevice } from "@/hooks/useDevice"
 import { Delete, Edit } from "@mui/icons-material"
 
 const CHECK_EQUAL_TO: number = 0
@@ -15,6 +16,8 @@ interface VarCheckProps {
 }
 
 export default function ViewToCheckListItem(props: VarCheckProps) {
+    const [device, setDeviceId] = useDevice(props.deviceId);
+
     let checkType: string = "";
     switch (props.checkType) {
         case (CHECK_EQUAL_TO): {
@@ -35,7 +38,7 @@ export default function ViewToCheckListItem(props: VarCheckProps) {
         <div className="w-full flex justify-between ml-5">
             <div className="flex justify-start gap-x-2.5 items-center text-on-surface">
                 <p>Device</p>
-                <p>&apos;&apos;{props.deviceId}&apos;&apos;</p>
+                <p>&apos;&apos;{device?.deviceName}&apos;&apos;</p>
                 <p>at</p>
                 <p>[{props.dataIndex}]</p>
                 <p>if</p>

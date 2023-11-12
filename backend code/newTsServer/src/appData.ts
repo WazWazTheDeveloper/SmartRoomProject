@@ -64,13 +64,23 @@ class AppData {
         return json
     }
 
-    public getAppdataOfUser(user: User) {
+    public async getAppdataOfUser(user: User) {
         let taskJson = []
         let deviceJson = []
+        let userJson = []
 
+        if(user.getIsAdmin()) {
+            let generalUserList = this.generalData.getUsernameList();
+            for (let index = 0; index < generalUserList.length; index++) {
+                const generalUser = generalUserList[index];
+                let user = await (await User.getUser(generalUser)).getAsJson();
+                userJson.push(user)
+            }
+        }
 
         if (user.hasPermission("*")) {
-            return this.getAsJson();
+            let json = this.getAsJson();
+            return Object.assign({} , json , {"userList": userJson})
         }
 
         console.log(user.getPermissions())
@@ -124,10 +134,14 @@ class AppData {
             }
         }
 
+        console.log("userJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJson")
+        console.log(userJson)
+
         let json = {
             "taskList": taskJson,
             "generalData": this.generalData.getAppdataOfUser(user),
-            "deviceList": deviceJson
+            "deviceList": deviceJson,
+            "userList": userJson,
         }
 
         return json;

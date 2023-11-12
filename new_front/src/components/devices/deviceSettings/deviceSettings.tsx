@@ -3,9 +3,9 @@ import { useAuth } from "@/hooks/useAuth"
 import { useDevice } from "@/hooks/useDevice"
 import { ApiService } from "@/services/apiService"
 import { DataType } from "@/services/appdataService"
-import { Done, Edit } from "@mui/icons-material"
+import { Done } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
-import { Fragment, useState, useEffect, Suspense, useRef } from "react"
+import { useState, useEffect } from "react"
 import SwitchSettings from "./types/switchSettings"
 
 interface DeviceSettingsProps {
@@ -69,8 +69,8 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
 
     function deleteDevice(e: React.MouseEvent<HTMLButtonElement>) {
         e.stopPropagation();
-        // let delete_path = '/device/delete_device?uuid=' + props.uuid;
-        // fetchWithReauth(delete_path, ApiService.REQUEST_POST, userdata.token)
+        let delete_path = '/device/delete_device?uuid=' + props.uuid;
+        fetchWithReauth(delete_path, ApiService.REQUEST_POST, userdata.token)
         // TODO: add comfirmation massage
         props.closeWindow();
         router.push("/devices")

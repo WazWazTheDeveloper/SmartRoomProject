@@ -62,7 +62,6 @@ export default function Page({ params }: { params: { id: string } }) {
     }, [isAppdata, appdata, device, params.id])
 
 
-    console.log(isValidId)
     if (!isValidId) {
         return (
             <Error statusCode={404} />

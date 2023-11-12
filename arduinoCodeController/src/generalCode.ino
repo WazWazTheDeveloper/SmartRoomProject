@@ -252,6 +252,7 @@ boolean getUUID()
         arr.add(deviceType[i]);
         Serial.println(deviceType[i]);
     }
+    // TODO: add device name to doc that can be chenged fron a variable
     serializeJson(doc, deviceTypeArray);
 
     if (!sendHttpPostRequest("/device/registerNewDevice", deviceTypeArray))
