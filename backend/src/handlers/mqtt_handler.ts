@@ -22,7 +22,7 @@ class MqttHandler {
 
         this.mqttClient.on('error', (err) => {
             console.log(err);
-            this.mqttClient?.end();
+            // this.mqttClient?.end();
         });
 
         this.mqttClient.on('connect', () => {
@@ -32,7 +32,7 @@ class MqttHandler {
         this.mqttClient.on('message', (topic, message) => {
             try {
                 let _message = JSON.parse(message.toString());
-                let newDataPackage: DataPacket = new DataPacket(_message.sender,_message.receiver, _message.dataType, _message.dataAt, _message.event, _message.data)
+                let newDataPackage: DataPacket = new DataPacket(_message.sender, _message.receiver, _message.dataType, _message.dataAt, _message.event, _message.data)
                 this.onMassageCallback(topic, newDataPackage)
             }
             catch (err) {
@@ -42,6 +42,8 @@ class MqttHandler {
 
         this.mqttClient.on('close', () => {
             console.log(`mqtt client disconnected`);
+
+            this.mqttClient?.reconnect()
         });
     }
 
