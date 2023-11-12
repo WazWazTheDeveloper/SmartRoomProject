@@ -1,6 +1,0 @@
-{
-    "sketch": "arduinoCode.ino",
-    "configuration": "cpu=8MHzatmega32U4",
-    "board": "SparkFun:avr:promicro",
-    "port": "COM5"
-}

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import Appdata from '../../services/appdataService';
 import { useAuth } from '../../hooks/useAuth';
-const socketUrl = 'ws://10.0.0.12:5000/appdata/websocket';
+const socketUrl = `ws://${process.env.API_URL}/appdata/websocket`;
 
 type Props = {
   children: JSX.Element
@@ -14,37 +14,49 @@ export type DataType = [
 
 export const AppdataContext = createContext<DataType | null>(null);
 
-// TODO: fix this claster-fuck :)
-// TODO: use appdata service.ts
+
 function AppdataProvider({ children }: Props) {
   const [appdata, setAppdata] = useState<Appdata>(Object);
   const [isAppdata, setIsAppdata] = useState(false);
-  const [userdata, login, logout, signup, updateUserData, isError, error] = useAuth();
+  const { userdata, login, logout, signup, updateUserData, isError, error } = useAuth();
 
-  const websocket = new WebSocket(socketUrl);
+  const [webSocketReady, setWebSocketReady] = useState(false);
+  const [webSocket, setWebSocket] = useState(new WebSocket(socketUrl));
 
   useEffect(() => {
-
-    websocket.onopen = () => {
-      websocket.send(userdata.token)
+    webSocket.onopen = () => {
+      setWebSocketReady(true)
       console.log('connected');
     }
 
-    websocket.onmessage = (event) => {
+    webSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log(data)
       const appdata = Appdata.createAppdataFromFetch(data)
-      // console.log(appdata)
+      console.log(appdata);
       setAppdata(appdata);
-      // console.log(JSON.parse(event.data))
+    }
+
+    webSocket.onclose = () => {
+      setWebSocketReady(false);
+      console.log('disconnected');
+      setTimeout(() => {
+         setWebSocket(new WebSocket(socketUrl));
+      }, 1000);
     }
 
     return () => {
-      websocket.close()
+      if (webSocket.readyState === 1) { // <-- This is important
+        webSocket.close();
+      }
     }
-    // if(websocket.OPEN == websocket.readyState) {
-    //   websocket.send(userdata.token)
-    // }
-  }, [userdata])
+  }, [webSocket])
+
+  useEffect(() => {
+    if (webSocket.readyState === 1 && webSocketReady) { // <-- This is important
+      webSocket.send(userdata.token);
+    }
+  }, [userdata.token, webSocketReady])
 
   useEffect(() => {
     setIsAppdata(appdata && Object.keys(appdata).length !== 0);

@@ -20,7 +20,7 @@ interface ToDoTask {
 
 }
 
-interface Task {
+export interface Task {
     taskId: string
     taskName: string
     isOn: boolean
@@ -35,42 +35,58 @@ interface DeviceDataType {
     data: any
 }
 
-interface Device {
+export interface Device {
     deviceName: string
     uuid: string
     topicPath: string
     deviceData: Array<DeviceDataType>
     isConnected: boolean
     isConnectedCheck: boolean
-    isAccepted: boolean
+    isAccepted: -1 | 0 | 1
 }
-class Appdata {
+
+export interface User {
+    uuid: string;
+    username: string;
+    password: string;
+    permission: Array<string>;
+    // settings: SettingsType;
+    isActive: boolean;
+    isAdmin : boolean;
+}
+export default class Appdata {
     private taskList: Array<Task>
     private deviceList: Array<Device>;
+    private userList: Array<User>;
 
-    constructor(taskList: Array<Task>, deviceList: Array<Device>) {
+    constructor(taskList: Array<Task>, deviceList: Array<Device>, userList: Array<User>) {
         this.taskList = taskList;
         this.deviceList = deviceList;
+        this.userList = userList;
     }
 
     public static createAppdataFromFetch(data: any) {
-        let newAppdata = new Appdata(data.taskList, data.deviceList)
+        let newAppdata = new Appdata(data.taskList, data.deviceList,data.userList)
         return newAppdata;
     }
 
     public static emptyAppdata() {
-        return new Appdata([], [])
+        return new Appdata([], [],[])
     }
 
     getTaskList() {
         return this.taskList;
     }
 
+    getUserList() {
+        return this.userList;
+    }
+
     getDeviceList() {
         return this.deviceList;
     }
 
-    getDeviceByUUID(deviceId : string) {
+    getDeviceByUUID(deviceId: string) {
         for (let index = 0; index < this.deviceList.length; index++) {
             const device = this.deviceList[index];
             if (device.uuid == deviceId) {
@@ -80,7 +96,17 @@ class Appdata {
         throw new Error("device not found")
     }
 
-    getTaskByUUID(taskId : string) {
+    getUserById(userId: string) {
+        for (let index = 0; index < this.userList.length; index++) {
+            const user = this.userList[index];
+            if (user.uuid == userId) {
+                return user
+            }
+        }
+        throw new Error("user not found")
+    }
+
+    getTaskByUUID(taskId: string) {
         for (let index = 0; index < this.taskList.length; index++) {
             const task = this.taskList[index];
             if (task.taskId == taskId) {
@@ -99,5 +125,19 @@ class Appdata {
 
         return uuids
     }
+
+    checkIfUserExist(uuid:string) {
+        for (let index = 0; index < this.userList.length; index++) {
+            const user = this.userList[index];
+            if(user.uuid == uuid) {
+                return true
+            }
+        }
+        return false
+    }
 }
-export default Appdata
+
+export class DataType {
+    static readonly AIRCONDITIONER_TYPE = 0;
+    static readonly SWITCH_TYPE = 1;
+}

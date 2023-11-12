@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "./useAuth";
-import { ApiService } from "../services/apiService";
+import { ApiService } from "@/services/apiService";
 
 const useApi = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({});
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState("");
-    const [userdata, login, logout, signup, updateUserData, authIsError, authError] = useAuth();
+    const {userdata, login, logout, signup, updateUserData, authIsError, authError} = useAuth();
 
     const refreshToken = async (): Promise<any> => {
         let response = await ApiService.refreshToken()
@@ -75,7 +75,7 @@ const useApi = () => {
         }
     }
 
-    return [data, isLoading, isError, error, fetchWithReauth] as const
+    return {data, isLoading, isError, error, fetchWithReauth} as const
 }
 
 export { useApi }

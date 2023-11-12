@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { ApiService } from '../../services/apiService';
-import jwt_decode from "jwt-decode";
+import { ApiService } from '@/services/apiService';
+import { jwtDecode } from "jwt-decode";
 
 type Props = {
     children: JSX.Element
@@ -9,9 +9,10 @@ type UserDataType = {
 
     token: string,
     userName: string,
-    permission: Array<string>
+    permission: Array<string>,
+    isAdmin : boolean
 }
-export type ContextType = [
+export type ContextType = {
     userdata: UserDataType,
     login: (username: string, password: string) => void,
     logout: () => void,
@@ -19,15 +20,15 @@ export type ContextType = [
     updateUserData: (newUserData: any) => void,
     isError: boolean,
     error: string
-]
+}
 
 export const AuthContext = createContext<ContextType | null>(null);
 
-// TODO: fix this claster-fuck :)
 function AuthProvider({ children }: Props) {
     const [token, setToken] = useState("");
     const [userName, setUserName] = useState("");
     const [permission, setPermission] = useState<Array<string>>([]);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState('');
 
@@ -49,10 +50,11 @@ function AuthProvider({ children }: Props) {
             if (!isError) {
                 let token = (data as any).accessToken
                 if (token) {
-                    let decoded: any = jwt_decode(token)
+                    let decoded: any = jwtDecode(token)
                     setToken(token)
                     setUserName(decoded.userInfo.username)
                     setPermission(decoded.userInfo.permission)
+                    setIsAdmin(decoded.userInfo.isAdmin)
                     setIsError(false)
                     setError("")
                 }
@@ -60,6 +62,7 @@ function AuthProvider({ children }: Props) {
                     setToken("")
                     setUserName("")
                     setPermission([])
+                    setIsAdmin(false)
                     setIsError(false)
                     setError("")
                 }
@@ -90,7 +93,7 @@ function AuthProvider({ children }: Props) {
     }
 
     const updateUserData = (newToken:string) => {
-        let decoded: any = jwt_decode(newToken)
+        let decoded: any = jwtDecode(newToken)
         setToken(newToken)
         setUserName(decoded.userName)
         setPermission(decoded.permission)
@@ -145,11 +148,11 @@ function AuthProvider({ children }: Props) {
     }
 
     let userdata: UserDataType = {
-        token, userName, permission
+        token, userName, permission, isAdmin
     }
 
     return (
-        <AuthContext.Provider value={[userdata, login, logout, signup, updateUserData, isError, error]}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{userdata, login, logout, signup, updateUserData, isError, error}}>{children}</AuthContext.Provider>
     )
 }
 
