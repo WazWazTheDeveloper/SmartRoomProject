@@ -17,6 +17,12 @@ function readFile<T>(fileName:string):Promise<T> {
 };
 
 async function writeFile<T>(fileName:string,json:T): Promise<void> {
+    // check if the folders exist and if not create them
+    let dir = "./data/" + fileName.substring(0,fileName.lastIndexOf('/'))
+    if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    
     let data = JSON.stringify(json);
                 console.log(`writing ${fileName}`)
                 await fsPromises.writeFile(`./data/${fileName}.json`, data);
