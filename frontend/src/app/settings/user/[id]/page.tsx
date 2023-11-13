@@ -11,6 +11,7 @@ import { Add, DeleteForever, Edit } from "@mui/icons-material";
 import { ApiService } from "@/services/apiService";
 import { useApi } from "@/hooks/useApi";
 import { AddPermission } from "../../../../components/options/users/AddPermission";
+import { AddPermissionGroup } from "@/components/options/users/AddPermissionGroup";
 
 export default function UserSettings({ params }: { params: { id: string } }) {
     const { fetchWithReauth } = useApi();
@@ -22,7 +23,9 @@ export default function UserSettings({ params }: { params: { id: string } }) {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const [isAddPermission, setIsAddPermission] = useState(false);
+    const [isAddPermissionGroup, setIsAddPermissionGroup] = useState(false);
     const [permissions, setPermissions] = useState<string[]>([]);
+    const [permissionGroups, setPermissionGroups] = useState<string[]>([]);
 
     useEffect(() => {
         if (isAppdata) {
@@ -155,6 +158,31 @@ export default function UserSettings({ params }: { params: { id: string } }) {
                                     </div>
                                     <div className="flex justify-center w-3/12 relative md:w-auto md:h-full md:justify-end items-center ring-1 px-1">
                                         <Edit className="fill-on-surface ml-1 cursor-pointer" onClick={() => { }} />
+                                        <DeleteForever className="fill-on-surface ml-1 cursor-pointer" onClick={() => { submitDeletePermission(element) }} />
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+
+                    <div className="w-full ring-1 ring-white pb-4">
+                        <div className="w-full flex justify-between items-center">
+                            <p className="ml-1 text-lg">Permissions Groups:</p>
+                            <Add className="fill-on-surface w-6 h-6 duration-200 hover:scale-105  md:h-10 md:w-10 cursor-pointer" onClick={() => {setIsAddPermissionGroup(true)}} />
+                        </div>
+                        {isAddPermission ?
+                            <AddPermissionGroup 
+                            user={user}
+                            closeFunction={() => {setIsAddPermissionGroup(false)}} /> :
+                            <></>
+                        }
+                        {
+                            permissionGroups.map((element, i) => (
+                                <div className="flex mx-1" key={i}>
+                                    <div className="relative w-9/12 md:w-full flex item-center ring-1">
+                                        <p className="w-full overflow-ellipsis overflow-hidden whitespace-nowrap">{element}</p>
+                                    </div>
+                                    <div className="flex justify-center w-3/12 relative md:w-auto md:h-full md:justify-end items-center ring-1 px-1">
                                         <DeleteForever className="fill-on-surface ml-1 cursor-pointer" onClick={() => { submitDeletePermission(element) }} />
                                     </div>
                                 </div>

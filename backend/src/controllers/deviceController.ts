@@ -7,7 +7,7 @@ import { User } from "../models/user";
 
 
 export const createNewDevice = async (req: Request, res: Response) => {
-    let deviceType = req.body.deviceType;
+    const {deviceType,deviceName} = req.body;
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
 
@@ -20,11 +20,14 @@ export const createNewDevice = async (req: Request, res: Response) => {
             res.send();
             return;
         }
-
+    }
+    let _deviceName = deviceName
+    if(!deviceName) {
+        _deviceName = "new Device"
     }
 
     try {
-        await appdata.createNewDevice("new device", newUUID, deviceType, `device/${newUUID}`);
+        await appdata.createNewDevice(_deviceName, newUUID, deviceType, `device/${newUUID}`);
         let newDevice: Device = appdata.getDeviceById(newUUID);
         res.status(200);
         res.send(newUUID);

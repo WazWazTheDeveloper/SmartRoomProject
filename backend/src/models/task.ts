@@ -455,7 +455,7 @@ class Task implements TaskType {
 
     callCallback() {
         let eventData: AppdataEvent = {
-            deviceUUID: this.taskId,
+            targetId: this.taskId,
             event: AppData.ON_TASK_CHANGE,
             dataType: -1,
             dataAt: -1,

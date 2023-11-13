@@ -12,20 +12,18 @@ export default function Tasks() {
     const [appdata, isAppdata] = useAppdata()
     const { userdata } = useAuth();
     const { data, isLoading, isError, error, fetchWithReauth } = useApi();
-    const [taskList,setTaskList] = useState<ReactNode>([])
 
-    useEffect(() => {
-        if(isAppdata) {
-            let _taskList = [];
-            let taskList = appdata.getTaskList()
-            for (let index = 0; index < taskList.length; index++) {
-                const taskId = taskList[index].taskId;
-                _taskList.push(<TaskListItem taskId={taskId} key={index}/>)
-            }
-
-            setTaskList(_taskList)
+    let taskElementList : ReactNode[] = []
+    if(isAppdata) {
+        let _taskList : ReactNode[] = [];
+        let taskList = appdata.getTaskList()
+        for (let index = 0; index < taskList.length; index++) {
+            const taskId = taskList[index].taskId;
+            _taskList.push(<TaskListItem taskId={taskId} key={index}/>)
         }
-    }, [isAppdata, appdata])
+
+        taskElementList = _taskList
+    }
 
     function onAddClick(e: React.MouseEvent<SVGSVGElement>) {
         fetchWithReauth("/task/create_task", ApiService.REQUEST_POST,userdata.token);
@@ -45,7 +43,7 @@ export default function Tasks() {
 
             <div className="w-full flex justify-center">
                 <div className={"w-full flex flex-wrap gap-1"}>
-                    {taskList}
+                    {taskElementList}
                 </div>
             </div>
         </div>

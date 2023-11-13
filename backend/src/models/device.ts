@@ -211,7 +211,7 @@ class Device {
 
     public setTopicPath(newTopicPath: string) {
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_TOPIC_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -236,7 +236,7 @@ class Device {
         console.log(this.deviceName)
 
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -255,7 +255,7 @@ class Device {
         this.saveData();
 
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -274,7 +274,7 @@ class Device {
         await this.saveData();
         
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -294,7 +294,7 @@ class Device {
         this.saveData();
         
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -310,7 +310,7 @@ class Device {
         }
 
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DATA_CHANGE,
             dataType: this.deviceData[dataAt].dataType,
             dataAt: dataAt,
@@ -329,7 +329,7 @@ class Device {
         }
 
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DATA_CHANGE,
             dataType: this.deviceData[dataAt].dataType,
             dataAt: dataAt,
@@ -342,7 +342,7 @@ class Device {
 
     async setDeviceVar(varName: string, newContent: any, toTrigger: boolean = true) {
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,
@@ -384,7 +384,7 @@ class Device {
 
     async setDeviceData(newData: any) {
         let eventData: AppdataEvent = {
-            deviceUUID: this.uuid,
+            targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
             dataType: -1,
             dataAt: -1,

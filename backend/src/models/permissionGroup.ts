@@ -1,4 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
 import data = require('../handlers/file_handler')
+import { AppData } from '../appData';
 
 
 interface PermissionGroupType {
@@ -18,12 +20,36 @@ class PermissionGroup{
         this.permission = permission;
     }
 
+    static async createNewPermissionGroup(groupName:string) {
+        let uuid = uuidv4();
+
+        let newPermissionGroup = new PermissionGroup(uuid, groupName, []);
+
+        let appDataInstance = await AppData.getAppDataInstance();
+        appDataInstance.addPermissionGroup(uuid,groupName)
+        await newPermissionGroup.saveData();
+
+        return newPermissionGroup
+    }
+
+    static async removePermissionGroup(groupId:string) {
+        let appDataInstance = await AppData.getAppDataInstance();
+        appDataInstance.removePermissionGroup(groupId)
+        await data.removeFile(`permissionGroups/${groupId}`)
+    }
+
+    public static async getPermissionGroup(groupId: string) {
+        let _data: PermissionGroupType = await data.readFile<PermissionGroupType>(`permissionGroups/${groupId}`)
+        let permissionGroup = await new PermissionGroup(_data.uuid, _data.groupName, _data.permission);
+        return permissionGroup;
+    }
+
     async saveData() {
         console.log(`saveing PermissionGroup object ${this.uuid}`)
 
         let dataJson: PermissionGroupType = this.getAsJson();
 
-        await data.writeFile<PermissionGroupType>(`permissionGroup/${this.uuid}`, dataJson)
+        await data.writeFile<PermissionGroupType>(`permissionGroups/${this.uuid}`, dataJson)
         console.log(`done saving PermissionGroup object ${this.uuid}`)
     }
 
@@ -40,22 +66,43 @@ class PermissionGroup{
     getGroupName():string {
         return this.groupName;
     }
+
     async setGroupName(_groupName:string) {
         this.groupName = _groupName;
         await this.saveData()
     }    
+    
     getUUID():string {
         return this.uuid;
     }
+
+    getPermissions():string[] {
+        return this.permission;
+    }
     
-    // IMPLEMENT
-    addPermission() {
+    async addPermission(newPermission : string) {
+        this.permission.push(newPermission);
+        await this.saveData()
+        console.log("added permission: '"+newPermission +"' to group: '" + this.groupName + "'")
+    }
+
+    async removePermission(permission: string) {
+        for (let index = 0; index < this.permission.length; index++) {
+            const element = this.permission[index];
+            if(element == permission) {
+                this.permission.splice(index, 1)
+                console.log("removed permission: '"+element +"' from group: '" + this.groupName + "'")
+            }
+        }
+        await this.saveData()
+    }
+
+    // IMPLEMENT!!
+    // IMPLEMENT:add same for tasks
+    removeDevicePermission(deviceID: string) {
 
     }
-    // IMPLEMENT
-    removePermission() {
 
-    }
 }
 
 export {PermissionGroup}

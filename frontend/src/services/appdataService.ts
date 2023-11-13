@@ -45,11 +45,18 @@ export interface Device {
     isAccepted: -1 | 0 | 1
 }
 
+interface PermissionGroup {
+    uuid:string;
+    groupName:string;
+    permission:Array<string>;
+}
+
 export interface User {
     uuid: string;
     username: string;
     password: string;
     permission: Array<string>;
+    permissionGroups : Array<PermissionGroup>
     // settings: SettingsType;
     isActive: boolean;
     isAdmin : boolean;
@@ -66,7 +73,7 @@ export default class Appdata {
     }
 
     public static createAppdataFromFetch(data: any) {
-        let newAppdata = new Appdata(data.taskList, data.deviceList,data.userList)
+        let newAppdata = new Appdata(data.taskList, data.deviceList, data.userList)
         return newAppdata;
     }
 

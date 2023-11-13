@@ -29,8 +29,11 @@ export default function Page({ params }: { params: { id: string } }) {
     const [isAddTimeCheck, setIsAddTimeCheck] = useState(false);
     const [isAddTodoTask, setIsAddTodoTask] = useState(false);
 
-    const [toCheckElements, setToCheckElements] = useState<React.ReactNode>([]);
-    const [todoElements, setTodoElements] = useState<React.ReactNode>([]);
+    // const [toCheckElements, setToCheckElements] = useState<React.ReactNode>([]);
+    // const [todoElements, setTodoElements] = useState<React.ReactNode>([]);
+
+    let toCheckElements: React.ReactNode[] = [];
+    let todoElements: React.ReactNode[] = [];
 
     const taskNameRef = useRef(taskName)
 
@@ -111,7 +114,7 @@ export default function Page({ params }: { params: { id: string } }) {
             targetTask: params.id,
             indexOfVarCheck: indexOfVarCheck
         }
-        fetchWithReauth("/task/remove-var-check", ApiService.REQUEST_POST, userdata.token, body)
+        fetchWithReauth("/task/var_check", ApiService.REQUEST_DELETE, userdata.token, body)
     }
 
     function onRemoveTimeCheck(indexOfVarCheck: number) {
@@ -119,8 +122,7 @@ export default function Page({ params }: { params: { id: string } }) {
             targetTask: params.id,
             indexOfTimeCheck: indexOfVarCheck
         }
-        console.log(indexOfVarCheck)
-        fetchWithReauth("/task/remove-time-check", ApiService.REQUEST_POST, userdata.token, body)
+        fetchWithReauth("/task/time_check", ApiService.REQUEST_DELETE, userdata.token, body)
     }
 
     function onRemoveTodo(indexOfVarCheck: number) {
@@ -128,19 +130,16 @@ export default function Page({ params }: { params: { id: string } }) {
             targetTask: params.id,
             indexOfTodoTask: indexOfVarCheck
         }
-        fetchWithReauth("/task/remove-todo", ApiService.REQUEST_POST, userdata.token, body)
+        fetchWithReauth("/task/todo", ApiService.REQUEST_DELETE, userdata.token, body)
     }
 
     useEffect(() => {
         if (isAppdata && params.id) {
             try {
                 let task = appdata.getTaskByUUID(params.id);
-                console.log(task)
                 setTaskName(task.taskName)
                 setIsOn(task.isOn)
                 setIsRepeating(task.isRepeating)
-                // TODO: find apropriate place for this
-                createListItems(task)
             } catch (err) {
                 console.log("task doesn't exist")
             }
@@ -159,7 +158,8 @@ export default function Page({ params }: { params: { id: string } }) {
         fetchWithReauth("/task/update_task", ApiService.REQUEST_POST, userdata.token, body)
     }, [triggerupdate])
 
-    function createListItems(task: Task) {
+    if (isAppdata && params.id) {
+        let task = appdata.getTaskByUUID(params.id);
         const _toCheck = task.varCheckList;
         let _toCheckArr = []
         for (let index = 0; index < _toCheck.length; index++) {
@@ -177,7 +177,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
             _toCheckArr.push(element)
         }
-        setToCheckElements(_toCheckArr);
+        toCheckElements = _toCheckArr
 
         const _todo = task.toDoTaskList;
         let _todoArr = []
@@ -195,7 +195,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
             _todoArr.push(element)
         }
-        setTodoElements(_todoArr);
+        todoElements = _todoArr;
     }
 
     return (

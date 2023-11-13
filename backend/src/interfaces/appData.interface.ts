@@ -1,5 +1,5 @@
 interface AppdataEvent {
-    deviceUUID:string
+    targetId:string
     event: string
     dataType : number
     dataAt : number

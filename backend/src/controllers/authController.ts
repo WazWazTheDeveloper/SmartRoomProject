@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 
 const login = asyncHandler(async (req: Request, res: Response) => {
     const { username, password } = req.body;
+    console.log(req.body)
     if (!username || !password) {
         res.status(400).json('All fields are required')
         return

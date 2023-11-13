@@ -7,6 +7,10 @@ import DropdownMenu from "@/components/ui/dropdownMenu";
 import { ApiService } from "@/services/apiService";
 import { useApi } from "@/hooks/useApi";
 
+interface AddPermissionProps {
+    
+}
+
 export function AddPermission(props: any) {
     const { fetchWithReauth } = useApi();
     const { userdata } = useAuth();

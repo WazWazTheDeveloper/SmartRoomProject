@@ -1,23 +1,28 @@
-interface GeneralDataType {
+export interface GeneralDataType {
     topicList : Array<GeneralTopicType>
     deviceList : Array<DeviceListItemType>
     taskList : Array<GeneralTaskType>
     usernameList: Array<string>
+    permissionGroup: Array<GeneralPermissionGroupType>;
 }
 
-interface GeneralTopicType {
+export interface GeneralTopicType {
     topicName: string
     topicPath: string
     isVisible:boolean
 }
 
 
-interface DeviceListItemType{
+export interface DeviceListItemType{
     UUID: string
     name: string
     deviceType: Array<number>
 }
-interface GeneralTaskType {
+export interface GeneralTaskType {
     taskId : string
 }
-export {GeneralDataType ,GeneralTopicType, DeviceListItemType,GeneralTaskType }
+
+export interface GeneralPermissionGroupType {
+    groupId : string
+    groupName : string
+}

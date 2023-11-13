@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
 
-// app.use(updateWebSocket)
+app.use(updateWebSocket)
 
 app.use('/api', router);
 
@@ -43,7 +43,7 @@ async function setup(): Promise<void> {
   appData.on(AppData.ON_DEVICE_ADDED, async (eventData: AppdataEvent) => {
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
-    client.subscribe(appData.getDeviceById(eventData.deviceUUID).getTopicPath(), appData.updateDevice)
+    client.subscribe(appData.getDeviceById(eventData.targetId).getTopicPath(), appData.updateDevice)
   });
 
   appData.on(AppData.ON_DEVICE_REMOVED, async (eventData: AppdataEvent) => {
@@ -56,20 +56,21 @@ async function setup(): Promise<void> {
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
     client.unsubscribe(eventData.oldTopic, appData.updateDevice)
-    client.subscribe(appData.getDeviceById(eventData.deviceUUID).getTopicPath(), appData.updateDevice)
+    client.subscribe(appData.getDeviceById(eventData.targetId).getTopicPath(), appData.updateDevice)
   });
 
   appData.on(AppData.ON_DATA_CHANGE, async (eventData: AppdataEvent) => {
     let client = MqttClient.getMqttClientInstance()
     let appData = await AppData.getAppDataInstance();
-    let device = appData.getDeviceById(eventData.deviceUUID)
+    let device = appData.getDeviceById(eventData.targetId)
     let event = DataPacket.DATA_CHANGE;
-    let massage: DataPacket = new DataPacket(DataPacket.SENDER_SERVER, eventData.deviceUUID, eventData.dataType, eventData.dataAt, event, device.getAsJsonForArduino(eventData.dataAt))
+    let massage: DataPacket = new DataPacket(DataPacket.SENDER_SERVER, eventData.targetId, eventData.dataType, eventData.dataAt, event, device.getAsJsonForArduino(eventData.dataAt))
     client.sendMassage(device.getTopicPath(), massage);
   });
 
   appData.on(AppData.ON_ANY_CHANGE, async (eventData: AppdataEvent) => {
-    WebSocketServerHandler.updateAppdata();
+    // DEL: I'm pretty sure I dont need this
+    // WebSocketServerHandler.updateAppdata();
   });
 
   // init scheduled functions

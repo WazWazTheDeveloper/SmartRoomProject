@@ -6,6 +6,7 @@ import { removeFile } from "./handlers/file_handler";
 import { AppdataEvent } from "./interfaces/appData.interface";
 import { User } from "./models/user";
 import { DataPacket } from "./models/dataPacket";
+import { Console } from "console";
 
 var appDataInstance: AppData;
 
@@ -25,8 +26,10 @@ class AppData {
     public static readonly ON_DEVICE_REMOVED = "deviceRemoved";
     public static readonly ON_DEVICE_ADDED = "deviceAdded";
     public static readonly ON_TASK_CHANGE = "taskChange"
-    public static readonly ON_TASK_COMPLETE = "taskChange"
+    public static readonly ON_TASK_COMPLETE = "taskComplete"
     public static readonly ON_ANY_CHANGE = "any";
+    public static readonly ON_TASK_CREATED = "taskCreated";
+    public static readonly ON_TASK_DELETED = "taskDeleted";
 
     private taskList: Array<Task>
     private generalData: GeneralData;
@@ -69,7 +72,7 @@ class AppData {
         let deviceJson = []
         let userJson = []
 
-        if(user.getIsAdmin()) {
+        if (user.getIsAdmin()) {
             let generalUserList = this.generalData.getUsernameList();
             for (let index = 0; index < generalUserList.length; index++) {
                 const generalUser = generalUserList[index];
@@ -78,17 +81,17 @@ class AppData {
             }
         }
 
-        if (user.hasPermission("*")) {
+        if (await user.hasPermission("*")) {
             let json = this.getAsJson();
-            return Object.assign({} , json , {"userList": userJson})
+            return Object.assign({}, json, { "userList": userJson })
         }
 
         console.log(user.getPermissions())
 
-        if (user.hasPermission("device.*") ||
-            user.hasPermission("device.*.read") ||
-            user.hasPermission("device.*.edit") ||
-            user.hasPermission("device.*.delete")) {
+        if (await user.hasPermission("device.*") ||
+            await user.hasPermission("device.*.read") ||
+            await user.hasPermission("device.*.edit") ||
+            await user.hasPermission("device.*.delete")) {
 
             for (let index = 0; index < this.deviceList.length; index++) {
                 const device = this.deviceList[index];
@@ -111,10 +114,10 @@ class AppData {
             }
         }
 
-        if (user.hasPermission("task.*") ||
-            user.hasPermission("task.*.read") ||
-            user.hasPermission("task.*.edit") ||
-            user.hasPermission("task.*.delete")) {
+        if (await user.hasPermission("task.*") ||
+            await user.hasPermission("task.*.read") ||
+            await user.hasPermission("task.*.edit") ||
+            await user.hasPermission("task.*.delete")) {
 
             for (let index = 0; index < this.taskList.length; index++) {
                 const task = this.taskList[index];
@@ -133,9 +136,6 @@ class AppData {
                 }
             }
         }
-
-        console.log("userJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJsonuserJson")
-        console.log(userJson)
 
         let json = {
             "taskList": taskJson,
@@ -229,6 +229,14 @@ class AppData {
         await this.generalData.removeUser(UUID);
     }
 
+    public async addPermissionGroup(groupId: string, groupName: string) {
+        await this.generalData.addPermissionGroup(groupId, groupName)
+    }
+
+    public async removePermissionGroup(groupId: string) {
+        await this.generalData.removePermissionGroup(groupId)
+    }
+
     // change to createDevice
     public async createNewDevice(deviceName: string, uuid: string, deviceType: Array<number>, topic: string): Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
@@ -253,7 +261,7 @@ class AppData {
 
 
         let eventData: AppdataEvent = {
-            deviceUUID: newDevice.getUUID(),
+            targetId: newDevice.getUUID(),
             event: AppData.ON_DEVICE_ADDED,
             dataType: -1,
             dataAt: -1,
@@ -285,7 +293,7 @@ class AppData {
 
         // TODO: remove general topic associated with the device and also any task the contain the device(or at least add try catch in the task module :))
         let eventData: AppdataEvent = {
-            deviceUUID: uuid,
+            targetId: uuid,
             event: AppData.ON_DEVICE_REMOVED,
             dataType: -1,
             dataAt: -1,
@@ -293,7 +301,7 @@ class AppData {
         }
 
         this.removeDevicePermissionsOfDevice(uuid);
-
+        
         this.triggerCallbacks(eventData)
     }
 
@@ -307,6 +315,16 @@ class AppData {
         }
     }
 
+    async removeTaskPermissionsOfTask(taskId: string) {
+        let usernamesList = this.generalData.getUsernameList();
+
+        for (let index = 0; index < usernamesList.length; index++) {
+            const username = usernamesList[index];
+            const user = await User.getUser(username);
+            user.removeTaskPermission(taskId);
+        }
+    }
+
     async createTask(taskId: string, taskName: string, isOn: boolean, isRepeating: boolean): Promise<void> {
         let task = await Task.createNewTask(taskId, taskName, isOn, isRepeating, [], [], [])
         this.generalData.addTask(taskId)
@@ -316,7 +334,18 @@ class AppData {
 
         // TODO: add triggerCall
         console.log("Created new task: " + task.taskName)
+
+        let eventData: AppdataEvent = {
+            targetId: taskId,
+            event: AppData.ON_TASK_CREATED,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: "",
+        }
+
+        this.triggerCallbacks(eventData)
     }
+
     async removeTask(taskId: string) {
         let taskName = ""
         await this.generalData.removeTask(taskId);
@@ -329,8 +358,20 @@ class AppData {
             }
         }
 
+        this.removeDevicePermissionsOfDevice(taskId);
+
         removeFile(`tasks/${taskId}`)
         console.log("Removed task: " + taskName)
+
+        let eventData: AppdataEvent = {
+            targetId: taskId,
+            event: AppData.ON_TASK_DELETED,
+            dataType: -1,
+            dataAt: -1,
+            oldTopic: "",
+        }
+
+        this.triggerCallbacks(eventData)
     }
 
     public getTaskById(taskId: string): Task {
@@ -412,7 +453,6 @@ class AppData {
 
     updateDevice(topic: string, dataPacket: DataPacket) {
         let device: Device
-        console.log(dataPacket)
         try {
             device = this.getDeviceById(dataPacket.sender)
         } catch (err) {
