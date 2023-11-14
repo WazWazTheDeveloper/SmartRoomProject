@@ -18,6 +18,8 @@ const int deviceType[] = {0};
 char *wifi_ssid = ("home");
 char *wifi_password = ("0525611397");
 
+char *device_name = ("Test device");
+
 const char broker[] = ("10.0.0.12");
 int port = 1883;
 
@@ -247,6 +249,7 @@ boolean getUUID()
     StaticJsonDocument<96> doc;
     JsonObject root = doc.to<JsonObject>();
     JsonArray arr = root.createNestedArray("deviceType");
+    doc["deviceName"] = device_name;
     for (size_t i = 0; i < sizeof(deviceType) / sizeof(deviceType[0]); i++)
     {
         arr.add(deviceType[i]);
@@ -255,7 +258,7 @@ boolean getUUID()
     // TODO: add device name to doc that can be chenged fron a variable
     serializeJson(doc, deviceTypeArray);
 
-    if (!sendHttpPostRequest("/device/registerNewDevice", deviceTypeArray))
+    if (!sendHttpPostRequest("/api/device/registerNewDevice", deviceTypeArray))
     {
         Serial.println("failed to send getUUID request to server");
         return 0;
@@ -410,7 +413,7 @@ boolean setUpDevice()
 
         char extraPathVariables[12] = {'\0'};
         sprintf(extraPathVariables, "dataat=%d", dataAt);
-        if (!sendHttpGetRequest("/device/getData", true, extraPathVariables))
+        if (!sendHttpGetRequest("/api/device/getData", true, extraPathVariables))
         {
             return 0;
         }
@@ -425,7 +428,7 @@ boolean setUpDevice()
         wifiClient.stop();
     }
 
-    if (!sendHttpGetRequest("/device/getTopic", true, ""))
+    if (!sendHttpGetRequest("/api/device/getTopic", true, ""))
     {
         return 0;
     }
