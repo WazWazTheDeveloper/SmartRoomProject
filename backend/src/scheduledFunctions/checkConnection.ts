@@ -1,4 +1,5 @@
 import { AppData } from "../appData";
+import { WebSocketServerHandler } from "../handlers/webSocketServerHandler";
 import { DataPacket } from "../models/dataPacket";
 import { Device } from "../models/device";
 import { GeneralTopic } from "../models/generalData";
@@ -85,26 +86,31 @@ class CheckConnection {
         let devices = appData.getDeviceList();
         for (let index = 0; index < devices.length; index++) {
             const device = devices[index];
-            device.setDeviceVar("isConnectedCheck",false);
-            
-        }        
+            device.setDeviceVar("isConnectedCheck", false);
+
+        }
 
         let mqttClient = MqttClient.getMqttClientInstance();
         let checkConnectionPacket = new DataPacket(DataPacket.SENDER_SERVER, DataPacket.REVEIVER_ALL, -1, -1, DataPacket.CHECK_IS_CONNECTED, {})
         mqttClient.sendMassage(this.isConnectedCheckTopic.topicPath, checkConnectionPacket)
 
         setTimeout(async () => {
+            let didChange = false;
             let appData = await AppData.getAppDataInstance();
             for (let index = 0; index < appData.getDeviceList().length; index++) {
                 try {
                     const device = appData.getDeviceList()[index];
                     device.setDeviceVar(Device.isConnected, device.getIsConnectedCheck())
+                    didChange = true;
                 }
                 catch (err) { }
             }
 
             appData.getTaskById(CheckConnection.TASKID).setIsOn(true)
             console.log("connection check completed")
+            if(didChange) {
+                WebSocketServerHandler.updateAppdata();
+            }
         }, 5000)
     }
 }
