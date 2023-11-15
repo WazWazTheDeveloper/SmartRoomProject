@@ -36,7 +36,7 @@ export default function SwitchDetailsData(props: props) {
                     isOn: isOn,
                 }
             }
-            fetchWithReauth("/device/update_device", ApiService.REQUEST_POST, userdata.token, body)
+            fetchWithReauth("/device/update_device", ApiService.REQUEST_PUT, userdata.token, body)
             toUpdate.current = false;
         }
     }, [isOn])

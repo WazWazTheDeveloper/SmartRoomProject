@@ -104,7 +104,7 @@ export default function AirconditionerDetailsData(props: props) {
                     isHealth: isHealth,
                 }
             }
-            fetchWithReauth("/device/update_device", ApiService.REQUEST_POST, userdata.token, body)
+            fetchWithReauth("/device/update_device", ApiService.REQUEST_PUT, userdata.token, body)
             toUpdate.current = false;
         }
     }, [isOn, tempCommit, mode, speed, swing1, swing2, timer, isStrong, isFeeling, isSleep, isHealth])
