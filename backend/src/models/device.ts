@@ -5,6 +5,8 @@ import { GeneralData, GeneralTopic } from "./generalData";
 import { AppdataEvent } from "../interfaces/appData.interface";
 import { AppData } from "../appData";
 import { SwitchData } from "../devices/switchData";
+import NumberData from "../devices/numberData";
+import MultiStateButtonData from "../devices/multiStateButtonData";
 
 // implements DeviceType
 class Device {
@@ -17,11 +19,13 @@ class Device {
     static readonly DEVICE_ACCEPTED_YES = 1
     static readonly DEVICE_ACCEPTED_NO = -1
     static readonly DEVICE_ACCEPTED_UNDEFINED = 0
-    
+
 
     // types
     static readonly AIRCONDITIONER_TYPE = 0;
     static readonly SWITCH_TYPE = 1;
+    static readonly NUMBER_TYPE = 2;
+    static readonly MULTI_STATE_BUTTON_TYPE = 3;
 
     private deviceName: string
     private uuid: string
@@ -56,7 +60,7 @@ class Device {
         this.isConnected = isConnected
         this.isConnectedCheck = isConnectedCheck
         this.deviceData = deviceData
-        this.callbackOnChange = callbackOnChange 
+        this.callbackOnChange = callbackOnChange
     }
 
     public async saveData(): Promise<void> {
@@ -95,16 +99,22 @@ class Device {
 
     private static getDefaultData(dataType: number) {
         switch (dataType) {
-            // TODO add Types
             case (Device.AIRCONDITIONER_TYPE): {
                 return new AirconditionerData();
             }
             case (Device.SWITCH_TYPE): {
                 return new SwitchData();
             }
+            case (Device.NUMBER_TYPE): {
+                return new NumberData();
+            }
+            case (Device.MULTI_STATE_BUTTON_TYPE): {
+                return new MultiStateButtonData();
+            }
             default: {
                 throw new Error("device type not found")
             }
+            // TODO add Types
         }
     }
 
@@ -142,6 +152,14 @@ class Device {
             }
             case (Device.SWITCH_TYPE): {
                 let _device = SwitchData.createFromJson(data);
+                return _device;
+            }
+            case (Device.NUMBER_TYPE): {
+                let _device = NumberData.createFromJson(data);
+                return _device;
+            }
+            case (Device.MULTI_STATE_BUTTON_TYPE): {
+                let _device = MultiStateButtonData.createFromJson(data);
                 return _device;
             }
             // TODO: add device Types
@@ -224,7 +242,7 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    public getDeviceName() : string {
+    public getDeviceName(): string {
         return this.deviceName;
     }
 
@@ -246,11 +264,11 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    public getIsVisible() : boolean {
+    public getIsVisible(): boolean {
         return this.isVisible;
     }
 
-    public setIsVisible(_isVisible : boolean) {
+    public setIsVisible(_isVisible: boolean) {
         this.isVisible = _isVisible;
         this.saveData();
 
@@ -265,14 +283,14 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    public getIsAccepted() : -1 | 0 | 1 {
+    public getIsAccepted(): -1 | 0 | 1 {
         return this.isAccepted;
     }
 
-    public async setIsAccepted(_isAccepted : -1 | 0 | 1) {
+    public async setIsAccepted(_isAccepted: -1 | 0 | 1) {
         this.isAccepted = _isAccepted;
         await this.saveData();
-        
+
         let eventData: AppdataEvent = {
             targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
@@ -285,14 +303,14 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    public getIsAdminOnly() : boolean {
+    public getIsAdminOnly(): boolean {
         return this.isAdminOnly;
     }
 
-    public setIsAdminOnly(_isAdminOnly : boolean) {
+    public setIsAdminOnly(_isAdminOnly: boolean) {
         this.isAdminOnly = _isAdminOnly;
         this.saveData();
-        
+
         let eventData: AppdataEvent = {
             targetId: this.uuid,
             event: AppData.ON_DEVICE_DATA_CHANGE,
@@ -305,7 +323,7 @@ class Device {
     }
 
     async setVar(dataAt: number, varName: string, newContent: any) {
-        if(this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
+        if (this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
             return
         }
 
@@ -324,7 +342,7 @@ class Device {
     }
 
     async setData(dataAt: number, newContent: any) {
-        if(this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
+        if (this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
             return
         }
 
