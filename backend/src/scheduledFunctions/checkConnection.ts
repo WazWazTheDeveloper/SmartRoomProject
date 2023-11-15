@@ -101,7 +101,11 @@ class CheckConnection {
                 try {
                     const device = appData.getDeviceList()[index];
                     device.setDeviceVar(Device.isConnected, device.getIsConnectedCheck())
-                    didChange = true;
+
+                    // only update when there is a change to connection state
+                    if(device.getIsConnectedCheck() != device.getIsConnected()) {
+                        didChange = true;
+                    }
                 }
                 catch (err) { }
             }

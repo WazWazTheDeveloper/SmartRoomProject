@@ -2,6 +2,7 @@
 import express, { Request, Response } from "express"
 import asyncHandler from 'express-async-handler'
 import { User } from "../models/user";
+import { JWTData } from "../interfaces/JWT.interface";
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -34,7 +35,7 @@ const login = asyncHandler(async (req: Request, res: Response) => {
         res.status(401).json('Unauthorized')
         return
     }
-    
+
     const accessToken = jwt.sign(
         {
             userInfo: {
@@ -99,14 +100,15 @@ const refresh = (req: Request, res: Response) => {
                 return
             }
 
+            const jwtData: JWTData = {
+                userInfo: {
+                    username: foundUser.getUsername(),
+                    permission: foundUser.getPermissions(),
+                    isAdmin: foundUser.getIsAdmin()
+                }
+            }
             const accessToken = jwt.sign(
-                {
-                    "userInfo": {
-                        "username": foundUser.getUsername(),
-                        "permission": foundUser.getPermissions(),
-                        "isAdmin": foundUser.getIsAdmin()
-                    }
-                },
+                jwtData,
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '15m' }
             )
@@ -130,9 +132,7 @@ const signup = async (req: Request, res: Response) => {
         return
     }
 
-    // TODO: add check to check if account already exist
-    let foundUser: User = await User.createNewUser(username,password);
-
+    let foundUser: User = await User.createNewUser(username, password);
 
     if (!foundUser || !foundUser.getIsActive()) {
         res.status(401).json('Unauthorized')
@@ -145,14 +145,16 @@ const signup = async (req: Request, res: Response) => {
         return
     }
 
+    const jwtData: JWTData = {
+        userInfo: {
+            username: foundUser.getUsername(),
+            permission: foundUser.getPermissions(),
+            isAdmin: foundUser.getIsAdmin()
+        }
+    }
+
     const accessToken = jwt.sign(
-        {
-            userInfo: {
-                username: foundUser.getUsername(),
-                permission: foundUser.getPermissions(),
-                isAdmin: foundUser.getIsAdmin()
-            }
-        },
+        jwtData,
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: '1000s' }
     )

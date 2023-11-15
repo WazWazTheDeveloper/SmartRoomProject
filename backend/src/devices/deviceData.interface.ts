@@ -28,6 +28,28 @@ interface SwitchDataType {
     isOn: boolean
     onName:string
     offName:string
+    isSensor: boolean
+}
+
+export interface NumberDataType {
+    number:Number
+    symbol : string
+    isSensor : boolean
+    minVal : number
+    maxVal : number
+    jumpVal : number
+}
+
+export interface MultiStateButtonDataType {
+    currentState : number
+    stateList : stateItem[]
+}
+
+export interface stateItem {
+    stateNumber : number,
+    isIcon : boolean
+    icon: string
+    string: string
 }
 
 export {IDeviceData , AirconditionerDataType,SwitchDataType}

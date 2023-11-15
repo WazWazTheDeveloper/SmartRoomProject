@@ -113,7 +113,8 @@ const addTodoToTask = async (req: Request, res: Response) => {
 
 const removeVarChackToTask = async (req: Request, res: Response) => {
     const { targetTask, indexOfVarCheck } = req.body;
-    if(!targetTask && !(indexOfVarCheck && indexOfVarCheck !== 0)) {
+    if(!targetTask || !(typeof indexOfVarCheck == "number")) {
+
         res.status(400).json("invalid request")
         return
     }
@@ -135,7 +136,7 @@ const removeVarChackToTask = async (req: Request, res: Response) => {
 
 const removeTimeCheckToTask = async (req: Request, res: Response) => {
     const { targetTask, indexOfTimeCheck } = req.body;
-    if(!targetTask && !(indexOfTimeCheck && indexOfTimeCheck !== 0)) {
+    if(!targetTask && !(typeof indexOfTimeCheck == 'number')) {
         res.status(400).json("invalid request")
         return
     }
@@ -157,8 +158,7 @@ const removeTimeCheckToTask = async (req: Request, res: Response) => {
 
 const removeTodoToTask = async (req: Request, res: Response) => {
     const { targetTask, indexOfTodoTask } = req.body;
-    //TODO: not working properly
-    if(!targetTask && !(indexOfTodoTask && indexOfTodoTask !== 0)) {
+    if(!targetTask && !(typeof indexOfTodoTask == 'number')) {
         res.status(400).json("invalid request")
         return
     }

@@ -17,19 +17,19 @@ interface callback {
 
 
 class AppData {
-    //on change listeners
-    // TODO: take a look at the listeners
-    //TODO: add listeners for tasks (add/remove/change)
     public static readonly ON_DEVICE_TOPIC_CHANGE = "deviceTopicChange";
     public static readonly ON_DEVICE_DATA_CHANGE = "deviceDataChange";
-    public static readonly ON_DATA_CHANGE = "dataChange";
     public static readonly ON_DEVICE_REMOVED = "deviceRemoved";
     public static readonly ON_DEVICE_ADDED = "deviceAdded";
+
+    public static readonly ON_DATA_CHANGE = "dataChange";
+    
     public static readonly ON_TASK_CHANGE = "taskChange"
     public static readonly ON_TASK_COMPLETE = "taskComplete"
-    public static readonly ON_ANY_CHANGE = "any";
     public static readonly ON_TASK_CREATED = "taskCreated";
     public static readonly ON_TASK_DELETED = "taskDeleted";
+
+    public static readonly ON_ANY_CHANGE = "any";
 
     private taskList: Array<Task>
     private generalData: GeneralData;
@@ -332,7 +332,6 @@ class AppData {
 
         appDataInstance.on(AppData.ON_DATA_CHANGE, task.onUpdateData.bind(task));
 
-        // TODO: add triggerCall
         console.log("Created new task: " + task.taskName)
 
         let eventData: AppdataEvent = {

@@ -26,6 +26,8 @@ out
 # mqtt server
 emqx-5.1.1-windows-amd64/*
 
+# backend build
+/backend/build/*
 
 # random stuff
 acdatadecode/*

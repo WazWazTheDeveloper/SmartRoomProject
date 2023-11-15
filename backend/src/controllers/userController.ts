@@ -3,7 +3,14 @@ import asyncHandler from 'express-async-handler'
 import { User } from "../models/user";
 
 export const setIsAdmin = async (req: Request, res: Response) => {
-    // TODO: add permission check of the user who send the reqest
+    if (!req.username) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+    let _user = await User.getUser(req.username!)
+    if (!_user.getIsAdmin()) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
     const { targetUser, newState } = req.body;
     if (!targetUser || typeof newState != "boolean") {
         res.status(400).json("invalid request")
@@ -25,7 +32,14 @@ export const setIsAdmin = async (req: Request, res: Response) => {
 }
 
 export const setIsActive = async (req: Request, res: Response) => {
-    // TODO: add permission check of the user who send the reqest
+    if (!req.username) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+    let _user = await User.getUser(req.username!)
+    if (!_user.getIsAdmin()) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
     const { targetUser, newState } = req.body;
     if (!targetUser || typeof newState != "boolean") {
         res.status(400).json("invalid request")
@@ -47,8 +61,15 @@ export const setIsActive = async (req: Request, res: Response) => {
 }
 
 export const addPermissions = async (req: Request, res: Response) => {
-    // TODO: add permission check of the user who send the reqest
-    const { targetUser,newPermission } = req.body;
+    if (!req.username) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+    let _user = await User.getUser(req.username!)
+    if (!_user.getIsAdmin()) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    const { targetUser, newPermission } = req.body;
     if (!targetUser && !newPermission) {
         res.status(400).json("invalid request")
         return
@@ -67,10 +88,16 @@ export const addPermissions = async (req: Request, res: Response) => {
     res.status(200).json('success')
 }
 
-// IMPLEMENT
 export const removePermissions = async (req: Request, res: Response) => {
-    // TODO: add permission check of the user who send the reqest
-    const { targetUser,permission } = req.body;
+    if (!req.username) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+    let _user = await User.getUser(req.username!)
+    if (!_user.getIsAdmin()) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    const { targetUser, permission } = req.body;
     if (!targetUser && !permission) {
         res.status(400).json("invalid request")
         return
@@ -90,8 +117,15 @@ export const removePermissions = async (req: Request, res: Response) => {
 }
 
 export const resetPassword = async (req: Request, res: Response) => {
-    // TODO: add permission check of the user who send the reqest
-    const { targetUser,newPassword } = req.body;
+    if (!req.username) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+    let _user = await User.getUser(req.username!)
+    if (!_user.getIsAdmin()) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    const { targetUser, newPassword } = req.body;
     if (!targetUser && !newPassword) {
         res.status(400).json("invalid request")
         return

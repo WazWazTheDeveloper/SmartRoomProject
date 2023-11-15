@@ -345,7 +345,6 @@ class Task implements TaskType {
         throw new Error("device not found")
     }
 
-    // TODO: add trigger update
     async addVarCheck(deviceId: string, dataIndex: number, varName: string, checkType: number, valueToCompareTo: any): Promise<void> {
         let newVarCheck = new VarCheck(deviceId, dataIndex, varName, checkType, valueToCompareTo, false);
         this.varCheckList.push(newVarCheck);

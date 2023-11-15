@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express"
+import { JWTData } from "../interfaces/JWT.interface";
 var jwt = require('jsonwebtoken');
 
 const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
@@ -16,15 +17,14 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     jwt.verify(
         token,
         process.env.ACCESS_TOKEN_SECRET,
-        // TODO: add type to decoded of somting
-        (err: Error, decoded: any) => {
+        (err: Error, decoded: JWTData) => {
             if (err) {
                 res.status(403).json({ message: 'Forbidden' })
                 return
             }
-            (req as any).user = decoded.userInfo.username;
-            (req as any).roles = decoded.userInfo.permission;
-            // TODO: add is admin
+            req.username = decoded.userInfo.username;
+            req.roles = decoded.userInfo.permission;
+            req.isAdmin = decoded.userInfo.isAdmin;
             next()
         }
     )

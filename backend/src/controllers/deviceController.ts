@@ -154,7 +154,6 @@ export const update_name = async (req:Request, res:Response) => {
 
 export const setIsAccepted = async (req:Request, res:Response) => {
     const { targetDevice,isAccepted } = req.body;
-    // TODO: maybe add max character limit or somting
     if (!targetDevice || !(typeof isAccepted === 'number')) {
         res.status(400).json('invalid data')
         return
