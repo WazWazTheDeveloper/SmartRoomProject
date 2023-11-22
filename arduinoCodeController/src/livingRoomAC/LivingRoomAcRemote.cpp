@@ -219,6 +219,9 @@ void LivingRoomAcRemote::calcRawBytesState()
     {
         tempByte2 += speedArray_Inverse[speed];
     }
+    if(!isOn) {
+        tempByte2 = 123;
+    }
 
     rawBytes[2] = tempByte2;
     // byte 3
@@ -230,6 +233,9 @@ void LivingRoomAcRemote::calcRawBytesState()
     else
     {
         tempByte3 += speedArray[speed];
+    }
+    if(!isOn) {
+        tempByte3 = 132;
     }
     rawBytes[3] = tempByte3;
 
@@ -244,8 +250,9 @@ void LivingRoomAcRemote::calcRawBytesState()
         tempByte4 += tempArray[temp - 17];
     }
     tempByte4 += modeArray[mode];
-
-
+    if(!isOn) {
+        tempByte4 = 224;
+    }
     rawBytes[4] = tempByte4;
 
     // byte 5
@@ -259,16 +266,18 @@ void LivingRoomAcRemote::calcRawBytesState()
         tempByte5 += tempArray_Inverse[temp - 17];
     }
     tempByte5 += modeArray_Inverse[mode];
-
+    if(!isOn) {
+        tempByte5 = 31;
+    }
     rawBytes[5] = tempByte5;
 }
 
 LivingRoomAcRemote &LivingRoomAcRemote::calcRawData()
 {
     calcRawBytesState();
-    rawData[0] = 4380;
-    rawData[1] = 4420;
-    rawData[98] = 480;
+    rawData[0] = 4400;
+    rawData[1] = 4400;
+    rawData[198] = 480;
     // for each byte is rawBytes
     for (int i = 0; i < 6; i++)
     {
@@ -283,17 +292,30 @@ LivingRoomAcRemote &LivingRoomAcRemote::calcRawData()
         for (int j = 0; j < 8; j++)
         {
             int placeOnRawData = 2 + i * 16 + j * 2;
+            int placeOnRawData2 = 102 + i * 16 + j * 2;
             if (byteString[j] == '0')
             {
                 rawData[placeOnRawData] = 480;
-                rawData[placeOnRawData + 1] = 620;
+                rawData[placeOnRawData + 1] = 560;
+
+                rawData[placeOnRawData2] = 480;
+                rawData[placeOnRawData2 + 1] = 560;
             }
             else if (byteString[j] == '1')
             {
                 rawData[placeOnRawData] = 480;
-                rawData[placeOnRawData + 1] = 1720;
+                rawData[placeOnRawData + 1] = 1700;
+
+                rawData[placeOnRawData2] = 480;
+                rawData[placeOnRawData2 + 1] = 1700;
             }
         }
     }
+
+    rawData[98] = 480;
+    rawData[99] = 5200;
+    rawData[100] = 4400;
+    rawData[101] = 4400;
+
     return *this;
 }

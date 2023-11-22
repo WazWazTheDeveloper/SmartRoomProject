@@ -80,7 +80,7 @@ private:
 
 public:
     // array
-    uint16_t rawData[99];
+    uint16_t rawData[199];
 
     // modes
     const int8_t MODE_AUTO = 0;
