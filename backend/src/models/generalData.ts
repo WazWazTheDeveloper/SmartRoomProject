@@ -248,10 +248,10 @@ class GeneralData implements GeneralDataType {
 
     }
 
-    public removeTopic(topicName: string): void {
+    public async removeTopic(topicName: string): Promise<void> {
         for (let i = this.topicList.length - 1; i >= 0; i--) {
             const element = this.topicList[i];
-            if (topicName == element.topicName) {
+            if (topicName == element.topicPath) {
                 this.topicList.splice(i, 1)
                 console.log("removed general topid: '" + topicName + "'")
             }

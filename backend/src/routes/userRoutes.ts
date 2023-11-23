@@ -19,4 +19,8 @@ router.route('/is_admin')
 router.route('/reset_password')
     .put(userController.resetPassword);
 
+router.route('/permission_group')
+    .post(userController.addGroup)
+    .delete(userController.removeGroup)
+
 export { router as userRouter }

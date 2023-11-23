@@ -7,6 +7,7 @@ import { AppdataEvent } from "./interfaces/appData.interface";
 import { User } from "./models/user";
 import { DataPacket } from "./models/dataPacket";
 import { Console } from "console";
+import { PermissionGroup } from "./models/permissionGroup";
 
 var appDataInstance: AppData;
 
@@ -272,7 +273,9 @@ class AppData {
     }
 
     async removeDevice(uuid: string): Promise<void> {
+        const _device = this.getDeviceById(uuid)
         await this.generalData.removeDevice(uuid);
+        await this.generalData.removeTopic(_device.getTopicPath());
 
         let topic: string = ""
         try {
@@ -287,11 +290,11 @@ class AppData {
                 this.deviceList.splice(i, 1)
             }
         }
+        this.removeDevicePermissionsOfDevice(uuid);
 
         removeFile(`devices/${uuid}`)
         console.log(`Removed device ${uuid} from appData`)
 
-        // TODO: remove general topic associated with the device and also any task the contain the device(or at least add try catch in the task module :))
         let eventData: AppdataEvent = {
             targetId: uuid,
             event: AppData.ON_DEVICE_REMOVED,
@@ -300,7 +303,6 @@ class AppData {
             oldTopic: topic,
         }
 
-        this.removeDevicePermissionsOfDevice(uuid);
         
         this.triggerCallbacks(eventData)
     }
@@ -313,6 +315,12 @@ class AppData {
             const user = await User.getUser(username);
             user.removeDevicePermission(uuid);
         }
+
+        for (let index = 0; index < this.generalData.permissionGroup.length; index++) {
+            const permissionGroupId = this.generalData.permissionGroup[index].groupId;
+            const permissionGroup = await PermissionGroup.getPermissionGroup(permissionGroupId)
+            permissionGroup.removeDevicePermission(uuid);
+        }
     }
 
     async removeTaskPermissionsOfTask(taskId: string) {
@@ -322,6 +330,12 @@ class AppData {
             const username = usernamesList[index];
             const user = await User.getUser(username);
             user.removeTaskPermission(taskId);
+        }
+
+        for (let index = 0; index < this.generalData.permissionGroup.length; index++) {
+            const permissionGroupId = this.generalData.permissionGroup[index].groupId;
+            const permissionGroup = await PermissionGroup.getPermissionGroup(permissionGroupId)
+            permissionGroup.removeTaskPermission(taskId);
         }
     }
 
@@ -357,7 +371,7 @@ class AppData {
             }
         }
 
-        this.removeDevicePermissionsOfDevice(taskId);
+        this.removeTaskPermissionsOfTask(taskId);
 
         removeFile(`tasks/${taskId}`)
         console.log("Removed task: " + taskName)

@@ -97,10 +97,26 @@ class PermissionGroup{
         await this.saveData()
     }
 
-    // IMPLEMENT!!
-    // IMPLEMENT:add same for tasks
     removeDevicePermission(deviceID: string) {
+        for (let index = 0; index < this.permission.length; index++) {
+            const element = this.permission[index];
+            const permission = element.split(".");
+            if (permission[0] == 'device' && permission[1] == deviceID) {
+                this.permission.splice(index, 1)
+                console.log("removed permission: '" + element + "' from group: '" + this.groupName + "'")
+            }
+        }
+    }
 
+    removeTaskPermission(taskId: string) {
+        for (let index = 0; index < this.permission.length; index++) {
+            const element = this.permission[index];
+            const permission = element.split(".");
+            if (permission[0] == 'task' && permission[1] == taskId) {
+                this.permission.splice(index, 1)
+                console.log("removed permission: '" + element + "' from group: '" + this.groupName + "'")
+            }
+        }
     }
 
 }

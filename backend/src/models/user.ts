@@ -3,6 +3,7 @@ import data = require('../handlers/file_handler')
 import { v4 as uuidv4 } from 'uuid';
 import { AppData } from "../appData";
 import { PermissionGroup } from "./permissionGroup";
+import { error } from "console";
 const bcrypt = require('bcrypt');
 
 interface permissionData {
@@ -15,10 +16,10 @@ interface UserType {
     username: string;
     password: string;
     permission: Array<string>;
-    permissionGroups : Array<string>
+    permissionGroups: Array<string>
     settings: SettingsType;
     isActive: boolean;
-    isAdmin : boolean;
+    isAdmin: boolean;
 }
 
 class User {
@@ -26,12 +27,12 @@ class User {
     private username: string;
     private password: string;
     private permission: Array<string>;
-    private permissionGroups : Array<string>
+    private permissionGroups: Array<string>
     private settings: Settings;
     private isActive: boolean;
     private isAdmin: boolean;
 
-    constructor(uuid: string, username: string, password: string, permission: Array<string>,permissionGroups : Array<string>, settings: Settings, isActive: boolean , isAdmin:boolean) {
+    constructor(uuid: string, username: string, password: string, permission: Array<string>, permissionGroups: Array<string>, settings: Settings, isActive: boolean, isAdmin: boolean) {
         this.uuid = uuid;
         this.username = username;
         this.password = password;
@@ -42,10 +43,10 @@ class User {
         this.isAdmin = isAdmin;
     }
 
-    static async createNewUser(username: string, password: string,isAdmin:boolean = false) {
+    static async createNewUser(username: string, password: string, isAdmin: boolean = false) {
         let uuid = uuidv4();
         let hashedPassword = await this.getHashedPassword(password);
-        let newUser = new User(uuid, username, hashedPassword, [],[], new Settings(), true,isAdmin);
+        let newUser = new User(uuid, username, hashedPassword, [], [], new Settings(), true, isAdmin);
 
         let appDataInstance = await AppData.getAppDataInstance();
         appDataInstance.addUser(username)
@@ -56,7 +57,7 @@ class User {
 
     public static async getUser(username: string) {
         let _data: UserType = await data.readFile<UserType>(`users/${username}`)
-        let user = await new User(_data.uuid, _data.username, _data.password, _data.permission,_data.permissionGroups, Settings.getFromJson(_data.settings), _data.isActive,_data.isAdmin);
+        let user = await new User(_data.uuid, _data.username, _data.password, _data.permission, _data.permissionGroups, Settings.getFromJson(_data.settings), _data.isActive, _data.isAdmin);
         return user;
     }
 
@@ -64,7 +65,6 @@ class User {
         console.log(`saveing user object ${this.uuid}`)
 
         let dataJson: UserType = this.getAsJson();
-
         await data.writeFile<UserType>(`users/${this.username}`, dataJson)
         console.log(`done saving user object ${this.uuid}`)
     }
@@ -90,19 +90,19 @@ class User {
         return hash
     }
 
-    async addPermission(newPermission : string) {
+    async addPermission(newPermission: string) {
         //TODO add check for correct format
         this.permission.push(newPermission);
         await this.saveData()
-        console.log("added permission: '"+newPermission +"' to user: '" + this.username + "'")
+        console.log("added permission: '" + newPermission + "' to user: '" + this.username + "'")
     }
-    
-    async removePermission(permission : string) {
+
+    async removePermission(permission: string) {
         for (let index = 0; index < this.permission.length; index++) {
             const element = this.permission[index];
-            if(element == permission) {
+            if (element == permission) {
                 this.permission.splice(index, 1)
-                console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
+                console.log("removed permission: '" + element + "' from user: '" + this.username + "'")
             }
         }
         await this.saveData()
@@ -112,9 +112,9 @@ class User {
         for (let index = 0; index < this.permission.length; index++) {
             const element = this.permission[index];
             const permission = element.split(".");
-            if(permission[0] == 'device' && permission[1] == deviceID) {
+            if (permission[0] == 'device' && permission[1] == deviceID) {
                 this.permission.splice(index, 1)
-                console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
+                console.log("removed permission: '" + element + "' from user: '" + this.username + "'")
             }
         }
     }
@@ -123,9 +123,9 @@ class User {
         for (let index = 0; index < this.permission.length; index++) {
             const element = this.permission[index];
             const permission = element.split(".");
-            if(permission[0] == 'task' && permission[1] == taskId) {
+            if (permission[0] == 'task' && permission[1] == taskId) {
                 this.permission.splice(index, 1)
-                console.log("removed permission: '"+element +"' from user: '" + this.username + "'")
+                console.log("removed permission: '" + element + "' from user: '" + this.username + "'")
             }
         }
     }
@@ -134,24 +134,24 @@ class User {
         return this.permission;
     }
 
-    async hasPermission(permission : string) {
+    async hasPermission(permission: string) {
         for (let index = 0; index < this.permission.length; index++) {
             const _permission = this.permission[index];
-            if(_permission == permission) {
+            if (_permission == permission) {
                 return true;
             }
         }
-        
+
         for (let index = 0; index < this.permissionGroups.length; index++) {
             const groupId = this.permissionGroups[index];
             const group = await PermissionGroup.getPermissionGroup(groupId)
             for (let index = 0; index < group.getPermissions().length; index++) {
                 const _permission = group.getPermissions()[index];
-                if(_permission == permission) {
+                if (_permission == permission) {
                     return true;
                 }
             }
-            
+
         }
         return false;
     }
@@ -197,19 +197,25 @@ class User {
         await this.saveData();
     }
 
-    addGroup(groupId : string){
+    async addGroup(groupId: string) {
+        if (!PermissionGroup.getPermissionGroup(groupId)) {
+            throw new Error("permission group not found")
+        }
+
         this.permissionGroups.push(groupId)
-        console.log("added group: '"+groupId +"' to user: '" + this.username + "'")
+        console.log("added group: '" + groupId + "' to user: '" + this.username + "'")
+        await this.saveData();
     }
 
-    removeGroup(groupId : string) {
+    async removeGroup(groupId: string) {
         for (let index = 0; index < this.permissionGroups.length; index++) {
             const group = this.permissionGroups[index];
-            if(groupId == group) {
-                this.permission.splice(index, 1)
-                console.log("removed group: '"+group +"' from user: '" + this.username + "'")
+            if (groupId == group) {
+                this.permissionGroups.splice(index, 1)
+                console.log("removed group: '" + group + "' from user: '" + this.username + "'")
             }
         }
+        await this.saveData();
     }
 }
 
