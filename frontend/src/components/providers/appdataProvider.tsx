@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import Appdata from '../../services/appdataService';
 import { useAuth } from '../../hooks/useAuth';
-const socketUrl = `ws://${process.env.API_URL}/appdata/websocket`;
+const socketUrl = `ws://${process.env.BACKEND_URL}:${process.env.BACKEND_PORT}/appdata/websocket`;
 
 type Props = {
   children: JSX.Element

@@ -6,7 +6,7 @@ class ApiService {
     public static readonly REQUEST_DELETE = 'DELETE'
     public static async basicHttpRequest(relativPath: string, metod: string, token: string, payload: {}={}){
         // TODO: add non static ip
-        let baseUrl = 'https://10.0.0.12:3000'
+        let baseUrl = `https://${process.env.BACKEND_URL}:3000`
         let url = baseUrl + relativPath
 
         let request:any = {
