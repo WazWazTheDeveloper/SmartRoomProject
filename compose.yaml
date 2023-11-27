@@ -1,0 +1,32 @@
+services:
+  backend:
+    container_name: 'backend'
+    build: /backend
+    tty: true
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/backend
+      - /backend/node_modules/
+
+  frontend:
+    container_name: 'frontend'
+    build: /frontend
+    tty: true
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules/
+    
+  emqx:
+    image: emqx:5.3.1
+    container_name: emqx
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083 
+    # volumes:
+    #   - $PWD/emqx1_data:/opt/emqx/data
