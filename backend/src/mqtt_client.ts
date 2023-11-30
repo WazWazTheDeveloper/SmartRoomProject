@@ -56,11 +56,10 @@ class MqttClient {
         let arrLength = this.subscribeList.length
         for (let index = arrLength - 1; index >= 0; index--) {
             const element = this.subscribeList[index];
-            // TODO: take a look at this
             if (callbackFunction == element.callbackFunction && element.topicPath == topicPath) {
                 this.subscribeList.splice(index, 1);
+                this.mqttClient.unsubscribe(topicPath)
             }
-
         }
         return this;
     }
