@@ -32,9 +32,9 @@ class AppData {
 
     public static readonly ON_ANY_CHANGE = "any";
 
-    private taskList: Array<Task>
     private generalData: GeneralData;
     private deviceList: Array<Device>;
+    private taskList: Array<Task>
     private callbacks: Array<callback>
 
     private constructor(generalData: GeneralData, devices: Array<Device>, taskList: Array<Task>) {
@@ -68,10 +68,12 @@ class AppData {
         return json
     }
 
+    // TODO: declusterfuck this
     public async getAppdataOfUser(user: User) {
         let taskJson = []
         let deviceJson = []
         let userJson = []
+        let permissionGroups = []
 
         if (user.getIsAdmin()) {
             let generalUserList = this.generalData.getUsernameList();
@@ -80,11 +82,17 @@ class AppData {
                 let user = await (await User.getUser(generalUser)).getAsJson();
                 userJson.push(user)
             }
+            let generalPermissionGroupsList = this.generalData.getPermissionGroupList();
+            for (let index = 0; index < generalPermissionGroupsList.length; index++) {
+                const generalPermissionGroups = generalPermissionGroupsList[index];
+                let user = await (await PermissionGroup.getPermissionGroup(generalPermissionGroups.groupId)).getAsJson();
+                permissionGroups.push(user)
+            }
         }
 
         if (await user.hasPermission("*")) {
             let json = this.getAsJson();
-            return Object.assign({}, json, { "userList": userJson })
+            return Object.assign({}, json, { "userList": userJson, "permissionGroups" : permissionGroups} )
         }
 
         console.log(user.getPermissions())
@@ -143,6 +151,7 @@ class AppData {
             "generalData": this.generalData.getAppdataOfUser(user),
             "deviceList": deviceJson,
             "userList": userJson,
+            "permissionGroups" : permissionGroups
         }
 
         return json;
