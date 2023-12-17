@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDevice } from "@/hooks/useDevice";
 import useDidMount from "@/hooks/useDidMount";
 import { ApiService } from "@/services/apiService";
+import Icon from "@/components/ui/icon";
 import { PowerSettingsNew } from "@mui/icons-material";
 import { useForkRef } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -47,7 +48,7 @@ export default function SwitchDetailsData(props: props) {
     }
     return (
         <div className="w-full flex justify-center gap-x-2.5 items-center pb-5">
-            <PowerSettingsNew className="fill-on-surface h-8 w-8" />
+            <Icon iconName={device?.deviceData[props.dataAt].data.iconName} className="fill-on-surface h-8 w-8" />
             <div className="w-4/5 flex flex-wrap content-center justify-center gap-x-5">
                 <SwitchButton
                     state={isOn}

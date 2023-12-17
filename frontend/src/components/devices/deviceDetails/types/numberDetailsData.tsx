@@ -6,6 +6,7 @@ import useDidMount from "@/hooks/useDidMount";
 import { DeviceThermostat } from "@mui/icons-material";
 import { Slider } from "@mui/material";
 import { ApiService } from "@/services/apiService";
+import Icon from "@/components/ui/icon";
 
 interface props {
     targetDevice: string,
@@ -77,7 +78,7 @@ export default function NumberDetailsData(props: props) {
 
     return (
         <div className="w-full flex justify-center gap-x-2.5 items-center pb-5">
-            <DeviceThermostat className="fill-on-surface h-8 w-8" />
+            <Icon iconName={device?.deviceData[props.dataAt].data.iconName} className="fill-on-surface h-8 w-8" />
             <div className="w-4/5 flex flex-wrap content-center justify-center gap-x-5">
                 {/* TODO: add costum slider */}
                 <Slider
