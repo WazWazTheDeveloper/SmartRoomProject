@@ -1,30 +1,52 @@
-#include "AcRemote.h"
+#include "RoomAirconditionerRemote.h"
 #include "Arduino.h"
 
-// void defaultCallback(){};
+IRsend roomAirconditionerIRLed(IR_LED_PIN);
+uint8_t const RoomAirconditionerRemote::swing1Array[2] = {224, 0};
+uint8_t const RoomAirconditionerRemote::tempArray[17] = {2, 18, 10, 26, 6, 22, 14, 30, 1, 17, 9, 25, 5, 21, 13, 29, 3};
+uint8_t const RoomAirconditionerRemote::swing2Array[2] = {7, 0};
+uint8_t const RoomAirconditionerRemote::fullHoursArray[25] = {0, 128, 192, 32, 160, 96, 224, 16, 144, 80, 208, 48, 176, 112, 240, 8, 136, 72, 200, 40, 168, 104, 232, 24};
+uint8_t const RoomAirconditionerRemote::speedArray[4] = {6, 2, 4, 5};
+uint8_t const RoomAirconditionerRemote::isHalfHourArray[2] = {0, 60};
+uint8_t const RoomAirconditionerRemote::isStrongArray[2] = {0, 2};
+uint8_t const RoomAirconditionerRemote::isSleepArray[2] = {0, 32};
+uint8_t const RoomAirconditionerRemote::modeArray[5] = {0, 4, 2, 1, 3};
+uint8_t const RoomAirconditionerRemote::isFeelOfHealthModeArray[] = {0, 198};
+uint8_t const RoomAirconditionerRemote::isHealthArray[2] = {64, 0};
+uint8_t const RoomAirconditionerRemote::isHeatingArray[2] = {4, 12};
+uint8_t const RoomAirconditionerRemote::isTimerArray[2] = {0, 2};
+uint8_t const RoomAirconditionerRemote::buttonArray[13] = {160, 96, 0, 128, 176, 32, 64, 192, 16, 120, 208, 168, 224};
 
-AcRemote &AcRemote::begin()
+
+void RoomAirconditionerRemote::begin()
 {
-    irsend.begin();
-    // Serial.println(F("init"));
-    return *this;
+    setIsOn(false);
+    setTemp(20);
+    setMode(MODE_AUTO);
+    setSpeed(SPEED_AUTO);
+    setSwing1(false);
+    setSwing2(false);
+    setTimer(0);
+    setIsStrong(false);
+    setIsSleep(false);
+    setIsFeeling(false);
+    setIsScreen();
+    setIsHealth(false);
+    buttonPressed = RoomAirconditionerRemote::buttonArray[onOffButton];
+
+    roomAirconditionerIRLed.begin();
+    // return *this;
 }
 
-AcRemote &AcRemote::execute()
+void RoomAirconditionerRemote::execute()
 {
     calcRawData();
-    irsend.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), 38); // Note the approach used to automatically calculate the size of the array.
-    // for (size_t i = 0; i < sizeof(rawData) / sizeof(rawData[0]); i++)
-    // {
-    // Serial.print(rawData[i]);
-    // Serial.print(',');
-    // }
-    // Serial.println(F("send"));
+    roomAirconditionerIRLed.sendRaw(rawData, sizeof(rawData) / sizeof(rawData[0]), 38); // Note the approach used to automatically calculate the size of the array.
     delay(50);
-    return *this;
+    // return *this;
 }
 
-// AcRemote::AcRemote(void (*_callback)(), bool _isOn, int _temp, int _mode, int _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
+// RoomAirconditionerRemote::RoomAirconditionerRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth)
 // {
 //     setIsOn(_isOn);
 //     setTemp(temp);
@@ -39,33 +61,12 @@ AcRemote &AcRemote::execute()
 //     setIsScreen();
 //     setIsHealth(_isHealth);
 //     buttonPressed = buttonArray[onOffButton];
-
-//     void (*callback)() = _callback;
 // }
 
-AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _swing1, bool _swing2, float _timer, bool _isStrong, bool _isSleep, bool _isFeeling, bool _isScreen, bool _isHealth) : irsend(kIrLed,true)
-{
-    setIsOn(_isOn);
-    setTemp(temp);
-    setMode(_mode);
-    setSpeed(_speed);
-    setSwing1(_swing1);
-    setSwing2(_swing2);
-    setTimer(_timer);
-    setIsStrong(_isStrong);
-    setIsSleep(_isSleep);
-    setIsFeeling(_isFeeling);
-    setIsScreen();
-    setIsHealth(_isHealth);
-    buttonPressed = buttonArray[onOffButton];
-
-    // void (*callback)() = defaultCallback;
-}
-
-// AcRemote::AcRemote(void (*_callback)())
+// RoomAirconditionerRemote::RoomAirconditionerRemote()
 // {
 //     setIsOn(false);
-//     setTemp(24);
+//     setTemp(20);
 //     setMode(MODE_AUTO);
 //     setSpeed(SPEED_AUTO);
 //     setSwing1(false);
@@ -78,45 +79,26 @@ AcRemote::AcRemote(bool _isOn, int8_t _temp, int8_t _mode, int8_t _speed, bool _
 //     setIsHealth(false);
 //     buttonPressed = buttonArray[onOffButton];
 
-//     callback = *_callback;
+//     // callback = defaultCallback;
 // }
 
-AcRemote::AcRemote() : irsend(kIrLed,true)
-{
-    setIsOn(false);
-    setTemp(20);
-    setMode(MODE_AUTO);
-    setSpeed(SPEED_AUTO);
-    setSwing1(false);
-    setSwing2(false);
-    setTimer(0);
-    setIsStrong(false);
-    setIsSleep(false);
-    setIsFeeling(false);
-    setIsScreen();
-    setIsHealth(false);
-    buttonPressed = buttonArray[onOffButton];
-
-    // callback = defaultCallback;
-}
-
-AcRemote &AcRemote::setIsOn(bool _isOn)
+void RoomAirconditionerRemote::setIsOn(bool _isOn)
 {
     isOn = _isOn;
     buttonPressed = buttonArray[onOffButton];
 
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsOn()
-// {
-//     return isOn;
-// }
+bool RoomAirconditionerRemote::getIsOn()
+{
+    return isOn;
+}
 
-AcRemote &AcRemote::setTemp(int _temp)
+void RoomAirconditionerRemote::setTemp(int _temp)
 {
     if (_temp < 16 || _temp > 32)
     {
-        return *this;
+        return;
     }
     if (_temp > temp)
     {
@@ -128,64 +110,64 @@ AcRemote &AcRemote::setTemp(int _temp)
     }
     temp = _temp;
 
-    return *this;
+    // return *this;
 }
-int AcRemote::getTemp()
+int RoomAirconditionerRemote::getTemp()
 {
     return temp;
 }
 
-AcRemote &AcRemote::setMode(int _mode)
+void RoomAirconditionerRemote::setMode(int _mode)
 {
     if (_mode >= 0 && _mode <= 4)
     {
         mode = _mode;
         buttonPressed = buttonArray[modeButton];
     }
-    return *this;
+    // return *this;
 }
-// int8_t AcRemote::getMode()
-// {
-//     return mode;
-// }
+int8_t RoomAirconditionerRemote::getMode()
+{
+    return mode;
+}
 
-AcRemote &AcRemote::setSpeed(int _speed)
+void RoomAirconditionerRemote::setSpeed(int _speed)
 {
     if (_speed >= 0 && _speed <= 3)
     {
         speed = _speed;
         buttonPressed = buttonArray[speedButton];
     }
-    return *this;
+    // return *this;
 }
-int8_t AcRemote::getSpeed()
+int8_t RoomAirconditionerRemote::getSpeed()
 {
     return speed;
 }
 
-AcRemote &AcRemote::setSwing1(bool _swing1)
+void RoomAirconditionerRemote::setSwing1(bool _swing1)
 {
     swing1 = _swing1;
     buttonPressed = buttonArray[swing1Button];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getSwing1()
-// {
-//     return swing1;
-// }
+bool RoomAirconditionerRemote::getSwing1()
+{
+    return swing1;
+}
 
-AcRemote &AcRemote::setSwing2(bool _swing2)
+void RoomAirconditionerRemote::setSwing2(bool _swing2)
 {
     swing2 = _swing2;
     buttonPressed = buttonArray[swing2Button];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getSwing2()
-// {
-//     return swing2;
-// }
+bool RoomAirconditionerRemote::getSwing2()
+{
+    return swing2;
+}
 
-AcRemote &AcRemote::setTimer(int _timer)
+void RoomAirconditionerRemote::setTimer(int _timer)
 {
     timer = _timer;
     fullhours = static_cast<int8_t>(timer);
@@ -198,69 +180,69 @@ AcRemote &AcRemote::setTimer(int _timer)
         isHalfHour = false;
     }
     buttonPressed = buttonArray[timerButton];
-    return *this;
+    // return *this;
 }
-// float AcRemote::getTimer()
-// {
-//     return timer;
-// }
+float RoomAirconditionerRemote::getTimer()
+{
+    return timer;
+}
 
-AcRemote &AcRemote::setIsStrong(bool _isStrong)
+void RoomAirconditionerRemote::setIsStrong(bool _isStrong)
 {
     isStrong = _isStrong;
     buttonPressed = buttonArray[strongButton];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsStrong()
-// {
-//     return isStrong;
-// }
+bool RoomAirconditionerRemote::getIsStrong()
+{
+    return isStrong;
+}
 
-AcRemote &AcRemote::setIsSleep(bool _isSleep)
+void RoomAirconditionerRemote::setIsSleep(bool _isSleep)
 {
     isSleep = _isSleep;
     buttonPressed = buttonArray[sleepButton];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsSleep()
-// {
-//     return isSleep;
-// }
+bool RoomAirconditionerRemote::getIsSleep()
+{
+    return isSleep;
+}
 
-AcRemote &AcRemote::setIsFeeling(bool _isFeeling)
+void RoomAirconditionerRemote::setIsFeeling(bool _isFeeling)
 {
     isFeeling = _isFeeling;
     buttonPressed = buttonArray[feelButton];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsFeeling()
-// {
-//     return isFeeling;
-// }
+bool RoomAirconditionerRemote::getIsFeeling()
+{
+    return isFeeling;
+}
 
-AcRemote &AcRemote::setIsHealth(bool _isHealth)
+void RoomAirconditionerRemote::setIsHealth(bool _isHealth)
 {
     isHealth = _isHealth;
     buttonPressed = buttonArray[healthButton];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsHealth()
-// {
-//     return isHealth;
-// }
+bool RoomAirconditionerRemote::getIsHealth()
+{
+    return isHealth;
+}
 
-AcRemote &AcRemote::setIsScreen()
+void RoomAirconditionerRemote::setIsScreen()
 {
     isScreen = !isScreen;
     buttonPressed = buttonArray[screenButton];
-    return *this;
+    // return *this;
 }
-// bool AcRemote::getIsScreen()
-// {
-//     return isScreen;
-// }
+bool RoomAirconditionerRemote::getIsScreen()
+{
+    return isScreen;
+}
 
-void AcRemote::calcRawBytes()
+void RoomAirconditionerRemote::calcRawBytes()
 {
     // byte 0
     rawBytes[0] = addressArray;
@@ -301,10 +283,12 @@ void AcRemote::calcRawBytes()
     uint8_t tempByte4 = 0;
 
     tempByte4 += fullHoursArray[fullhours];
-    if(isStrong) {
+    if (isStrong)
+    {
         tempByte4 += speedArray[SPEED_HIGH];
     }
-    else {
+    else
+    {
         tempByte4 += speedArray[speed];
     }
 
@@ -416,7 +400,7 @@ void AcRemote::calcRawBytes()
     rawBytes[12] = calcCheckSum();
 }
 
-uint8_t AcRemote::calcCheckSum()
+uint8_t RoomAirconditionerRemote::calcCheckSum()
 {
     int8_t tempLastBit = 0;
     for (size_t i = 0; i < 12; i++)
@@ -427,7 +411,7 @@ uint8_t AcRemote::calcCheckSum()
     return reversedBitsNum(tempLastBit);
 }
 
-uint8_t AcRemote::reversedBitsNum(uint8_t n)
+uint8_t RoomAirconditionerRemote::reversedBitsNum(uint8_t n)
 {
     uint8_t dn = 0; // variable for new decimal number
     int j = 6;      // initial value of j
@@ -455,7 +439,7 @@ uint8_t AcRemote::reversedBitsNum(uint8_t n)
     return abs(dn);
 }
 
-AcRemote &AcRemote::calcRawData()
+void RoomAirconditionerRemote::calcRawData()
 {
     calcRawBytes();
     rawData[0] = 8930;
@@ -487,5 +471,5 @@ AcRemote &AcRemote::calcRawData()
             }
         }
     }
-    return *this;
+    // return *this;
 }
