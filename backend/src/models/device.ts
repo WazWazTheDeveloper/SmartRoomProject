@@ -195,6 +195,7 @@ class Device {
     }
 
     public getAsJsonForArduino(dataAt: number) {
+        // TODO: refactor and change data to get only relevent data for arduino
         const data = this.deviceData[dataAt].data.getAsJson();
         let dataJson: any = {
             data: data
@@ -341,8 +342,8 @@ class Device {
         this.callbackOnChange(eventData);
     }
 
-    async setData(dataAt: number, newContent: any) {
-        if (this.isAccepted != Device.DEVICE_ACCEPTED_YES) {
+    async setData(dataAt: number, newContent: any, isInitialSetup: boolean = false) {
+        if ((this.isAccepted != Device.DEVICE_ACCEPTED_YES) && !isInitialSetup) {
             return
         }
 

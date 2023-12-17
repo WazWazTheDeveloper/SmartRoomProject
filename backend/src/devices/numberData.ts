@@ -14,9 +14,9 @@ export default class NumberData implements IDeviceData {
         number: Number = 0,
         symbol: string = "", 
         isSensor: boolean = false, 
-        minVal: number = -1, 
-        maxVal: number = -1, 
-        jumpVal: number = -1) {
+        minVal: number = 0, 
+        maxVal: number = 100, 
+        jumpVal: number = 1) {
         this.number = number;
         this.symbol = symbol;
         this.isSensor = isSensor;
@@ -69,6 +69,7 @@ export default class NumberData implements IDeviceData {
     setVar(varName: string, newValue: any): string {
         switch (varName) {
             case ("number"): {
+                // TODO: check if new val is multiple of jumpval and in between minval and maxval
                 this.number = newValue
                 return "number"
             }

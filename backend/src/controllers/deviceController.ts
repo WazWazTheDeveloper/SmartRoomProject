@@ -4,10 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppData } from "../appData";
 import { Device } from "../models/device";
 import { User } from "../models/user";
+import { Console } from "console";
 
 
 export const createNewDevice = async (req: Request, res: Response) => {
-    const {deviceType,deviceName} = req.body;
+    const { deviceType, deviceName, extraConfigurations } = req.body;
     let newUUID = uuidv4();
     let appdata = await AppData.getAppDataInstance();
 
@@ -22,15 +23,22 @@ export const createNewDevice = async (req: Request, res: Response) => {
         }
     }
     let _deviceName = deviceName
-    if(!deviceName) {
+    if (!deviceName) {
         _deviceName = "new Device"
     }
 
     try {
         await appdata.createNewDevice(_deviceName, newUUID, deviceType, `device/${newUUID}`);
         let newDevice: Device = appdata.getDeviceById(newUUID);
+        if (extraConfigurations && Array.isArray(extraConfigurations)) {
+            for (let index = 0; index < extraConfigurations.length; index++) {
+                const element = extraConfigurations[index];
+                newDevice.setData(element.dataAt, element.data, true);
+            }
+        }
         res.status(200);
         res.send(newUUID);
+
     } catch (err) {
         res.status(404);
         res.send();
@@ -46,7 +54,7 @@ export const getData = async (req: Request, res: Response) => {
     let appdata = await AppData.getAppDataInstance();
 
     let uuidString = String(uuid)
-    if (!(dataAtString instanceof String)) {
+    if (!(dataAtString && typeof dataAtString == 'string')) {
         dataAtString = "0"
     }
     let dataAt = Number(dataAtString);
@@ -107,7 +115,7 @@ export const update_device = async (req: Request, res: Response) => {
         return
     }
 
-    if(foundDevice.getIsAccepted() != 1) {
+    if (foundDevice.getIsAccepted() != 1) {
         res.status(401).json('Device is not accepted yet')
         return
     }
@@ -128,8 +136,8 @@ export const delete_device = async (req: Request, res: Response) => {
     res.status(200).json('success');
 }
 
-export const update_name = async (req:Request, res:Response) => {
-    const { targetDevice,newName } = req.body;
+export const update_name = async (req: Request, res: Response) => {
+    const { targetDevice, newName } = req.body;
     // TODO: maybe add max character limit or somting
     if (!newName || !targetDevice) {
         res.status(400).json('invalid data')
@@ -152,13 +160,13 @@ export const update_name = async (req:Request, res:Response) => {
     res.status(200).json('success')
 }
 
-export const setIsAccepted = async (req:Request, res:Response) => {
-    const { targetDevice,isAccepted } = req.body;
+export const setIsAccepted = async (req: Request, res: Response) => {
+    const { targetDevice, isAccepted } = req.body;
     if (!targetDevice || !(typeof isAccepted === 'number')) {
         res.status(400).json('invalid data')
         return
     }
-    if(isAccepted != 1 && isAccepted != 0 && isAccepted != -1) {
+    if (isAccepted != 1 && isAccepted != 0 && isAccepted != -1) {
         res.status(400).json('invalid data')
     }
 

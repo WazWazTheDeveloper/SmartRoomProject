@@ -247,7 +247,7 @@ class AppData {
         await this.generalData.removePermissionGroup(groupId)
     }
 
-    // change to createDevice
+    //TODO: change to createDevice
     public async createNewDevice(deviceName: string, uuid: string, deviceType: Array<number>, topic: string): Promise<void> {
         if (Array.isArray(deviceType) && deviceType.length == 0) {
             throw new Error("deviceTypeList should not be empty");
