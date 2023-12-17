@@ -1,11 +1,11 @@
+import Button from "@/components/ui/button";
 import SwitchButton from "@/components/ui/switchButton";
 import { useApi } from "@/hooks/useApi";
 import { useAuth } from "@/hooks/useAuth";
 import { useDevice } from "@/hooks/useDevice";
 import useDidMount from "@/hooks/useDidMount";
 import { ApiService } from "@/services/apiService";
-import { PowerSettingsNew } from "@mui/icons-material";
-import { useForkRef } from "@mui/material";
+import { AcUnit, FastForward } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 
 interface props {
@@ -13,18 +13,24 @@ interface props {
     dataAt: number,
 }
 
-export default function SwitchDetailsData(props: props) {
+export default function MultiStateButtonDetailsData(props: props) {
     const { userdata } = useAuth();
-    const [isOn, setIsOn] = useState(false);
+    const [state, setState] = useState(0);
     const [device, setDeviceId] = useDevice(props.targetDevice);
     const { fetchWithReauth } = useApi();
 
     const toUpdate = useRef(false);
+
+    function onStateChange(newState: number) {
+        setState(newState)
+        toUpdate.current = true;
+    }
+
     useEffect(() => {
         if (!device) {
             return
         }
-        setIsOn(device.deviceData[props.dataAt].data.isOn);
+        setState(device.deviceData[props.dataAt].data.currentState);
     }, [device, props])
 
     useDidMount(() => {
@@ -33,26 +39,27 @@ export default function SwitchDetailsData(props: props) {
                 targetDevice: props.targetDevice,
                 dataAt: props.dataAt,
                 data: {
-                    isOn: isOn,
+                    currentState: state,
                 }
             }
             fetchWithReauth("/device/update_device", ApiService.REQUEST_PUT, userdata.token, body)
             toUpdate.current = false;
         }
-    }, [isOn])
-
-    function onButtonStateChange(checked: boolean) {
-        setIsOn(!isOn)
-        toUpdate.current = true;
-    }
+    }, [state])
+    
+    
     return (
         <div className="w-full flex justify-center gap-x-2.5 items-center pb-5">
-            <PowerSettingsNew className="fill-on-surface h-8 w-8" />
+            <FastForward className="fill-on-surface h-8 w-8" />
             <div className="w-4/5 flex flex-wrap content-center justify-center gap-x-5">
-                <SwitchButton
-                    state={isOn}
-                    stateChangeFunction={onButtonStateChange}
-                />
+                {device?.deviceData[props.dataAt].data.stateList.map((stateItem: any, index: number) => {
+                    let _state = device?.deviceData[props.dataAt].data.stateList[index].stateNumber
+                    return (
+                        <Button key={index} isFocused={state == stateItem.stateNumber} className="h-10 w-16 md:w-20" onClick={() => { onStateChange(_state) }}>
+                            {stateItem.isIcon ? <AcUnit /> : stateItem.string}
+                        </Button>
+                    )
+                })}
             </div>
         </div>
     )

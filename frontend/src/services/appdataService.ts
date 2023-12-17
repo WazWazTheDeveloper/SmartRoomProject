@@ -61,6 +61,7 @@ export interface User {
     isActive: boolean;
     isAdmin : boolean;
 }
+// TODO: add permmison groups
 export default class Appdata {
     private taskList: Array<Task>
     private deviceList: Array<Device>;

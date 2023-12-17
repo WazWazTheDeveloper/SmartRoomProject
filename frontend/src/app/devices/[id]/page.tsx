@@ -1,6 +1,8 @@
 'use client'
 
 import AirconditionerDetailsData from "@/components/devices/deviceDetails/types/airconditionerDetailsData";
+import MultiStateButtonDetailsData from "@/components/devices/deviceDetails/types/multiStateButtonDetailsData";
+import NumberDetailsData from "@/components/devices/deviceDetails/types/numberDetailsData";
 import SwitchDetailsData from "@/components/devices/deviceDetails/types/switchDetailsData";
 import { useAppdata } from "@/hooks/useAppdata";
 import { Device } from "@/services/appdataService";
@@ -10,12 +12,14 @@ import { useEffect, useState } from "react";
 
 const AIRCONDITIONER_TYPE = 0;
 const SWITCH_TYPE = 1;
-
+const NUMBER_TYPE = 2;
+const MULTI_STATE_BUTTON_TYPE = 3;
 export default function Page({ params }: { params: { id: string } }) {
     const router = useRouter();
     const [appdata, isAppdata] = useAppdata();
     const [device, setDevice] = useState<Device>();
-    const [deviceDataElements, setDeviceDataElements] = useState<React.ReactNode>([]);
+    // DEL
+    // const [deviceDataElements, setDeviceDataElements] = useState<React.ReactNode>([]);
     const [isValidId, setIsValidId] = useState(true);
     useEffect(() => {
         if (isAppdata) {
@@ -28,38 +32,51 @@ export default function Page({ params }: { params: { id: string } }) {
             }
         }
     }, [appdata, isAppdata, params.id])
-    useEffect(() => {
-        if (isAppdata && device) {
-            let _newElements = [];
-            for (let index = 0; index < device.deviceData.length; index++) {
-                const _device = device.deviceData[index];
-                switch (device.deviceData[0].dataType) {
-                    case AIRCONDITIONER_TYPE:
-                        _newElements.push(
-                            <AirconditionerDetailsData
-                                targetDevice={String(params.id)}
-                                dataAt={Number(0)}
-                                data={device.deviceData[0].data}
-                                key={index}
-                            />);
-                        break;
-                    case SWITCH_TYPE:
-                        _newElements.push(
-                            <SwitchDetailsData
-                                targetDevice={String(params.id)}
-                                dataAt={Number(0)}
-                                key={index}
-                            />);
-                        break;
-                    default:
-                        _newElements.push(<></>);
-                        break;
+    let _newElements = [];
+    if (isAppdata && device) {
+        for (let index = 0; index < device.deviceData.length; index++) {
+            const _device = device.deviceData[index];
+            switch (device.deviceData[index].dataType) {
+                case AIRCONDITIONER_TYPE:
+                    _newElements.push(
+                        <AirconditionerDetailsData
+                            targetDevice={String(params.id)}
+                            dataAt={Number(0)}
+                            data={device.deviceData[0].data}
+                            key={index}
+                        />);
+                    break;
+                case SWITCH_TYPE:
+                    _newElements.push(
+                        <SwitchDetailsData
+                            targetDevice={String(params.id)}
+                            dataAt={index}
+                            key={index}
+                        />);
+                    break;
+                case NUMBER_TYPE:
+                    _newElements.push(
+                        <NumberDetailsData
+                            targetDevice={String(params.id)}
+                            dataAt={index}
+                            key={index}
+                        />);
+                    break;
+                case MULTI_STATE_BUTTON_TYPE:
+                    _newElements.push(
+                        <MultiStateButtonDetailsData
+                            targetDevice={String(params.id)}
+                            dataAt={index}
+                            key={index}
+                        />);
+                    break;
+                default:
+                    _newElements.push(<></>);
+                    break;
 
-                }
             }
-            setDeviceDataElements(_newElements);
         }
-    }, [isAppdata, appdata, device, params.id])
+    }
 
 
     if (!isValidId) {
@@ -79,7 +96,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     {device.deviceName}
                 </h1>
                 <div className="w-full flex content-center items-start flex-wrap gap-y-4">
-                    {deviceDataElements}
+                    {_newElements}
                 </div>
             </div>
         </div>
