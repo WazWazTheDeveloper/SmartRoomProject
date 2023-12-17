@@ -5,9 +5,11 @@ import data = require('../handlers/file_handler')
 
 export default class MultiStateButtonData implements IDeviceData {
 
+    iconName:string
     currentState : number
     stateList : stateItem[]
-    constructor(currentState : number = 0, stateList : stateItem[] = []) {
+    constructor(currentState : number = 0, stateList : stateItem[] = [],iconName: string = "") {
+        this.iconName = iconName
         this.currentState = currentState
         this.stateList = stateList
 
@@ -21,7 +23,8 @@ export default class MultiStateButtonData implements IDeviceData {
     static createFromJson(data: MultiStateButtonDataType): MultiStateButtonData {
         let DeviceData = new MultiStateButtonData(
             data.currentState,
-            data.stateList
+            data.stateList,
+            data.iconName
             )
 
         return DeviceData;
@@ -33,7 +36,8 @@ export default class MultiStateButtonData implements IDeviceData {
                 let data = deviceJson.deviceData[dataPlace].data
                 let newNumberDevice = new MultiStateButtonData(
                     data.currentState,
-                    data.stateList
+                    data.stateList,
+                    data.iconName
                 )
 
                 resolve(newNumberDevice)
@@ -47,6 +51,10 @@ export default class MultiStateButtonData implements IDeviceData {
 
     setVar(varName: string, newValue: any): string {
         switch (varName) {
+            case ("iconName"): {
+                this.iconName = newValue
+                return "iconName"
+            }
             case ("currentState"): {
                 this.currentState = newValue
                 return "currentState"
@@ -86,6 +94,9 @@ export default class MultiStateButtonData implements IDeviceData {
             return this.getAsJson()
         }
         switch (event) {
+            case ("iconName"): {
+                return { "iconName": this.iconName };
+            }
             case ("currentState"): {
                 return { "currentState": this.currentState };
             }
@@ -96,7 +107,8 @@ export default class MultiStateButtonData implements IDeviceData {
     }
 
     getAsJson() {
-        let json = {
+        let json : MultiStateButtonDataType = {
+            "iconName": this.iconName,
             "currentState": this.currentState,
             // WARN: this may cause a problm when sending data to the esp, check later
             "stateList": this.stateList,
@@ -106,6 +118,9 @@ export default class MultiStateButtonData implements IDeviceData {
 
     getVar(varName: string) {
         switch (varName) {
+            case ("iconName"): {
+                return this.iconName
+            }
             case ("currentState"): {
                 return this.currentState
             }

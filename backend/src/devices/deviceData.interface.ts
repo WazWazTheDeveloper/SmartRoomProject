@@ -4,7 +4,6 @@ interface IDeviceData {
     getData:Function
     getAsJson:Function
     getVar:Function
-
 }
 
 interface AirconditionerDataType {
@@ -25,6 +24,7 @@ interface AirconditionerDataType {
 }
 
 interface SwitchDataType {
+    iconName:string
     isOn: boolean
     onName:string
     offName:string
@@ -32,6 +32,7 @@ interface SwitchDataType {
 }
 
 export interface NumberDataType {
+    iconName:string
     number:Number
     symbol : string
     isSensor : boolean
@@ -41,6 +42,7 @@ export interface NumberDataType {
 }
 
 export interface MultiStateButtonDataType {
+    iconName:string
     currentState : number
     stateList : stateItem[]
 }

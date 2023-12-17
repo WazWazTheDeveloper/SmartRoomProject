@@ -3,12 +3,14 @@ import { IDeviceData, SwitchDataType } from "./deviceData.interface";
 import data = require('../handlers/file_handler')
 
 class SwitchData implements IDeviceData {
+    iconName:string
     isOn: boolean
     onName:string
     offName:string
     isSensor: boolean
 
-    constructor(isOn = false,onName:string = "ON",offName:string ="OFF",isSensor = true) {
+    constructor(isOn = false,onName:string = "ON",offName:string ="OFF",isSensor = true,iconName: string = "") {
+        this.iconName = iconName
         this.isOn = isOn
         this.isSensor = isSensor
 
@@ -26,7 +28,8 @@ class SwitchData implements IDeviceData {
             data.isOn,
             data.onName,
             data.offName,
-            data.isSensor)
+            data.isSensor,
+            data.iconName)
 
             return DeviceData;
     }
@@ -39,7 +42,8 @@ class SwitchData implements IDeviceData {
                     data.isOn,
                     data.onName,
                     data.offName,
-                    data.isSensor
+                    data.isSensor,
+                    data.iconName
                 )
 
                 resolve(newAirconditionerDevice)
@@ -53,6 +57,10 @@ class SwitchData implements IDeviceData {
 
     setVar(varName: string, newValue: any): string {
         switch (varName) {
+            case ("iconName"): {
+                this.iconName = newValue
+                return "iconName"
+            }
             case ("isOn"): {
                 this.isOn = newValue == 1 ? true : false;
                 return "isOn"
@@ -93,6 +101,9 @@ class SwitchData implements IDeviceData {
             return this.getAsJson()
         }
         switch (event) {
+            case ("iconName"): {
+                return { "iconName": this.iconName };
+            }
             case("isOn"): {
                 return { "isOn": this.isOn };
             }
@@ -108,7 +119,8 @@ class SwitchData implements IDeviceData {
         }
     }
     getAsJson () {
-        let json = {
+        let json : SwitchDataType = {
+            "iconName": this.iconName,
             "isOn": this.isOn,
             "onName": this.onName,
             "offName": this.offName,
@@ -118,6 +130,9 @@ class SwitchData implements IDeviceData {
     }
     getVar(varName:string) {
         switch (varName) {
+            case ("iconName"): {
+                return this.iconName
+            }
             case ("isOn"): {
                 return this.isOn
             }
