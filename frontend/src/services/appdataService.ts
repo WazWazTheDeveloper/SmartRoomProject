@@ -148,4 +148,6 @@ export default class Appdata {
 export class DataType {
     static readonly AIRCONDITIONER_TYPE = 0;
     static readonly SWITCH_TYPE = 1;
+    static readonly NUMBER_TYPE = 2;
+    static readonly MULTI_STATE_BUTTON_TYPE = 3;
 }

@@ -55,8 +55,8 @@ export default function MultiStateButtonDetailsData(props: props) {
                 {device?.deviceData[props.dataAt].data.stateList.map((stateItem: any, index: number) => {
                     let _state = device?.deviceData[props.dataAt].data.stateList[index].stateNumber
                     return (
-                        <Button key={index} isFocused={state == stateItem.stateNumber} className="h-10 w-16 md:w-20" onClick={() => { onStateChange(_state) }}>
-                            {stateItem.isIcon ? <AcUnit /> : stateItem.string}
+                        <Button key={index} isFocused={state == stateItem.stateNumber} className="h-10 min-w-16 md:min-w-20" onClick={() => { onStateChange(_state) }}>
+                            {stateItem.isIcon ? <Icon iconName={stateItem.icon} /> : stateItem.string}
                         </Button>
                     )
                 })}

@@ -9,7 +9,7 @@ interface DropdownMenuProps {
 }
 
 export interface DropdownMenuItem {
-    itemTitle: string;
+    itemTitle: string | React.ReactNode;
     onClick: React.MouseEventHandler;
 }
 

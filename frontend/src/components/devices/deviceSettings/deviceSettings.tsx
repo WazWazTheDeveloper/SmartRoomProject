@@ -7,6 +7,8 @@ import { Done } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import SwitchSettings from "./types/switchSettings"
+import NumberSettings from "./types/numberSettings"
+import MultiStateButtonSettings from "./types/multiStateButtonSettings"
 
 interface DeviceSettingsProps {
     uuid: string
@@ -15,7 +17,6 @@ interface DeviceSettingsProps {
 
 export default function DeviceSettings(props: DeviceSettingsProps) {
     const router = useRouter()
-    const [settingElements, setSettingsElements] = useState<React.ReactNode>([])
     const { fetchWithReauth } = useApi();
     const { userdata } = useAuth();
     const [device, setDeviceId] = useDevice(props.uuid);
@@ -29,8 +30,7 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
         }
     }, [device])
 
-    //create setting for each datatype
-    useEffect(() => {
+    function createSettingsElement() {
         if (!device) return;
 
         let _settingsElements: React.ReactNode[] = []
@@ -45,6 +45,12 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
                 case DataType.SWITCH_TYPE:
                     newElement = <SwitchSettings key={dataAt} dataAt={dataAt} uuid={props.uuid} />
                     break;
+                case DataType.NUMBER_TYPE:
+                    newElement = <NumberSettings key={dataAt} dataAt={dataAt} uuid={props.uuid} />
+                    break;
+                case DataType.MULTI_STATE_BUTTON_TYPE:
+                    newElement = <MultiStateButtonSettings key={dataAt} dataAt={dataAt} uuid={props.uuid} />
+                    break;
                 default:
                     newElement = <></>;
                     break;
@@ -52,8 +58,8 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
             _settingsElements.push(newElement);
         }
 
-        setSettingsElements(_settingsElements)
-    }, [device, props])
+        return _settingsElements
+    }
 
     function handleNameChane(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation()
@@ -107,7 +113,7 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
                     <Done className="ml-2 fill-on-surface h-8 w-8 cursor-pointer" onClick={onSubmitNameChange} />
                 </div>
             </div>
-            {settingElements}
+            {createSettingsElement()}
             <div className="w-full flex justify-center mt-4">
                 <button
                     type="button"
@@ -116,7 +122,7 @@ export default function DeviceSettings(props: DeviceSettingsProps) {
                 >
                     {"FORGET DEVICE"}
                 </button>
-            </div>            
+            </div>
             <div className="w-full flex justify-center mt-4">
                 <button
                     type="button"

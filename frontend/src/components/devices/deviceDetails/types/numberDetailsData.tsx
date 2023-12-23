@@ -28,11 +28,11 @@ export default function NumberDetailsData(props: props) {
     const marks = [
         {
             value: Number(minVal),
-            label: Number(minVal)+symbol,
+            label: String(Number(minVal))+String(symbol),
         },
         {
             value: Number(maxVal),
-            label: Number(maxVal)+symbol,
+            label: String(Number(maxVal))+String(symbol),
         }
     ];
 
