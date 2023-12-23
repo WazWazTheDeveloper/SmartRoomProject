@@ -3,29 +3,30 @@ import { IDeviceData, NumberDataType } from "./deviceData.interface";
 import data = require('../handlers/file_handler')
 
 export default class NumberData implements IDeviceData {
-    iconName:string
+    iconName: string
     number: Number
-    symbol: string
     isSensor: boolean
     minVal: number
     maxVal: number
     jumpVal: number
+    symbol: string
 
     constructor(
         number: Number = 0,
-        symbol: string = "", 
-        isSensor: boolean = false, 
-        minVal: number = 0, 
-        maxVal: number = 100, 
+        isSensor: boolean = false,
+        minVal: number = 0,
+        maxVal: number = 100,
         jumpVal: number = 1,
-        iconName: string = "") {
+        iconName: string = "",
+        symbol: string = ""
+    ) {
         this.iconName = iconName
         this.number = number;
-        this.symbol = symbol;
         this.isSensor = isSensor;
         this.minVal = minVal;
         this.maxVal = maxVal;
         this.jumpVal = jumpVal;
+        this.symbol = symbol;
 
         this.setData = this.setData.bind(this);
         this.setVar = this.setVar.bind(this);
@@ -37,13 +38,13 @@ export default class NumberData implements IDeviceData {
     static createFromJson(data: NumberDataType): NumberData {
         let DeviceData = new NumberData(
             data.number,
-            data.symbol,
             data.isSensor,
             data.minVal,
             data.maxVal,
             data.jumpVal,
-            data.iconName
-            )
+            data.iconName,
+            data.symbol
+        )
 
         return DeviceData;
     }
@@ -54,12 +55,12 @@ export default class NumberData implements IDeviceData {
                 let data = deviceJson.deviceData[dataPlace].data
                 let newNumberDevice = new NumberData(
                     data.number,
-                    data.symbol,
                     data.isSensor,
                     data.minVal,
                     data.maxVal,
                     data.jumpVal,
-                    data.iconName
+                    data.iconName,
+                    data.symbol
                 )
 
                 resolve(newNumberDevice)
@@ -82,10 +83,6 @@ export default class NumberData implements IDeviceData {
                 this.number = newValue
                 return "number"
             }
-            case ("symbol"): {
-                this.symbol = newValue
-                return "symbol"
-            }
             case ("isSensor"): {
                 this.isSensor = newValue
                 return "isSensor"
@@ -101,6 +98,10 @@ export default class NumberData implements IDeviceData {
             case ("jumpVal"): {
                 this.jumpVal = newValue
                 return "jumpVal"
+            } 
+            case ("symbol"): {
+                this.symbol = newValue
+                return "symbol"
             }
             default: {
                 throw new Error("variable not found")
@@ -131,9 +132,6 @@ export default class NumberData implements IDeviceData {
             case ("number"): {
                 return { "number": this.number };
             }
-            case ("symbol"): {
-                return { "symbol": this.symbol };
-            }
             case ("isSensor"): {
                 return { "isSensor": this.isSensor };
             }
@@ -146,18 +144,21 @@ export default class NumberData implements IDeviceData {
             case ("jumpVal"): {
                 return { "jumpVal": this.jumpVal };
             }
+            case ("symbol"): {
+                return { "symbol": this.symbol };
+            }
         }
     }
 
     getAsJson() {
-        let json : NumberDataType = {
+        let json: NumberDataType = {
             "iconName": this.iconName,
             "number": this.number,
-            "symbol": this.symbol,
             "isSensor": this.isSensor,
             "minVal": this.minVal,
             "maxVal": this.maxVal,
             "jumpVal": this.jumpVal,
+            "symbol": this.symbol,
         }
         return json;
     }
@@ -170,9 +171,6 @@ export default class NumberData implements IDeviceData {
             case ("number"): {
                 return this.number
             }
-            case ("symbol"): {
-                return this.symbol
-            }
             case ("isSensor"): {
                 return this.isSensor
             }
@@ -184,6 +182,9 @@ export default class NumberData implements IDeviceData {
             }
             case ("jumpVal"): {
                 return this.jumpVal
+            }
+            case ("symbol"): {
+                return this.symbol
             }
         }
     }

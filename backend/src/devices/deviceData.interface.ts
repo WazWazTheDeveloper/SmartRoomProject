@@ -34,11 +34,11 @@ interface SwitchDataType {
 export interface NumberDataType {
     iconName:string
     number:Number
-    symbol : string
     isSensor : boolean
     minVal : number
     maxVal : number
     jumpVal : number
+    symbol : string
 }
 
 export interface MultiStateButtonDataType {
