@@ -28,7 +28,7 @@ export default function NumberSettings(props: props) {
             setMaxVal(device.deviceData[props.dataAt].data.maxVal)
             setJumpVal(device.deviceData[props.dataAt].data.jumpVal)
         }
-    }, [device])
+    }, [device,props])
 
     function sendPostRequest(data: any) {
         let body = {
