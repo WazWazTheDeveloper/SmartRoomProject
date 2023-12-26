@@ -182,7 +182,17 @@ class AppData {
                 appDataInstance.on(this.ON_DATA_CHANGE, task.onUpdateData.bind(task));
             }
 
-            let adminUser: User = await User.createNewUser('Admin', 'admin',true,['*']);
+            //create admin account if doesn't already exist
+            let isAdminExist = false;
+            for (let index = 0; index < newAppDataInstance.getGeneralData().getUsernameList().length; index++) {
+                const user = newAppDataInstance.getGeneralData().getUsernameList()[index];
+                if (user == "Admin") {
+                    isAdminExist  = true
+                }
+            }
+            if(!isAdminExist) {
+                let adminUser: User = await User.createNewUser('Admin', 'admin',true,['*']);
+            }
         }
     }
 
