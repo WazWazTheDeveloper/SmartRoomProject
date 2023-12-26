@@ -8,10 +8,12 @@ import { CheckConnection } from './src/scheduledFunctions/checkConnection';
 import { AppdataEvent } from './src/interfaces/appData.interface';
 import { DataPacket } from './src/models/dataPacket';
 import { updateWebSocket } from './src/middleware/updateWebSocket';
+import { logger } from './src/middleware/logger';
 const cookieParser = require('cookie-parser')
 
 
 const app: express.Application = express();
+app.use(logger)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
