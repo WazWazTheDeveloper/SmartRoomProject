@@ -37,7 +37,7 @@ export default function SwitchSettings(props: props) {
             setOffName(device.deviceData[props.dataAt].data.offName)
             setIconName(device.deviceData[props.dataAt].data.iconName)
         }
-    }, [device])
+    }, [device,props])
 
     function handleOnIconName(iconName: string) {
         setIconName(iconName);

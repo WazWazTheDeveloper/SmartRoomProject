@@ -21,7 +21,7 @@ export default function MultiStateButtonSettings(props: props) {
         if (device) {
             setIconName(device.deviceData[props.dataAt].data.iconName)
         }
-    }, [device])
+    }, [device,props])
 
     function sendPostRequest(data: any) {
         let body = {
