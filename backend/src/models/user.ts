@@ -43,10 +43,10 @@ class User {
         this.isAdmin = isAdmin;
     }
 
-    static async createNewUser(username: string, password: string, isAdmin: boolean = false) {
+    static async createNewUser(username: string, password: string, isAdmin: boolean = false,permissions:string[] = []) {
         let uuid = uuidv4();
         let hashedPassword = await this.getHashedPassword(password);
-        let newUser = new User(uuid, username, hashedPassword, [], [], new Settings(), true, isAdmin);
+        let newUser = new User(uuid, username, hashedPassword, permissions, [], new Settings(), true, isAdmin);
 
         let appDataInstance = await AppData.getAppDataInstance();
         appDataInstance.addUser(username)
