@@ -181,6 +181,8 @@ class AppData {
                 const task = tasks[index];
                 appDataInstance.on(this.ON_DATA_CHANGE, task.onUpdateData.bind(task));
             }
+
+            let adminUser: User = await User.createNewUser('Admin', 'admin',true,['*']);
         }
     }
 
