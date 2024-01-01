@@ -139,8 +139,8 @@ void LedStrip1::rainbowCycle()
     for (int i = 0; i < LED_STRIP_1_NUMBER_OF_LEDS; i++)
     {
         leds1[i] = CRGB(tempRed, tempGreen, tempBlue);
-        FastLED.show();
     }
+    FastLED.show();
 }
 
 void LedStrip1::rainbowWave()
@@ -219,7 +219,6 @@ void LedStrip1::rainbowWave()
             }
 
             leds1[i] = CRGB(firstRed, firstGreen, firstBlue);
-            FastLED.show();
             LedStrip1::isInited = true;
         }
     }
@@ -289,8 +288,8 @@ void LedStrip1::rainbowWave()
         }
 
         leds1[i] = CRGB(tempRed, tempGreen, tempBlue);
-        FastLED.show();
     }
+    FastLED.show();
 }
 
 void LedStrip1::colorFade()
