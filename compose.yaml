@@ -103,7 +103,6 @@ services:
     volumes:
       - "mongo1_data:/data/db"
       - "mongo1_config:/etc/configdb"
-      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     depends_on:
       - mongo02
       - mongo03
