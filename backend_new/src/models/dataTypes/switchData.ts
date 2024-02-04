@@ -1,4 +1,4 @@
-import {TDeviceData, TDeviceDataConfig, TSwitchData, TSwitchDataConfig } from "../../interfaces/deviceData.interface";
+import {DeviceDataTypes, TDeviceData, TDeviceDataConfig, TSwitchData, TSwitchDataConfig } from "../../interfaces/deviceData.interface";
 
 export default class SwitchData implements TSwitchData {
     static readonly TYPE_ID = 0
@@ -31,7 +31,7 @@ export default class SwitchData implements TSwitchData {
         this.offName = offName
     }
 
-    static createData(dataConfig: TSwitchDataConfig): SwitchData {
+    static createNewData(dataConfig: TSwitchDataConfig): SwitchData {
         const dataTitle = dataConfig.dataTitle ? dataConfig.dataTitle : "";
         const iconName = dataConfig.iconName ? dataConfig.iconName : "";
         const isSensor = dataConfig.isSensor ? dataConfig.isSensor : false;
@@ -46,6 +46,19 @@ export default class SwitchData implements TSwitchData {
             isOn,
             onName,
             offName)
+
+        return newSwitchData;
+    }
+
+    static createDataFromDeviceDataTypes(data: TSwitchData):SwitchData {
+        const newSwitchData = new SwitchData(
+            data.dataID,
+            data.dataTitle,
+            data.iconName,
+            data.isSensor,
+            data.isOn,
+            data.onName,
+            data.offName)
 
         return newSwitchData;
     }
