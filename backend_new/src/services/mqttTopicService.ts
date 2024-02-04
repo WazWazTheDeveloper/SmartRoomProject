@@ -14,6 +14,7 @@ export async function createNewMqttTopic(topicName: string, topicPath: string): 
     let functionResult: createNewMqttTopicResult
     let logItem = "";
 
+    // check if db collection exist
     const mqttCollection = collections.mqttTopics
     if (!mqttCollection) {
         const err = "no collection found mqttTopics at mqttTopicService.ts line:7"
@@ -21,10 +22,11 @@ export async function createNewMqttTopic(topicName: string, topicPath: string): 
         throw new Error(err)
     }
 
+    // create and insert mqtt topic
     const mqttTopic = new MqttTopicObject(topicName, topicPath)
-
     const insertResult = await mqttCollection?.insertOne(mqttTopic.getAsJson_DB());
 
+    // check if accepted by db
     if (insertResult.acknowledged) {
         logItem = `A document type "MqttTopicObject" was inserted with the _id: ${insertResult.insertedId} to ${mqttCollection.namespace}`
         functionResult = {
