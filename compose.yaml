@@ -1,33 +1,53 @@
 services:
   backend:
-    container_name: 'backend'
-    build: /backend
+    container_name: 'backend_new'
+    build: /backend_new
     tty: true
     ports:
       - 5000:5000
     volumes:
-      - ./backend:/backend
+      - ./backend_new:/backend
       - /backend/node_modules/
     environment:
       - MQTT_HOST=emqx
-      - MQTT_PORT='1883'
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo01:27017,mongo01:27018,mongo01:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+    networks:
+      - mongoCluster
 
-  frontend:
-    container_name: 'frontend'
-    build: /frontend
-    tty: true
-    ports:
-      - 3000:3000
-    volumes:
-      - ./frontend:/frontend
-      - /frontend/node_modules/
-    environment:
-      - "NEXT_WEBPACK_USEPOLLING=1"
-      # change this to your local ip
-      - BACKEND_URL=10.0.0.12
-      - BACKEND_INTERNAL_URL=backend
-      - BACKEND_PORT=5000
-    
+  # backend:
+  #   container_name: 'backend_new'
+  #   build: /backend_new
+  #   tty: true
+  #   ports:
+  #     - 5000:5000
+  #   volumes:
+  #     - ./backend_new:/backend
+  #     - /backend/node_modules/
+  #   environment:
+  #     - MQTT_HOST=emqx
+  #     - MQTT_PORT='1883'
+  #     - MONGODB_HOST=mongo
+  #     - MONGODB_PORT='27017'
+
+  # frontend:
+  #   container_name: 'frontend'
+  #   build: /frontend
+  #   tty: true
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./frontend:/frontend
+  #     - /frontend/node_modules/
+  #   environment:
+  #     - "NEXT_WEBPACK_USEPOLLING=1"
+  #     # change this to your local ip
+  #     - BACKEND_URL=10.0.0.12
+  #     - BACKEND_INTERNAL_URL=backend
+  #     - BACKEND_PORT=5000
+
   emqx:
     image: emqx:5.3.1
     container_name: emqx
@@ -36,10 +56,121 @@ services:
       - 8083:8083
       - 8084:8084
       - 8883:8883
-      - 18083:18083 
+      - 18083:18083
     environment:
       - "EMQX_NODE_NAME=emqx@node1.emqx.io"
       - "EMQX_CLUSTER__DISCOVERY_STRATEGY=static"
       - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.io]"
     # volumes:
     #   - $PWD/emqx1_data:/opt/emqx/data
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongo01:27017/
+    networks:
+      - mongoCluster
+
+  mongo01:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    hostname: mongo01
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--bind_ip",
+        "localhost,mongo01",
+        "--port",
+        "27017",
+        "--config",
+        "/etc/configdb/mongod.conf"
+      ]
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    networks:
+      mongoCluster:
+    volumes:
+      - "mongo1_data:/data/db"
+      - "mongo1_config:/etc/configdb"
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    depends_on:
+      - mongo02
+      - mongo03
+
+  mongo02:
+    image: mongo
+    restart: always
+    ports:
+      - 27018:27017
+    hostname: mongo02
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--bind_ip",
+        "localhost,mongo02",
+        "--port",
+        "27017",
+        "--config",
+        "/etc/configdb/mongod.conf"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    networks:
+      mongoCluster:
+    volumes:
+      - "mongo2_data:/data/db"
+      - "mongo2_config:/etc/configdb"
+
+  mongo03:
+    image: mongo
+    restart: always
+    ports:
+      - 27019:27017
+    hostname: mongo03
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--bind_ip",
+        "localhost,mongo03",
+        "--port",
+        "27017",
+        "--config",
+        "/etc/configdb/mongod.conf"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    networks:
+      mongoCluster:
+    volumes:
+      - "mongo3_data:/data/db"
+      - "mongo3_config:/etc/configdb"
+
+networks:
+  default:
+  mongoCluster:
+    driver: bridge
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+  mongo1_config:
+  mongo2_config:
+  mongo3_config:
