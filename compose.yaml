@@ -11,7 +11,7 @@ services:
     environment:
       - MQTT_HOST=emqx
       - MQTT_PORT=1883
-      - MONGODB_IP=mongo01:27017,mongo01:27018,mongo01:27019
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
       - MONGODB_USERNAME=admin
       - MONGODB_PASSWORD=admin
     networks:
@@ -72,94 +72,88 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: admin
-      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongo01:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongo1:27017,mongo3:27017,mongo2:27017/
     networks:
-      - mongoCluster
+      mongoCluster:
 
-  mongo01:
+  mongo1:
     image: mongo
     restart: always
     ports:
       - 27017:27017
-    hostname: mongo01
     command:
       [
         "mongod",
         "--replSet",
         "rs0",
-        "--bind_ip",
-        "localhost,mongo01",
+        "--keyFile",
+        "/etc/mongo-keyfile",
         "--port",
         "27017",
-        "--config",
-        "/etc/configdb/mongod.conf"
+        "--bind_ip",
+        "localhost,mongo1"
       ]
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: mongodb-primary
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-    networks:
-      mongoCluster:
     volumes:
       - "mongo1_data:/data/db"
-      - "mongo1_config:/etc/configdb"
-    depends_on:
-      - mongo02
-      - mongo03
+      - "mongo1_config:/etc"
+    networks:
+      mongoCluster:
 
-  mongo02:
+  mongo2:
     image: mongo
     restart: always
     ports:
       - 27018:27017
-    hostname: mongo02
     command:
       [
         "mongod",
         "--replSet",
         "rs0",
-        "--bind_ip",
-        "localhost,mongo02",
+        "--keyFile",
+        "/etc/mongo-keyfile",
         "--port",
         "27017",
-        "--config",
-        "/etc/configdb/mongod.conf"
+        "--bind_ip",
+        "localhost,mongo2"
       ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-    networks:
-      mongoCluster:
     volumes:
       - "mongo2_data:/data/db"
-      - "mongo2_config:/etc/configdb"
+      - "mongo2_config:/etc"
+    networks:
+      mongoCluster:
 
-  mongo03:
+  mongo3:
     image: mongo
     restart: always
     ports:
       - 27019:27017
-    hostname: mongo03
     command:
       [
         "mongod",
         "--replSet",
         "rs0",
-        "--bind_ip",
-        "localhost,mongo03",
+        "--keyFile",
+        "/etc/mongo-keyfile",
         "--port",
         "27017",
-        "--config",
-        "/etc/configdb/mongod.conf"
+        "--bind_ip",
+        "localhost,mongo3"
       ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-    networks:
-      mongoCluster:
+
     volumes:
       - "mongo3_data:/data/db"
-      - "mongo3_config:/etc/configdb"
+      - "mongo3_config:/etc"
+    networks:
+      mongoCluster:
 
 networks:
   default:
