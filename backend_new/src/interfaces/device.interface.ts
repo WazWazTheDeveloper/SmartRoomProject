@@ -1,3 +1,5 @@
+import MultiStateButton from "../models/dataTypes/multiStateButtonData"
+import NumberData from "../models/dataTypes/numberData"
 import SwitchData from "../models/dataTypes/switchData"
 import { DeviceDataTypes, DeviceDataTypesConfigs } from "./deviceData.interface"
 
@@ -25,7 +27,7 @@ export type TDevice = {
     mqttTopicID: string
     isAccepted: -1 | 0 | 1
     isAdminOnly: boolean
-    data: (TDataObject)[]
+    data: (TDeviceDataObject)[]
 }
 
 export type TDeviceJSON_DB = {
@@ -42,5 +44,5 @@ export type TDataConfig = {
     dataConfig: DeviceDataTypesConfigs
 }
 
-export type TDataObject = SwitchData
+export type TDeviceDataObject = SwitchData | NumberData | MultiStateButton;
 
