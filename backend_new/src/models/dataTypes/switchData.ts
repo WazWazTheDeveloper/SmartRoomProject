@@ -1,4 +1,4 @@
-import {DeviceDataTypes, TDeviceData, TDeviceDataConfig, TSwitchData, TSwitchDataConfig } from "../../interfaces/deviceData.interface";
+import { TDeviceData,  TSwitchData, TSwitchDataConfig } from "../../interfaces/deviceData.interface";
 
 export default class SwitchData implements TSwitchData {
     static readonly TYPE_ID = 0
@@ -63,8 +63,8 @@ export default class SwitchData implements TSwitchData {
         return newSwitchData;
     }
 
-    getAsJson_DB() : TDeviceData & TSwitchData {
-        const data : TDeviceData & TSwitchData = {
+    getAsJson_DB() : TSwitchData {
+        const data : TSwitchData = {
             dataID : this.dataID,
             dataTitle : this.dataTitle,
             iconName : this.iconName,
