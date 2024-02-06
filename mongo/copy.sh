@@ -8,3 +8,6 @@ chmod 600 mongo-keyfile
 docker cp mongo-keyfile helper:/db1
 docker cp mongo-keyfile helper:/db2
 docker cp mongo-keyfile helper:/db3
+
+# add to C:\Windows\System32\drivers\etc\hosts to be able to log into the db from the compas
+# 127.0.0.1 mongo1 mongo2 mongo3
