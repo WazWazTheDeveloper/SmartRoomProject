@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface"
-import { DB_LOG, ERROR_LOG, logEvents } from "../middleware/logger"
+import { ERROR_LOG, logEvents } from "../middleware/logger"
 import Device from "../models/device"
 import { COLLECTION_DEVICES, collections, createDocument, getDocument, updateDocument } from "./mongoDBService"
 import { createNewMqttTopic } from './mqttTopicService';
@@ -32,7 +32,7 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
 
     // create Device and insert into db
     const newDevice = Device.createNewDevice(_id, deviceName, deviceTopicResult.mqttTopicObject._id, dataTypeArray)
-    const isSuccessful = await createDocument(COLLECTION_DEVICES,newDevice.getAsJson_DB())
+    const isSuccessful = await createDocument(COLLECTION_DEVICES, newDevice.getAsJson_DB())
 
     // check if acknowledged by db
     if (isSuccessful) {
@@ -47,7 +47,6 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
         }
     }
 
-    logEvents(logItem, DB_LOG)
     return functionResult
 }
 
@@ -56,8 +55,7 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
 
     //query
     const fillter = { _id: _id }
-    const findResultArr= await getDocument<TDeviceJSON_DB>(COLLECTION_DEVICES,fillter)
-    // const findResultArr = await findResult.toArray();
+    const findResultArr = await getDocument<TDeviceJSON_DB>(COLLECTION_DEVICES, fillter)
 
     //validation
     if (findResultArr.length > 1) {
@@ -78,18 +76,17 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
 }
 
 export async function updateDeviceProperties(_id: string, propertyList: TDeviceProperty[]) {
-    const deviceCollection = collections.devices
-
     //create update obj from propertyList
-    const set:any = {}
+    const set: any = {}
     for (let index = 0; index < propertyList.length; index++) {
         const property = propertyList[index];
         set[property.propertyName] = property.newValue;
     }
-    
+
     const updateFilter: UpdateFilter<TDeviceJSON_DB> = {
-        $set: {set}
+        $set: { set }
     }
     
-    await updateDocument(COLLECTION_DEVICES,_id,updateFilter);
+    const filter = { _id: _id }
+    await updateDocument(COLLECTION_DEVICES, _id, filter, updateFilter);
 }

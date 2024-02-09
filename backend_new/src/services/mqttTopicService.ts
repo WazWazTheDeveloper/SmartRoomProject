@@ -75,6 +75,7 @@ export async function updateMqttTopic(_id: string, propertyList: TMqttTopicPrope
     const updateFilter: UpdateFilter<TMqttTopicObjectJSON_DB> = {
         $set: {set}
     }
-    
-    await updateDocument(COLLECTION_MQTT_TOPICS,_id,updateFilter);
+
+    const filter = { _id: _id }
+    await updateDocument(COLLECTION_MQTT_TOPICS,_id,filter,updateFilter);
 }
