@@ -4,18 +4,24 @@ import * as dotenv from "dotenv";
 import { TDeviceJSON_DB } from '../interfaces/device.interface';
 import { TMqttTopicObjectJSON_DB } from '../interfaces/mqttTopicObject.interface';
 import { DB_LOG, ERROR_LOG, logEvents } from '../middleware/logger';
+import { TTaskJSON_DB } from '../interfaces/task.interface';
 type TCollection = {
     devices?: mongoDB.Collection<TDeviceJSON_DB>
     mqttTopics?: mongoDB.Collection<TMqttTopicObjectJSON_DB>
+    tasks?: mongoDB.Collection<TTaskJSON_DB>
 }
-type collectionTypes = 
-mongoDB.Collection<TDeviceJSON_DB> |
-mongoDB.Collection<TMqttTopicObjectJSON_DB>
+type collectionTypes =
+    mongoDB.Collection<TDeviceJSON_DB> |
+    mongoDB.Collection<TMqttTopicObjectJSON_DB> |
+    mongoDB.Collection<TTaskJSON_DB>
 
-type collectionNames = "devices" | "mqttTopics"
+type JSONDBTypes = TDeviceJSON_DB | TMqttTopicObjectJSON_DB | TTaskJSON_DB
+
+type collectionNames = "devices" | "mqttTopics" | "tasks"
 
 export const COLLECTION_DEVICES = 'devices'
 export const COLLECTION_MQTT_TOPICS = 'mqttTopics'
+export const COLLECTION_TASKS = 'tasks'
 
 export const collections: TCollection = {}
 
@@ -31,26 +37,28 @@ export async function connectToDatabase() {
     const db: mongoDB.Db = client.db(process.env.DATABASE_NAME as string);
     const devices: mongoDB.Collection<TDeviceJSON_DB> = db.collection<TDeviceJSON_DB>(process.env.DATABASE_COLLECTION_DEVICE as string);
     const mqttTopics: mongoDB.Collection<TMqttTopicObjectJSON_DB> = db.collection<TMqttTopicObjectJSON_DB>(process.env.DATABASE_COLLECTION_MQTT_TOPICS as string);
+    const tasks: mongoDB.Collection<TTaskJSON_DB> = db.collection<TTaskJSON_DB>(process.env.DATABASE_COLLECTION_TASKS as string);
 
     collections.devices = devices;
     collections.mqttTopics = mqttTopics;
+    collections.tasks = tasks;
 
     logEvents(`Successfully connected to database`, DB_LOG)
 }
 
-export async function updateDocument(collectionStr: collectionNames,documentId : string,updateFilter:mongoDB.UpdateFilter<collectionTypes>) {
+export async function updateDocument(collectionStr: collectionNames, documentId: string, fillter: mongoDB.Filter<JSONDBTypes>, updateFilter: mongoDB.UpdateFilter<collectionTypes>) {
     let logItem = "";
 
     // check if db collection exist
-    let collection : collectionTypes | undefined  = collections[collectionStr]
+    let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, ERROR_LOG)
+        logEvents(err, DB_LOG)
         throw new Error(err)
     }
 
     // db update
-    const updateResult = await collection.updateOne({ _id: documentId }, updateFilter)
+    const updateResult = await collection.updateOne(fillter, updateFilter)
     console.log(updateResult)
 
     //check if accepted by db and return
@@ -67,16 +75,16 @@ export async function updateDocument(collectionStr: collectionNames,documentId :
     }
 }
 
-export async function createDocument(collectionStr: collectionNames,documentJSON : any) {
+export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
     let isSuccessful = false;
     const _id = uuidv4()
     let logItem = "";
 
     // check if db collection exist
-    let collection : collectionTypes | undefined  = collections[collectionStr]
+    let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, ERROR_LOG)
+        logEvents(err, DB_LOG)
         throw new Error(err)
     }
 
@@ -99,14 +107,14 @@ export async function createDocument(collectionStr: collectionNames,documentJSON
     return isSuccessful
 }
 
-export async function getDocument<DocumentType>(collectionStr: collectionNames,fillter : mongoDB.Filter<any>){
+export async function getDocument<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>) {
     let logItem = "";
 
     // check if db collection exist
-    let collection : collectionTypes | undefined  = collections[collectionStr]
+    let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, ERROR_LOG)
+        logEvents(err, DB_LOG)
         throw new Error(err)
     }
 
@@ -120,4 +128,16 @@ export async function getDocument<DocumentType>(collectionStr: collectionNames,f
 
 
     return findResultArr
+}
+
+export async function getCollection(collectionStr: collectionNames) {
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
+        logEvents(err, DB_LOG)
+        throw new Error(err)
+    }
+
+    return collection;
 }
