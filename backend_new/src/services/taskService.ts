@@ -2,8 +2,10 @@ import { TPropertyCheck, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTask } fr
 import { Task } from "../models/task"
 import { v4 as uuidv4 } from 'uuid';
 import { COLLECTION_TASKS, createDocument, getDocument, updateDocument } from "./mongoDBService";
-import { ERROR_LOG, logEvents } from "../middleware/logger";
+import { ERROR_LOG, logEvents, logger } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
+import { addScheduledTask } from "./taskSchedulerService";
+import { taskCheckHandler } from "../handlers/taskHandler";
 
 type TaskResult = {
     isSuccessful: false
@@ -103,6 +105,9 @@ export async function updateTaskProperty(_id: string, propertyList: TTaskPropert
                 deleteTodoTask(_id, element)
             }
         }
+        // TODO: add element.taskPropertyName == "taskname"
+        // TODO: add element.taskPropertyName == "isOn"
+        // TODO: add element.taskPropertyName == "isRepeating"
     }
 }
 
@@ -172,6 +177,8 @@ async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         timingData: propertyItem.timingData,
         isTrue: false,
     }
+
+    addScheduledTask(propertyItem.timingData,_id,() =>{taskCheckHandler(_id)})
 
     const updateFilter: UpdateFilter<TTaskJSON_DB> = {
         $push: {

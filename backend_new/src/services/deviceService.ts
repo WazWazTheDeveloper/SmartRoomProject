@@ -14,7 +14,7 @@ type DeviceResult = {
     device: Device
 }
 
-export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
+export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {   
     let functionResult: DeviceResult = { isSuccessful: false }
     let logItem = "";
     const _id = uuidv4()
@@ -76,6 +76,8 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
 }
 
 export async function updateDeviceProperties(_id: string, propertyList: TDeviceProperty[]) {
+    // TODO: add data validation
+    
     //create update obj from propertyList
     const set: any = {}
     for (let index = 0; index < propertyList.length; index++) {
