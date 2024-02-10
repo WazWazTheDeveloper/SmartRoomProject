@@ -5,13 +5,17 @@ import { COLLECTION_TASKS, createDocument, getDocument, updateDocument } from ".
 import { ERROR_LOG, logEvents, logger } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
 import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
-import { taskCheckHandler } from "../handlers/taskHandler";
+import { taskTimeCheckHandler } from "../handlers/taskHandler";
 
 type TaskResult = {
     isSuccessful: false
 } | {
     isSuccessful: true
     task: Task
+}
+
+export function initializeTasksFromDB(handler:Function) {
+
 }
 
 export async function createTask(
@@ -178,7 +182,7 @@ async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         isTrue: false,
     }
 
-    addScheduledTask(propertyItem.timingData,_id,() =>{taskCheckHandler(taskID)})
+    addScheduledTask(propertyItem.timingData,_id,() =>{taskTimeCheckHandler(_id)})
 
     const updateFilter: UpdateFilter<TTaskJSON_DB> = {
         $push: {
@@ -196,7 +200,7 @@ async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
 
     if(propertyItem.checkPropertyName == "timingDatas") {
         stopScheduledTask(propertyItem.itemID)
-        addScheduledTask(propertyItem.newValue,propertyItem.itemID,() =>{taskCheckHandler(taskID)})
+        addScheduledTask(propertyItem.newValue,propertyItem.itemID,() =>{taskTimeCheckHandler(propertyItem.itemID)})
     }
 
     const filter = {
