@@ -41,6 +41,8 @@ export default class Device implements TDevice {
 
     // create device from with DeviceDataTypesConfigs
     static createNewDevice(_id: string, deviceName: string, mqttTopicID: string, dataTypeArray: DeviceDataTypesConfigs[]): Device {
+        // TODO: add data validation
+        
         const isAccepted = Device.DEVICE_ACCEPTED_UNDEFINED
         const isAdminOnly = false;
         const data: (TDeviceDataObject)[] = []
@@ -58,6 +60,8 @@ export default class Device implements TDevice {
 
     // create device from TDeviceJSON_DB JSON object
     static createDeviceFromTDeviceJSON_DB(deviceData: TDeviceJSON_DB): Device {
+        // TODO: add data validation
+
         const data: (TDeviceDataObject)[] = []
         for (let dataID = 0; dataID < deviceData.data.length; dataID++) {
             const dataJSON = deviceData.data[dataID];
