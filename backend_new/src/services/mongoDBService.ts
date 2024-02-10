@@ -63,7 +63,7 @@ export async function updateDocument(collectionStr: collectionNames, documentId:
 
     //check if accepted by db and return
     if (updateResult.acknowledged) {
-        logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace}`
+        logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
         logEvents(logItem, DB_LOG)
         return true
     }
@@ -93,7 +93,7 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
 
     // check if accepted by db
     if (insertResult.acknowledged) {
-        logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}`
+        logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
         isSuccessful = true
     }
     else {
