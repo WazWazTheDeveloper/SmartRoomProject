@@ -2,16 +2,32 @@ import { v4 as uuidv4 } from 'uuid';
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface"
 import { ERROR_LOG, logEvents } from "../middleware/logger"
 import Device from "../models/device"
-import { COLLECTION_DEVICES, collections, createDocument, getDocument, updateDocument } from "./mongoDBService"
+import { COLLECTION_DEVICES, createDocument, getCollection, getDocument, updateDocument } from "./mongoDBService"
 import { createNewMqttTopic } from './mqttTopicService';
 import { TDeviceJSON_DB, TDeviceProperty } from '../interfaces/device.interface';
-import { UpdateFilter } from 'mongodb';
+import * as mongoDB from "mongodb";
 
 type DeviceResult = {
     isSuccessful: false
 } | {
     isSuccessful: true
     device: Device
+}
+
+export async function initializeDeviceHandler(handler:(changeEvent:mongoDB.ChangeStreamDocument) => void) {
+    let collection : mongoDB.Collection<TDeviceJSON_DB>
+    try {
+        collection = await getCollection("devices") as mongoDB.Collection<TDeviceJSON_DB>;
+    }catch(e) {
+        // TODO: maybe add ERROR LOG
+        console.log(e)
+        return false
+    }
+
+    const changeStream = collection.watch()
+    changeStream.on("change",handler);
+
+    return true
 }
 
 export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {   
@@ -85,7 +101,7 @@ export async function updateDeviceProperties(_id: string, propertyList: TDeviceP
         set[property.propertyName] = property.newValue;
     }
 
-    const updateFilter: UpdateFilter<TDeviceJSON_DB> = {
+    const updateFilter: mongoDB.UpdateFilter<TDeviceJSON_DB> = {
         $set: { set }
     }
     
