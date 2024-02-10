@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { COLLECTION_TASKS, createDocument, getDocument, updateDocument } from "./mongoDBService";
 import { ERROR_LOG, logEvents, logger } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
-import { addScheduledTask } from "./taskSchedulerService";
+import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
 import { taskCheckHandler } from "../handlers/taskHandler";
 
 type TaskResult = {
@@ -178,7 +178,7 @@ async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         isTrue: false,
     }
 
-    addScheduledTask(propertyItem.timingData,_id,() =>{taskCheckHandler(_id)})
+    addScheduledTask(propertyItem.timingData,_id,() =>{taskCheckHandler(taskID)})
 
     const updateFilter: UpdateFilter<TTaskJSON_DB> = {
         $push: {
@@ -194,6 +194,11 @@ async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "timeChecks") return
     if (propertyItem.operation != "update") return
 
+    if(propertyItem.checkPropertyName == "timingDatas") {
+        stopScheduledTask(propertyItem.itemID)
+        addScheduledTask(propertyItem.newValue,propertyItem.itemID,() =>{taskCheckHandler(taskID)})
+    }
+
     const filter = {
         _id: taskID,
         "timeChecks.itemID": propertyItem.itemID
@@ -206,6 +211,8 @@ async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
 async function deleteTimeCheck(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "timeChecks") return
     if (propertyItem.operation != "delete") return
+
+    stopScheduledTask(propertyItem.itemID)
 
     const filter = {
         _id: taskID,
