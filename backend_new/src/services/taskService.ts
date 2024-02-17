@@ -1,7 +1,7 @@
-import { TPropertyCheck, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTask } from "../interfaces/task.interface";
+import { TPropertyCheck, TTask, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTask } from "../interfaces/task.interface";
 import { Task } from "../models/task"
 import { v4 as uuidv4 } from 'uuid';
-import { COLLECTION_TASKS, createDocument, getDocument, updateDocument } from "./mongoDBService";
+import { COLLECTION_TASKS, createDocument, deleteDocuments, getDocuments, getDocumentsAggregate, updateDocument, updateDocuments } from "./mongoDBService";
 import { ERROR_LOG, logEvents, logger } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
 import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
@@ -14,15 +14,38 @@ type TaskResult = {
     task: Task
 }
 
-export function initializeTasksFromDB(handler:Function) {
+export async function initializeTasksFromDB(handler: Function) {
+    const filter = {
+        $expr: {
+            $gt: [{ $size: "$timeChecks" }, 0]
+        }
+    }
 
+    const project = {
+        _id: 1,
+        isOn: 1,
+        timeChecks: 1,
+    }
+
+
+    const tasks: TTask[] = await getDocuments("tasks", filter, project)
+
+    for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        if (task.isOn) {
+            for (let j = 0; j < task.timeChecks.length; j++) {
+                const timeCheck = task.timeChecks[j];
+                addScheduledTask(timeCheck.timingData, timeCheck.itemID, () => { taskTimeCheckHandler(task._id, timeCheck.itemID) })
+            }
+        }
+    }
 }
 
 export async function createTask(
     taskName: string,
     isOn: boolean = false,
     isRepeating: boolean = false,
-    varChecks: TPropertyCheck[] = [],
+    propertyChecks: TPropertyCheck[] = [],
     timeChecks: TTimeCheck[] = [],
     todoTasks: TTodoTask[] = []
 ): Promise<TaskResult> {
@@ -30,7 +53,7 @@ export async function createTask(
     const _id = uuidv4()
 
     // create task and insert into db
-    const newTask = Task.createNewTask(_id, taskName, isOn, isRepeating, varChecks, timeChecks, todoTasks)
+    const newTask = Task.createNewTask(_id, taskName, isOn, isRepeating, propertyChecks, timeChecks, todoTasks)
     const isSuccessful = await createDocument(COLLECTION_TASKS, newTask.getAsJson_DB())
 
     // check if acknowledged by db
@@ -54,7 +77,7 @@ export async function getTask(_id: string) {
 
     //query
     const fillter = { _id: _id }
-    const findResultArr = await getDocument<TTaskJSON_DB>(COLLECTION_TASKS, fillter)
+    const findResultArr = await getDocuments<TTaskJSON_DB>(COLLECTION_TASKS, fillter)
 
     //validation
     if (findResultArr.length > 1) {
@@ -109,9 +132,15 @@ export async function updateTaskProperty(_id: string, propertyList: TTaskPropert
                 deleteTodoTask(_id, element)
             }
         }
-        // TODO: add element.taskPropertyName == "taskname"
-        // TODO: add element.taskPropertyName == "isOn"
-        // TODO: add element.taskPropertyName == "isRepeating"
+        else if (element.taskPropertyName == "isOn") {
+            updateIsOn(_id, element)
+        }
+        else if(element.taskPropertyName == "isRepeating") {
+            updateIsRepeating(_id, element)
+        }
+        else if(element.taskPropertyName == "taskName"){
+            updateTaskName(_id, element)
+        }
     }
 }
 
@@ -131,13 +160,13 @@ async function addPropertyCheck(taskID: string, propertyItem: TTaskProperty) {
 
     const updateFilter: UpdateFilter<TTaskJSON_DB> = {
         $push: {
-            varChecks: {
+            propertyChecks: {
                 $each: [newPropertyCheck]
             }
         }
     }
     const filter = { _id: taskID }
-    await updateDocument(COLLECTION_TASKS, _id, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 
 async function updatePropertyCheck(taskID: string, propertyItem: TTaskProperty) {
@@ -146,12 +175,12 @@ async function updatePropertyCheck(taskID: string, propertyItem: TTaskProperty) 
 
     const filter = {
         _id: taskID,
-        "varChecks.itemID": propertyItem.itemID
+        "propertyChecks.itemID": propertyItem.itemID
     }
     const updateFilter = {
-        $set: { [`varChecks.$.${propertyItem.checkPropertyName}`]: propertyItem.newValue }
+        $set: { [`propertyChecks.$.${propertyItem.checkPropertyName}`]: propertyItem.newValue }
     }
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 
 async function deletePropertyCheck(taskID: string, propertyItem: TTaskProperty) {
@@ -164,11 +193,11 @@ async function deletePropertyCheck(taskID: string, propertyItem: TTaskProperty) 
 
     const updateFilter = {
         $pull: {
-            varChecks: { itemID: propertyItem.itemID }
+            propertyChecks: { itemID: propertyItem.itemID }
         }
     }
 
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 
 async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
@@ -182,8 +211,19 @@ async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         isTrue: false,
     }
 
-    addScheduledTask(propertyItem.timingData,_id,() =>{taskTimeCheckHandler(_id)})
+    // get state of task
+    const isOnFilter = { _id: taskID }
+    const project = {
+        isOn: 1,
+    }
+    const taskIsOn = await getDocuments<TTask>("tasks", isOnFilter, project)
 
+    //create scheduled task is task is on
+    if (taskIsOn[0].isOn) {
+        addScheduledTask(propertyItem.timingData, _id, () => { taskTimeCheckHandler(taskID, _id) })
+    }
+
+    console.log(taskIsOn)
     const updateFilter: UpdateFilter<TTaskJSON_DB> = {
         $push: {
             timeChecks: {
@@ -192,15 +232,22 @@ async function addTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         }
     }
     const filter = { _id: taskID }
-    await updateDocument(COLLECTION_TASKS, _id, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "timeChecks") return
     if (propertyItem.operation != "update") return
 
-    if(propertyItem.checkPropertyName == "timingDatas") {
+    // get state of task
+    const isOnFilter = { _id: taskID }
+    const project = {
+        isOn: 1,
+    }
+    const taskIsOn = await getDocuments<TTask>("tasks", isOnFilter, project)
+
+    if (propertyItem.checkPropertyName == "timingDatas" && taskIsOn) {
         stopScheduledTask(propertyItem.itemID)
-        addScheduledTask(propertyItem.newValue,propertyItem.itemID,() =>{taskTimeCheckHandler(propertyItem.itemID)})
+        addScheduledTask(propertyItem.newValue, propertyItem.itemID, () => { taskTimeCheckHandler(taskID, propertyItem.itemID) })
     }
 
     const filter = {
@@ -210,7 +257,7 @@ async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
     const updateFilter = {
         $set: { [`timeChecks.$.${propertyItem.checkPropertyName}`]: propertyItem.newValue }
     }
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 async function deleteTimeCheck(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "timeChecks") return
@@ -228,7 +275,7 @@ async function deleteTimeCheck(taskID: string, propertyItem: TTaskProperty) {
         }
     }
 
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 
 async function addTodoTask(taskID: string, propertyItem: TTaskProperty) {
@@ -251,7 +298,7 @@ async function addTodoTask(taskID: string, propertyItem: TTaskProperty) {
         }
     }
     const filter = { _id: taskID }
-    await updateDocument(COLLECTION_TASKS, _id, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 async function updateTodoTask(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "todoTasks") return
@@ -264,7 +311,7 @@ async function updateTodoTask(taskID: string, propertyItem: TTaskProperty) {
     const updateFilter = {
         $set: { [`todoTasks.$.${propertyItem.todoPropertyName}`]: propertyItem.newValue }
     }
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
 }
 async function deleteTodoTask(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "todoTasks") return
@@ -280,5 +327,107 @@ async function deleteTodoTask(taskID: string, propertyItem: TTaskProperty) {
         }
     }
 
-    await updateDocument(COLLECTION_TASKS, taskID, filter, updateFilter)
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter)
+}
+
+async function updateIsOn(taskID: string, propertyItem: TTaskProperty) {
+    if (propertyItem.taskPropertyName != "isOn") return
+
+
+    const filter = {
+        _id: taskID
+    }
+    const project = {
+        _id: 1,
+        timeChecks: 1,
+    }
+    const task: TTask[] = await getDocuments("tasks", filter, project)
+    console.log(task[0].timeChecks)
+
+    //turn all off
+    for (let index = 0; index < task[0].timeChecks.length; index++) {
+        const timedTask = task[0].timeChecks[index];
+        stopScheduledTask(timedTask.itemID)
+    }
+
+    if (propertyItem.newValue == true) {
+        for (let index = 0; index < task[0].timeChecks.length; index++) {
+            const timedTask = task[0].timeChecks[index];
+            addScheduledTask(timedTask.timingData, timedTask.itemID, () => { taskTimeCheckHandler(taskID, timedTask.itemID) })
+        }
+    }
+
+    const filter2 = {
+        _id: taskID,
+    }
+    const updateFilter = {
+        $set: { isOn: propertyItem.newValue }
+    }
+    await updateDocument(COLLECTION_TASKS, filter2, updateFilter)
+}
+
+async function updateTaskName(taskID: string, propertyItem: TTaskProperty) {
+    if (propertyItem.taskPropertyName != "taskName") return
+    
+    const updateFilter = {
+        $set: { taskName: propertyItem.newValue }
+    }
+    
+    const filter = { _id: taskID }
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter);
+}
+
+async function updateIsRepeating(taskID: string, propertyItem: TTaskProperty) {
+    if (propertyItem.taskPropertyName != "isRepeating") return
+    
+    const updateFilter = {
+        $set: { isRepeating: propertyItem.newValue }
+    }
+    
+    const filter = { _id: taskID }
+    await updateDocument(COLLECTION_TASKS, filter, updateFilter);
+}
+
+
+export async function deleteTask(taskID: string) {
+    const filter = {
+        _id: taskID,
+        $expr: {
+            $gt: [{ $size: "$timeChecks" }, 0]
+        }
+    }
+
+    const project = {
+        _id: 1,
+        timeChecks: 1,
+    }
+
+
+    const tasks: TTask[] = await getDocuments("tasks", filter, project)
+
+    for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        for (let j = 0; j < task.timeChecks.length; j++) {
+            const timeCheck = task.timeChecks[j];
+            stopScheduledTask(timeCheck.itemID)
+        }
+    }
+
+    const filter2 = {
+        _id: taskID
+    }
+
+    await deleteDocuments("tasks", filter2);
+}
+
+export async function deleteAllProperyChecksOfDevice(deviceID: string) {
+    const filter = {}
+
+    const updateFilter = {
+        $pull: {
+            propertyChecks: { deviceID: deviceID }
+        }
+    }
+
+    await updateDocuments(COLLECTION_TASKS, filter, updateFilter)
 }
