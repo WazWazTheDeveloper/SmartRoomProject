@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { DB_LOG, ERROR_LOG, logEvents } from "../middleware/logger";
 import MqttTopicObject from "../models/mqttTopicObject";
-import { COLLECTION_MQTT_TOPICS, collections, createDocument, getDocument, updateDocument } from "./mongoDBService";
+import { COLLECTION_MQTT_TOPICS, collections, createDocument, getDocuments, updateDocument } from "./mongoDBService";
 import { TMqttTopicObjectJSON_DB, TMqttTopicProperty } from '../interfaces/mqttTopicObject.interface';
 import { UpdateFilter } from 'mongodb';
 
@@ -42,7 +42,7 @@ export async function getMqttTopic(_id: string): Promise<MqttTopicResult> {
 
     //query
     const fillter = { _id: _id }
-    const findResultArr = await getDocument<TMqttTopicObjectJSON_DB>(COLLECTION_MQTT_TOPICS,fillter)
+    const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>(COLLECTION_MQTT_TOPICS,fillter)
 
     //validation
     if (findResultArr.length > 1) {
@@ -77,5 +77,5 @@ export async function updateMqttTopic(_id: string, propertyList: TMqttTopicPrope
     }
 
     const filter = { _id: _id }
-    await updateDocument(COLLECTION_MQTT_TOPICS,_id,filter,updateFilter);
+    await updateDocument(COLLECTION_MQTT_TOPICS,filter,updateFilter);
 }

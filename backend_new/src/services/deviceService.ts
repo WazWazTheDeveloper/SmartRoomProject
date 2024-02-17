@@ -2,10 +2,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface"
 import { ERROR_LOG, logEvents } from "../middleware/logger"
 import Device from "../models/device"
-import { COLLECTION_DEVICES, createDocument, getCollection, getDocument, updateDocument } from "./mongoDBService"
+import { COLLECTION_DEVICES, createDocument, deleteDocuments, getCollection, getDocuments, updateDocument } from "./mongoDBService"
 import { createNewMqttTopic } from './mqttTopicService';
 import { TDeviceJSON_DB, TDeviceProperty } from '../interfaces/device.interface';
 import * as mongoDB from "mongodb";
+import { deleteAllProperyChecksOfDevice } from './taskService';
 
 type DeviceResult = {
     isSuccessful: false
@@ -71,7 +72,7 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
 
     //query
     const fillter = { _id: _id }
-    const findResultArr = await getDocument<TDeviceJSON_DB>(COLLECTION_DEVICES, fillter)
+    const findResultArr = await getDocuments<TDeviceJSON_DB>(COLLECTION_DEVICES, fillter)
 
     //validation
     if (findResultArr.length > 1) {
@@ -102,9 +103,18 @@ export async function updateDeviceProperties(_id: string, propertyList: TDeviceP
     }
 
     const updateFilter: mongoDB.UpdateFilter<TDeviceJSON_DB> = {
-        $set: { set }
+        $set: set 
     }
     
     const filter = { _id: _id }
-    await updateDocument(COLLECTION_DEVICES, _id, filter, updateFilter);
+    await updateDocument(COLLECTION_DEVICES, filter, updateFilter);
+}
+
+export async function deleteDevice(_id: string) {
+    await deleteAllProperyChecksOfDevice(_id)
+
+    const filter= {
+        _id: _id
+    }
+    await deleteDocuments("devices",filter);
 }
