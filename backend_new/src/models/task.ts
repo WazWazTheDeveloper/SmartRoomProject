@@ -1,6 +1,10 @@
 import { TPropertyCheck, TTask, TTaskJSON_DB, TTimeCheck, TTodoTask } from "../interfaces/task.interface"
 
 export class Task implements TTask {
+    static readonly CHECK_TYPE_EQUAL = 0
+    static readonly CHECK_TYPE_MORE_THEN = 1
+    static readonly CHECK_TYPE_LESS_THEN = 2
+    static readonly CHECK_TYPE_ANY = 3
     _id: string
     taskName: string
     isOn: boolean

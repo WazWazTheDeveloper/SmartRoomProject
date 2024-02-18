@@ -1,7 +1,7 @@
 import express = require('express')
 import { deviceRouter } from './deviceRoutes'
 import { taskRouter } from './taskRoutes'
-export const router:express.Router = express.Router()
+export const routerv1:express.Router = express.Router()
 
-router.use("/device",deviceRouter)
-router.use("/task",taskRouter)
+routerv1.use("/device",deviceRouter)
+routerv1.use("/task",taskRouter)

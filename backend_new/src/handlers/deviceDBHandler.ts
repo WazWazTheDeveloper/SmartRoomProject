@@ -1,10 +1,44 @@
 import * as mongoDB from "mongodb";
+import { COLLECTION_DEVICES, COLLECTION_TASKS, getDocuments } from "../services/mongoDBService";
+import { TTask } from "../interfaces/task.interface";
+import { taskCheckHandler } from "./taskHandler";
 
-export function deviceDBHandler(changeEvent:mongoDB.ChangeStreamDocument) {
-    if(changeEvent.operationType != "update") return
-    
+export async function deviceDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
+    deviceTaskHandler(changeEvent)
+    updateDevice(changeEvent)
+}
+
+// check if there is a need to update the device and if so updates it
+async function updateDevice(changeEvent: mongoDB.ChangeStreamDocument) {
+
+}
+
+// checks if updated field is a property check of a task and if so call taskCheckHandler()
+async function deviceTaskHandler(changeEvent: mongoDB.ChangeStreamDocument) {
+    if (changeEvent.operationType != "update") return
+    if (!changeEvent.updateDescription.updatedFields) return
+
+    // TODO: move this to task service
+    const changed = Object.keys(changeEvent.updateDescription.updatedFields)
+
     const changedDeviceID = changeEvent.documentKey._id
+    const filter = {
+        propertyChecks: {
+            $elemMatch: {
+                deviceID: changedDeviceID
+            }
+        }
 
-    // get all task ids where changedDeviceID is included
-    // call taskCheckHandler(task id)
+    }
+
+    const project = {
+        _id: 1,
+    }
+
+    const tasksIDs = await getDocuments<TTask>(COLLECTION_TASKS, filter, project)
+
+    for (let index = 0; index < tasksIDs.length; index++) {
+        const element = tasksIDs[index];
+        taskCheckHandler(element._id);
+    }
 }
