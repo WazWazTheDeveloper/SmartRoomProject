@@ -2,6 +2,8 @@ import { TMultiStateButton, TMultiStateButtonConfig, TStateItem } from "../../in
 
 export default class MultiStateButton implements TMultiStateButton {
     static readonly TYPE_ID = 2
+    mqttPrimeryTopicID: string
+    mqttSecondaryTopicID: string[]
     dataID: number
     typeID: number
     iconName: string
@@ -16,7 +18,9 @@ export default class MultiStateButton implements TMultiStateButton {
         iconName: string,
         isSensor: boolean,
         currentState: number,
-        stateList: TStateItem[]
+        stateList: TStateItem[],
+        mqttPrimeryTopicID: string,
+        mqttSecondaryTopicID: string[]
     ) {
         this.dataID = dataID;
         this.typeID = MultiStateButton.TYPE_ID;
@@ -25,6 +29,8 @@ export default class MultiStateButton implements TMultiStateButton {
         this.isSensor = isSensor;
         this.currentState = currentState;
         this.stateList = stateList;
+        this.mqttPrimeryTopicID = mqttPrimeryTopicID;
+        this.mqttSecondaryTopicID = mqttSecondaryTopicID;
     }
 
     static createNewData(dataConfig: TMultiStateButtonConfig): MultiStateButton {
@@ -33,6 +39,7 @@ export default class MultiStateButton implements TMultiStateButton {
         const isSensor = dataConfig.isSensor ? dataConfig.isSensor : false;
         const currentState = dataConfig.currentState ? dataConfig.currentState : 0;
         const stateList = dataConfig.stateList ? dataConfig.stateList : [];
+        const mqttPrimeryTopicID = dataConfig.mqttPrimeryTopicID ? dataConfig.mqttPrimeryTopicID : "";
 
         const newMultiStateButton = new MultiStateButton(
             dataConfig.dataID,
@@ -40,7 +47,9 @@ export default class MultiStateButton implements TMultiStateButton {
             iconName,
             isSensor,
             currentState,
-            stateList
+            stateList,
+            mqttPrimeryTopicID,
+            []
         )
 
         return newMultiStateButton
@@ -53,7 +62,9 @@ export default class MultiStateButton implements TMultiStateButton {
             data.iconName,
             data.isSensor,
             data.currentState,
-            data.stateList
+            data.stateList,
+            data.mqttPrimeryTopicID,
+            data.mqttSecondaryTopicID
         )
 
         return newMultiStateButton
@@ -67,7 +78,9 @@ export default class MultiStateButton implements TMultiStateButton {
             iconName: this.iconName,
             isSensor: this.isSensor,
             currentState: this.currentState,
-            stateList: this.stateList
+            stateList: this.stateList,
+            mqttPrimeryTopicID : this.mqttPrimeryTopicID,
+            mqttSecondaryTopicID : this.mqttSecondaryTopicID,
         }
 
         return json

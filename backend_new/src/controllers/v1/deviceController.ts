@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import { DeviceDataTypesConfigs } from "../../interfaces/deviceData.interface";
 import * as deviceService from "../../services/deviceService"
 
+
+import { COLLECTION_DEVICES, COLLECTION_TASKS, getDocuments } from "../../services/mongoDBService";
+import { TTask } from "../../interfaces/task.interface";
+
 export async function createNewDevice(req: Request, res: Response) {
     let { deviceName, dataTypeArray } = req.body;
     if (!dataTypeArray || !Array.isArray(dataTypeArray)) {
@@ -41,13 +45,14 @@ export function deleteDevice(req: Request, res: Response) {
     res.status(200).send("ok");
 }
 
-export function updateDevice(req: Request, res: Response) {
-    const { deviceID } = req.body
-    let x = "180aaf43-3933-4e90-a6cd-d68a8797e410"
-    deviceService.updateDeviceProperties(x,[{
-        propertyName: "deviceName",
-        newValue: "11123"
-    }])
+export async function updateDevice(req: Request, res: Response) {
+    const { deviceID, propertyList } = req.body
+    if (!deviceID || !propertyList || !Array.isArray(propertyList)){
+        res.status(400).json("invalid request")
+        return
+    }
+
+    deviceService.updateDeviceProperties(deviceID, propertyList)
 
     res.status(200).send("ok");
 }

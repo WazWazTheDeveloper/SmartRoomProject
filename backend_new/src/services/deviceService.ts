@@ -47,6 +47,21 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
         return functionResult
     }
 
+    //create and add mqtt topics to DeviceDataTypesConfigs
+    for (let i = 0; i < dataTypeArray.length; i++) {
+        const config = dataTypeArray[i];
+        
+        const configTopicResult = await createNewMqttTopic(`${_id}.${i}`, `${topicPath}.${i}`)
+        // check if created isSuccessful
+        if (!configTopicResult.isSuccessful) {
+            logItem = `Failed to create device due to failing to create a topic to data`
+            logEvents(logItem, ERROR_LOG)
+            return functionResult
+        }
+
+        config.mqttPrimeryTopicID = configTopicResult.mqttTopicObject._id
+    }
+
     // create Device and insert into db
     const newDevice = Device.createNewDevice(_id, deviceName, deviceTopicResult.mqttTopicObject._id, dataTypeArray)
     const isSuccessful = await createDocument(COLLECTION_DEVICES, newDevice.getAsJson_DB())
@@ -99,7 +114,7 @@ export async function updateDeviceProperties(_id: string, propertyList: TDeviceP
     const set: any = {}
     for (let index = 0; index < propertyList.length; index++) {
         const property = propertyList[index];
-        set[property.propertyName] = property.newValue;
+        // set[property.propertyName] = property.newValue;
     }
 
     const updateFilter: mongoDB.UpdateFilter<TDeviceJSON_DB> = {

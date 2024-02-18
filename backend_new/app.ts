@@ -10,7 +10,8 @@ import { taskCheckHandler } from "./src/handlers/taskHandler";
 import { connectToDatabase } from "./src/services/mongoDBService";
 import { initializeDeviceHandler } from "./src/services/deviceService";
 import { initializeTasksFromDB, updateTaskProperty } from "./src/services/taskService";
-import { router } from './src/routes/v1/router';
+import { routerv1 } from './src/routes/v1/router';
+import { TDeviceProperty } from './src/interfaces/device.interface';
 
 const app = express();
 app.use(logger)
@@ -18,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
 
-app.use('/api/v1', router);
+app.use('/api/v1', routerv1);
 
 function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -46,16 +47,16 @@ async function test() {
 
     x.close()
 
-    let test: DeviceDataTypesConfigs = {
-        dataID: 0,
-        typeID: 0,
-        iconName: "test",
-        // dataTitle?:string,
-        // isSensor?: boolean,
-        // isOn?: boolean,
-        // onName?:string,
-        // ofName?:string,
-    }
+    // let test: DeviceDataTypesConfigs = {
+    //     dataID: 0,
+    //     typeID: 0,
+    //     iconName: "test",
+    //     // dataTitle?:string,
+    //     // isSensor?: boolean,
+    //     // isOn?: boolean,
+    //     // onName?:string,
+    //     // ofName?:string,
+    // }
 
     // createTask("test")
     // createTask("test2")
