@@ -1,7 +1,7 @@
 import MultiStateButton from "../models/dataTypes/multiStateButtonData"
 import NumberData from "../models/dataTypes/numberData"
 import SwitchData from "../models/dataTypes/switchData"
-import { DeviceDataTypes, DeviceDataTypesConfigs } from "./deviceData.interface"
+import { DeviceDataTypes, DeviceDataTypesConfigs, TDeviceDataProperties } from "./deviceData.interface"
 
 export type TDeviceProperty =
     {
@@ -19,7 +19,10 @@ export type TDeviceProperty =
     {
         propertyName: "isAdminOnly"
         newValue: boolean
-    }
+    } |
+    ({
+        propertyName: "data"
+    } & TDeviceDataProperties)
 
 export type TDevice = {
     _id: string
@@ -32,7 +35,7 @@ export type TDevice = {
 
 export type TDeviceJSON_DB = {
     _id: string
-    deviceName:string
+    deviceName: string
     mqttTopicID: string
     isAccepted: -1 | 0 | 1
     isAdminOnly: boolean

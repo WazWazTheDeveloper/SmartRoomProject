@@ -1,8 +1,8 @@
 import { TPropertyCheck, TTask, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTask } from "../interfaces/task.interface";
 import { Task } from "../models/task"
 import { v4 as uuidv4 } from 'uuid';
-import { COLLECTION_TASKS, createDocument, deleteDocuments, getDocuments, getDocumentsAggregate, updateDocument, updateDocuments } from "./mongoDBService";
-import { ERROR_LOG, logEvents, logger } from "../middleware/logger";
+import { COLLECTION_TASKS, createDocument, deleteDocuments, getDocuments, updateDocument, updateDocuments } from "./mongoDBService";
+import { ERROR_LOG, logEvents } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
 import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
 import { taskTimeCheckHandler } from "../handlers/taskHandler";
