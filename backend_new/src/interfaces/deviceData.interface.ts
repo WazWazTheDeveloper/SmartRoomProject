@@ -61,6 +61,7 @@ export type TSwitchDataProperty = ({
     newValue: string
 } | TDeviceDataProperty) & {
     dataID: number
+    typeID:0
 }
 
 export type TNumberData = {
@@ -96,6 +97,7 @@ export type TNumberDataProperty = ({
     newValue: string
 } | TDeviceDataProperty) & {
     dataID: number
+    typeID:1
 }
 
 
@@ -124,13 +126,14 @@ export type TMultiStateButtonProperty = ({
     dataPropertyName: "stateList"
     operation: "update"
     state: {
-        stateValue?: number
+        stateValue: number
         isIcon?: boolean
         icon?: string
         stateTitle?: string
     }
 } | TDeviceDataProperty) & {
     dataID: number
+    typeID:2
 }
 
 export type TStateItem = {
