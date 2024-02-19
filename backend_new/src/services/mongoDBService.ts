@@ -3,7 +3,7 @@ import * as mongoDB from "mongodb";
 import * as dotenv from "dotenv";
 import { TDeviceJSON_DB } from '../interfaces/device.interface';
 import { TMqttTopicObjectJSON_DB } from '../interfaces/mqttTopicObject.interface';
-import { DB_LOG , logEvents } from '../middleware/logger';
+import { DB_LOG, logEvents } from '../middleware/logger';
 import { TTaskJSON_DB } from '../interfaces/task.interface';
 type TCollection = {
     devices?: mongoDB.Collection<TDeviceJSON_DB>
@@ -15,7 +15,7 @@ type collectionTypes =
     mongoDB.Collection<TMqttTopicObjectJSON_DB> |
     mongoDB.Collection<TTaskJSON_DB>
 
-type JSONDBTypes = TDeviceJSON_DB | TMqttTopicObjectJSON_DB | TTaskJSON_DB
+export type JSONDBTypes = TDeviceJSON_DB | TMqttTopicObjectJSON_DB | TTaskJSON_DB
 
 type collectionNames = "devices" | "mqttTopics" | "tasks"
 
@@ -103,7 +103,7 @@ export async function updateDocuments(collectionStr: collectionNames, fillter: m
     }
 }
 
-export async function bulkWriteCollection(collectionStr: collectionNames, operations:mongoDB.AnyBulkWriteOperation<JSONDBTypes>[]) {
+export async function bulkWriteCollection(collectionStr: collectionNames, operations: mongoDB.AnyBulkWriteOperation<JSONDBTypes>[], options?: mongoDB.BulkWriteOptions) {
     let logItem = "";
 
     // check if db collection exist
@@ -114,7 +114,13 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
         throw new Error(err)
     }
 
-    // collection.bulkWrite(operations)
+    //@ts-ignore
+    const bulkWriteResult: mongoDB.BulkWriteResult = await collection.bulkWrite(operations, options)
+    
+    logItem = `Inserted ${bulkWriteResult.insertedCount}, Modified ${bulkWriteResult.modifiedCount}, Deleted ${bulkWriteResult.deletedCount} documents at:${collection.namespace} with: \n
+        ${JSON.stringify(operations, null, "\t")}`
+    logEvents(logItem, DB_LOG)
+    return true
 }
 
 export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
@@ -149,7 +155,7 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
     return isSuccessful
 }
 
-export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>,project:any = {}) {
+export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
     let logItem = "";
 
     // check if db collection exist
