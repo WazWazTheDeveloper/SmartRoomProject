@@ -103,8 +103,18 @@ export async function updateDocuments(collectionStr: collectionNames, fillter: m
     }
 }
 
-export async function updateCollection() {
+export async function bulkWriteCollection(collectionStr: collectionNames, operations:mongoDB.AnyBulkWriteOperation<JSONDBTypes>[]) {
+    let logItem = "";
 
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
+        logEvents(err, DB_LOG)
+        throw new Error(err)
+    }
+
+    // collection.bulkWrite(operations)
 }
 
 export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
