@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface"
 import { ERROR_LOG, logEvents } from "../middleware/logger"
 import Device from "../models/device"
-import { COLLECTION_DEVICES, createDocument, deleteDocuments, getCollection, getDocuments, updateDocument } from "./mongoDBService"
+import { COLLECTION_DEVICES, JSONDBTypes, bulkWriteCollection, createDocument, deleteDocuments, getCollection, getDocuments, updateDocument } from "./mongoDBService"
 import { createNewMqttTopic } from './mqttTopicService';
 import { TDeviceJSON_DB, TDeviceProperty } from '../interfaces/device.interface';
 import * as mongoDB from "mongodb";
@@ -15,23 +15,23 @@ type DeviceResult = {
     device: Device
 }
 
-export async function initializeDeviceHandler(handler:(changeEvent:mongoDB.ChangeStreamDocument) => void) {
-    let collection : mongoDB.Collection<TDeviceJSON_DB>
+export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.ChangeStreamDocument) => void) {
+    let collection: mongoDB.Collection<TDeviceJSON_DB>
     try {
         collection = await getCollection("devices") as mongoDB.Collection<TDeviceJSON_DB>;
-    }catch(e) {
+    } catch (e) {
         // TODO: maybe add ERROR LOG
         console.log(e)
         return false
     }
 
     const changeStream = collection.watch()
-    changeStream.on("change",handler);
+    changeStream.on("change", handler);
 
     return true
 }
 
-export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {   
+export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
     let functionResult: DeviceResult = { isSuccessful: false }
     let logItem = "";
     const _id = uuidv4()
@@ -50,7 +50,7 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
     //create and add mqtt topics to DeviceDataTypesConfigs
     for (let i = 0; i < dataTypeArray.length; i++) {
         const config = dataTypeArray[i];
-        
+
         const configTopicResult = await createNewMqttTopic(`${_id}.${i}`, `${topicPath}.${i}`)
         // check if created isSuccessful
         if (!configTopicResult.isSuccessful) {
@@ -109,27 +109,122 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
 
 export async function updateDeviceProperties(_id: string, propertyList: TDeviceProperty[]) {
     // TODO: add data validation
-    
+
+
+    const filter = { _id: _id }
     //create update obj from propertyList
     const set: any = {}
+    const operations: mongoDB.AnyBulkWriteOperation<JSONDBTypes>[] = []
+    // move this to sub functions
     for (let index = 0; index < propertyList.length; index++) {
         const property = propertyList[index];
-        // set[property.propertyName] = property.newValue;
+        if (
+            property.propertyName == "deviceName" ||
+            property.propertyName == "isAccepted" ||
+            property.propertyName == "isAdminOnly" ||
+            property.propertyName == "mqttTopicID"
+        ) {
+            set[property.propertyName] = property.newValue;
+        } else if (property.typeID == 0 || property.typeID == 1) {
+            let filter2 = {
+                _id: _id,
+                'data.dataID': property.dataID
+            }
+            const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                updateOne: {
+                    filter: filter2,
+                    update: {
+                        $set: {
+                            [`data.$.${property.dataPropertyName}`]: property.newValue
+                        }
+                    }
+                }
+            }
+            operations.push(operation);
+        } else if (property.typeID == 2) {
+            let set2 = {}
+            let filter2 = {
+                _id: _id,
+                'data.dataID': property.dataID
+            }
+            if (property.dataPropertyName == "currentState") {
+                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                    updateOne: {
+                        filter: filter2,
+                        update: {
+                            $set: {
+                                [`data.$.${property.dataPropertyName}`]: property.newValue
+                            }
+                        }
+                    }
+                }
+                operations.push(operation);
+            } else {
+                if (property.dataPropertyName == "stateList") {
+                    if (property.operation == "add") {
+                        // need to add a check to see it stateValue exist
+                        const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                            updateOne: {
+                                filter: filter2,
+                                update: {
+                                    $push: {
+                                        'data.$.stateList': property.newState
+                                    }
+                                }
+                            }
+                        }
+                        operations.push(operation);
+                    }
+                    if (property.operation == "delete") {
+                        const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                            updateOne: {
+                                filter: filter2,
+                                update: {
+                                    $pull: {
+                                        'data.$.stateList': { stateValue: property.stateValue }
+                                    }
+                                }
+                            }
+                        }
+                        operations.push(operation);
+                    }
+                    if (property.operation == "update") {
+                        let filter2 = {
+                            _id: _id,
+                            'data.dataID': property.dataID,
+                        }
+                        const set: any = {}
+                        if (property.state.isIcon) set[`data.$.stateList.$[e].isIcon`] = property.state.isIcon
+                        if (property.state.icon) set[`data.$.stateList.$[e].icon`] = property.state.icon
+                        if (property.state.stateTitle) set[`data.$.stateList.$[e].stateTitle`] = property.state.stateTitle
+                        const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                            updateOne: {
+                                filter: filter2,
+                                update: {
+                                    $set: set
+                                },
+                                arrayFilters: [{ "e.stateValue": property.state.stateValue }]
+                            }
+                        }
+                        operations.push(operation);
+                    }
+                }
+            }
+        }
     }
 
     const updateFilter: mongoDB.UpdateFilter<TDeviceJSON_DB> = {
-        $set: set 
+        $set: set
     }
-    
-    const filter = { _id: _id }
-    await updateDocument(COLLECTION_DEVICES, filter, updateFilter);
+
+    await bulkWriteCollection(COLLECTION_DEVICES, operations);
 }
 
 export async function deleteDevice(_id: string) {
     await deleteAllProperyChecksOfDevice(_id)
 
-    const filter= {
+    const filter = {
         _id: _id
     }
-    await deleteDocuments("devices",filter);
+    await deleteDocuments("devices", filter);
 }
