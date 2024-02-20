@@ -114,13 +114,17 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
         throw new Error(err)
     }
 
-    //@ts-ignore
-    const bulkWriteResult: mongoDB.BulkWriteResult = await collection.bulkWrite(operations, options)
-    
-    logItem = `Inserted ${bulkWriteResult.insertedCount}, Modified ${bulkWriteResult.modifiedCount}, Deleted ${bulkWriteResult.deletedCount} documents at:${collection.namespace} with: \n
-        ${JSON.stringify(operations, null, "\t")}`
-    logEvents(logItem, DB_LOG)
-    return true
+    try {
+        //@ts-ignore
+        const bulkWriteResult: mongoDB.BulkWriteResult = await collection.bulkWrite(operations, options)
+        logItem = `Inserted ${bulkWriteResult.insertedCount}, Modified ${bulkWriteResult.modifiedCount}, Deleted ${bulkWriteResult.deletedCount} documents at:${collection.namespace} with: \n
+            ${JSON.stringify(operations, null, "\t")}`
+        logEvents(logItem, DB_LOG)
+        return true
+    } catch (e) {
+        logEvents(e, DB_LOG)
+        return true
+    }
 }
 
 export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
