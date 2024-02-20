@@ -52,7 +52,11 @@ export async function updateDevice(req: Request, res: Response) {
         return
     }
 
-    deviceService.updateDeviceProperties(updateList)
+    const result = await deviceService.updateDeviceProperties(updateList)
+    if(result.isSuccessful) {
+        res.status(200).send("ok");
+    }else {
+        res.status(400).json(result.error);
+    }
 
-    res.status(200).send("ok");
 }
