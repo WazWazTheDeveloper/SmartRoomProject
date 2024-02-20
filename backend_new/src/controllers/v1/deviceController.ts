@@ -46,13 +46,13 @@ export function deleteDevice(req: Request, res: Response) {
 }
 
 export async function updateDevice(req: Request, res: Response) {
-    const { deviceID, propertyList } = req.body
-    if (!deviceID || !propertyList || !Array.isArray(propertyList)){
+    const { updateList } = req.body
+    if (!updateList || !Array.isArray(updateList)){
         res.status(400).json("invalid request")
         return
     }
 
-    deviceService.updateDeviceProperties(deviceID, propertyList)
+    deviceService.updateDeviceProperties(updateList)
 
     res.status(200).send("ok");
 }
