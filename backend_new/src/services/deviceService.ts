@@ -241,7 +241,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
             const dataPropertyName = changeItem.propertyToChange.dataPropertyName
             const typeID = changeItem.propertyToChange.typeID;
 
-            if(dataPropertyName == "mqttPrimeryTopicID" || dataPropertyName == "iconName" || dataPropertyName == "dataTitle") {
+            if (dataPropertyName == "mqttPrimeryTopicID" || dataPropertyName == "iconName" || dataPropertyName == "dataTitle") {
                 if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
 
                 const filter = {
@@ -261,7 +261,8 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 };
                 operations.push(operation);
             }
-            else if(dataPropertyName == "isSensor") {
+            else if (dataPropertyName == "isSensor") {
+                //type checking
                 if (typeof changeItem.propertyToChange.newValue != "boolean") return returnError(`changeList[${index}].propertyToChange.newValue is not a boolean`)
 
                 const filter = {
@@ -280,10 +281,47 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                     },
                 };
                 operations.push(operation);
-            } else if(dataPropertyName == "mqttSecondaryTopicID") [
-                
-            ]
-            if (typeID == SwitchData.TYPE_ID) {
+            } else if (dataPropertyName == "mqttSecondaryTopicID") {
+                //type checking
+                if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
+
+                if (changeItem.propertyToChange.operation == "add") {
+                    const filter = {
+                        _id: changeItem._id,
+                        "data.dataID": changeItem.propertyToChange.dataID,
+                    };
+                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+                    {
+                        updateOne: {
+                            filter: filter,
+                            update: {
+                                $push: {
+                                    "data.$.mqttSecondaryTopicID": changeItem.propertyToChange.newValue,
+                                },
+                            },
+                        },
+                    };
+                    operations.push(operation);
+                }
+                else if (changeItem.propertyToChange.operation == "delete") {
+                    const filter = {
+                        _id: changeItem._id,
+                        "data.dataID": changeItem.propertyToChange.dataID,
+                    };
+                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+                    {
+                        updateOne: {
+                            filter: filter,
+                            update: {
+                                $pull: {
+                                    "data.$.mqttSecondaryTopicID":  changeItem.propertyToChange.newValue,
+                                },
+                            },
+                        },
+                    };
+                    operations.push(operation);
+                } else return returnError(`changeList[${index}].propertyToChange.operation is not a valid option`)
+            } else if (typeID == SwitchData.TYPE_ID) {
                 //type checking
                 if (!changeItem.propertyToChange.newValue) return returnError(`changeList[${index}].propertyToChange.newValue is undefined`)
                 if (dataPropertyName == "isOn") {
