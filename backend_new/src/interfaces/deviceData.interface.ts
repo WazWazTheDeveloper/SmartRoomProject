@@ -1,16 +1,22 @@
 export type TDeviceData = {
-    mqttPrimeryTopicID: string
-    mqttSecondaryTopicID: string[]
     dataID: number
     typeID: number
     iconName: string
     dataTitle: string
     isSensor: boolean
+    mqttPrimeryTopicID: string
+    mqttSecondaryTopicID: string[]
+}
+
+export type TDeviceDeviceDataProperties = {
+    mqttPrimeryTopicID: string
+} | {
+    mqttSecondaryTopicID: string[]
 }
 
 export type TDeviceDataConfig = {
     mqttPrimeryTopicID?: string
-    mqttSecondaryTopicID?: string[]
+    mqttSecondaryTopicID?: string[] // probably needs to be deleted
     dataID: number
     typeID: number
     iconName?: string
@@ -49,6 +55,10 @@ export type TSwitchData = {
     offName: string
 } & TDeviceData
 
+export type TSwitchDeviceDataProperties = {
+    isOn: boolean
+}
+
 export type TSwitchDataConfig = {
     isOn?: boolean
     onName?: string
@@ -66,7 +76,7 @@ export type TSwitchDataProperty = ({
     newValue: string
 } | TDeviceDataProperty) & {
     dataID: number
-    typeID:0
+    typeID: 0
 }
 
 export type TNumberData = {
@@ -76,6 +86,10 @@ export type TNumberData = {
     jumpValue: Number
     symbol: string
 } & TDeviceData
+
+export type TNumberDeviceDataProperties = {
+    currentValue: Number
+}
 
 export type TNumberDataConfig = {
     currentValue?: Number
@@ -102,7 +116,7 @@ export type TNumberDataProperty = ({
     newValue: string
 } | TDeviceDataProperty) & {
     dataID: number
-    typeID:1
+    typeID: 1
 }
 
 
@@ -110,6 +124,10 @@ export type TMultiStateButton = {
     currentState: number
     stateList: TStateItem[]
 } & TDeviceData
+
+export type TMultiStateButtonDeviceDataProperties = {
+    currentValue: Number
+}
 
 export type TMultiStateButtonConfig = {
     currentState?: number
@@ -138,7 +156,7 @@ export type TMultiStateButtonProperty = ({
     }
 } | TDeviceDataProperty) & {
     dataID: number
-    typeID:2
+    typeID: 2
 }
 
 export type TStateItem = {
@@ -149,3 +167,5 @@ export type TStateItem = {
 }
 
 export type TDeviceDataProperties = TSwitchDataProperty | TNumberDataProperty | TMultiStateButtonProperty
+
+export type TDeviceDeviceDataPropertiesAny = TDeviceDeviceDataProperties | TMultiStateButtonDeviceDataProperties | TSwitchDeviceDataProperties | TNumberDeviceDataProperties;
