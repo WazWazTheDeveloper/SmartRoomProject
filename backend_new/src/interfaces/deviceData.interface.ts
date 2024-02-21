@@ -23,7 +23,12 @@ export type TDeviceDataProperty = {
     newValue: string
 } | {
     dataPropertyName: "mqttSecondaryTopicID"
-    newValue: string[]
+    operation: "add"
+    newValue: string
+} | {
+    dataPropertyName: "mqttSecondaryTopicID"
+    operation: "delete"
+    newValue: string
 } | {
     dataPropertyName: "iconName"
     newValue: string
