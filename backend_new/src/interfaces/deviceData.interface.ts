@@ -9,9 +9,13 @@ export type TDeviceData = {
 }
 
 export type TDeviceDeviceDataProperties = {
-    mqttPrimeryTopicID: string
-} | {
-    mqttSecondaryTopicID: string[]
+    mqttPrimeryTopicID?: string
+}
+
+export type TDeviceDataDeviceProperties = {
+    dataID: number
+    mqttPrimeryTopicID?: string
+    mqttSecondaryTopicID?: string[]
 }
 
 export type TDeviceDataConfig = {
@@ -56,7 +60,8 @@ export type TSwitchData = {
 } & TDeviceData
 
 export type TSwitchDeviceDataProperties = {
-    isOn: boolean
+    dataPropertyName : "isOn"
+    newValue : boolean
 }
 
 export type TSwitchDataConfig = {
@@ -88,7 +93,8 @@ export type TNumberData = {
 } & TDeviceData
 
 export type TNumberDeviceDataProperties = {
-    currentValue: Number
+    dataPropertyName : "currentValue"
+    newValue : Number
 }
 
 export type TNumberDataConfig = {
@@ -126,7 +132,8 @@ export type TMultiStateButton = {
 } & TDeviceData
 
 export type TMultiStateButtonDeviceDataProperties = {
-    currentValue: Number
+    dataPropertyName : "currentValue"
+    newValue : Number
 }
 
 export type TMultiStateButtonConfig = {
@@ -168,4 +175,4 @@ export type TStateItem = {
 
 export type TDeviceDataProperties = TSwitchDataProperty | TNumberDataProperty | TMultiStateButtonProperty
 
-export type TDeviceDeviceDataPropertiesAny = TDeviceDeviceDataProperties | TMultiStateButtonDeviceDataProperties | TSwitchDeviceDataProperties | TNumberDeviceDataProperties;
+export type TDeviceDeviceDataPropertiesAny = TMultiStateButtonDeviceDataProperties | TSwitchDeviceDataProperties | TNumberDeviceDataProperties;
