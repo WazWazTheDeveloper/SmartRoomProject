@@ -1,53 +1,71 @@
-import { DeviceDataTypesConfigs, TDeviceDeviceDataPropertiesAny } from "./deviceData.interface"
+import { DeviceDataTypesConfigs, TDeviceDataDeviceProperties, TDeviceDeviceDataProperties, TDeviceDeviceDataPropertiesAny } from "./deviceData.interface"
 
-type TInitDeviceRequest = {
-    operation : "initDevice"
-    origin : string
+export type TInitDeviceRequest = {
+    operation: "initDevice"
+    origin: string
     dataTypeArray: DeviceDataTypesConfigs[]
     deviceName?: string,
 }
 
-type TInitDeviceRespone = {
-    operation : "initDevice"
-    target : string,
-    isSuccessful : false
+export type TInitDeviceRespone = {
+    operation: "initDevice"
+    origin: "server"
+    target: string,
+    isSuccessful: false
 } | {
-    operation : "initDevice"
-    target : string,
-    isSuccessful : true,
-    _id : string
+    operation: "initDevice"
+    origin: "server"
+    target: string,
+    isSuccessful: true,
+    _id: string
 }
 
-type TGetDeviceRequest = {
-    operation : "getDevice"
-    deviceID : string
+export type TGetDeviceRequest = {
+    origin: string
+    operation: "getDevice"
+    deviceID: string
 }
 
-type TUpdateDataFromDeviceRequest = {
-    deviceID : string
-    operation : "updateServer"
-    dataID : number
-    typeID : number
+export type TGetDeviceResponse = {
+    origin: "server"
+    operation: "getDevice"
+    deviceID: string
+} & (({
+    isSuccessful: true,
+    data: TDeviceDataDeviceProperties[]
+} & TDeviceDeviceDataProperties) | {
+    isSuccessful: false
+})
+
+export type TUpdateDataFromDeviceRequest = {
+    origin: string
+    deviceID: string
+    operation: "updateServer"
+    dataID: number
+    typeID: number
 } & TDeviceDeviceDataPropertiesAny
 
-type TUpdateDataFromDeviceResponse = {
-    isSuccessful : boolean
-}
-
-type TUpdateDataToDeviceRequest = {
-    operation : "updateDevice"
-    typeID : number
+export type TUpdateDataToDeviceRequest = {
+    origin: "server"
+    operation: "updateDevice"
+    typeID: number
 } & TDeviceDeviceDataPropertiesAny
 
-type TUpdateDataToDeviceResponse = {
-    isSuccessful : boolean
+export type TUpdateDataToDeviceResponse = {
+    origin: string
+    operation: "updateDevice"
+    isSuccessful: boolean
 }
 
-type TConnectionCheckRequest = {
-    operation : "checkConnection"
+export type TConnectionCheckRequest = {
+    origin: "server"
+    operation: "checkConnection"
 }
 
-type TConnectionCheckResponse = {
-    operation : "checkConnection"
-    deviceID : string
+export type TConnectionCheckResponse = {
+    origin: string
+    operation: "checkConnection"
+    deviceID: string
 }
+
+export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse
