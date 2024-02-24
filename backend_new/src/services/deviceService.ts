@@ -144,7 +144,7 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
     return functionResult;
 }
 
-type TUpdateDeviceProperties = {
+export type TUpdateDeviceProperties = {
     _id: string;
     propertyToChange: TDeviceProperty;
 };
