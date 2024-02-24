@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const ERROR_LOG = "error_log"
 export const DB_LOG = "db_log"
+export const MQTT_LOG = "mqtt_log"
 
 const logEvents = async (message: any, logFIlesName: any) => {
     const dateTime = `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
