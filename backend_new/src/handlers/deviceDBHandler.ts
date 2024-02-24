@@ -6,11 +6,18 @@ import { taskCheckHandler } from "./taskHandler";
 export async function deviceDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
     deviceTaskHandler(changeEvent)
     updateDevice(changeEvent)
+    setupDevice(changeEvent)
+}
+
+async function setupDevice(changeEvent: mongoDB.ChangeStreamDocument) {
+    if(changeEvent.operationType != "insert") return
+    // subscribe to topics and stuff
 }
 
 // check if there is a need to update the device and if so updates it
 async function updateDevice(changeEvent: mongoDB.ChangeStreamDocument) {
-
+    console.log("changeEvent")
+    console.log(changeEvent)
 }
 
 // checks if updated field is a property check of a task and if so call taskCheckHandler()
