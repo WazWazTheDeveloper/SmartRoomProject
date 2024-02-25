@@ -13,6 +13,7 @@ import { initializeTasksFromDB, updateTaskProperty } from "./src/services/taskSe
 import { routerv1 } from './src/routes/v1/router';
 import { mqttMessageHandler } from './src/handlers/mqttHandler';
 import { initializeMqttClient } from './src/services/mqttClientService';
+import * as DeviceService from "./src/services/deviceService"
 
 const app = express();
 app.use(logger)
@@ -29,6 +30,10 @@ async function startServer(): Promise<void> {
     initializeMqttClient(mqttMessageHandler);
 
     startListeningToReqests()
+}
+
+async function subscribeToAllDevices() {
+    // const devices = DeviceService.queryDevices()
 }
 
 function startListeningToReqests(): void {

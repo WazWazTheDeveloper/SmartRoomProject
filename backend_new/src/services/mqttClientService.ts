@@ -3,7 +3,7 @@ import { MQTT_LOG, logEvents, logger } from '../middleware/logger';
 import { TAllMqttMessageType } from '../interfaces/mqttMassge.interface';
 
 let mqttClient: mqtt.MqttClient
-let subscribes: string[] = []
+let subscribes: string[] = ["initDevice"]
 let isReconnectInterval = false;
 let reconnectInterval: NodeJS.Timeout
 
@@ -65,6 +65,7 @@ export function subscribeToTopic(mqttTopicPath: string) {
 
     mqttClient.subscribe(mqttTopicPath)
     subscribes.push(mqttTopicPath);
+    console.log(subscribes)
     return true
 }
 
