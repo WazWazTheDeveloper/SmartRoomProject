@@ -3,7 +3,7 @@ import { TMultiStateButton, TMultiStateButtonConfig, TStateItem } from "../../in
 export default class MultiStateButton implements TMultiStateButton {
     static readonly TYPE_ID = 2
     mqttPrimeryTopicID: string
-    mqttSecondaryTopicID: string[]
+    // mqttSecondaryTopicID: string[]
     dataID: number
     typeID: number
     iconName: string
@@ -20,7 +20,7 @@ export default class MultiStateButton implements TMultiStateButton {
         currentState: number,
         stateList: TStateItem[],
         mqttPrimeryTopicID: string,
-        mqttSecondaryTopicID: string[]
+        // mqttSecondaryTopicID: string[]
     ) {
         this.dataID = dataID;
         this.typeID = MultiStateButton.TYPE_ID;
@@ -30,7 +30,7 @@ export default class MultiStateButton implements TMultiStateButton {
         this.currentState = currentState;
         this.stateList = stateList;
         this.mqttPrimeryTopicID = mqttPrimeryTopicID;
-        this.mqttSecondaryTopicID = mqttSecondaryTopicID;
+        // this.mqttSecondaryTopicID = mqttSecondaryTopicID;
     }
 
     static createNewData(dataConfig: TMultiStateButtonConfig): MultiStateButton {
@@ -49,7 +49,7 @@ export default class MultiStateButton implements TMultiStateButton {
             currentState,
             stateList,
             mqttPrimeryTopicID,
-            []
+            // []
         )
 
         return newMultiStateButton
@@ -64,7 +64,7 @@ export default class MultiStateButton implements TMultiStateButton {
             data.currentState,
             data.stateList,
             data.mqttPrimeryTopicID,
-            data.mqttSecondaryTopicID
+            // data.mqttSecondaryTopicID
         )
 
         return newMultiStateButton
@@ -80,7 +80,7 @@ export default class MultiStateButton implements TMultiStateButton {
             currentState: this.currentState,
             stateList: this.stateList,
             mqttPrimeryTopicID : this.mqttPrimeryTopicID,
-            mqttSecondaryTopicID : this.mqttSecondaryTopicID,
+            // mqttSecondaryTopicID : this.mqttSecondaryTopicID,
         }
 
         return json
