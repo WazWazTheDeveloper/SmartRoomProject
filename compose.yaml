@@ -16,6 +16,7 @@ services:
       - MONGODB_PASSWORD=admin
     networks:
       - mongoCluster
+      - mqttCluster
 
   # backend:
   #   container_name: 'backend_new'
@@ -63,6 +64,9 @@ services:
       - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.io]"
     # volumes:
     #   - $PWD/emqx1_data:/opt/emqx/data
+    networks:
+      - mqttCluster
+      - mongoCluster
 
   mongo-express:
     image: mongo-express
@@ -155,9 +159,12 @@ services:
     networks:
       mongoCluster:
 
+
 networks:
   default:
   mongoCluster:
+    driver: bridge
+  mqttCluster:
     driver: bridge
 
 volumes:
