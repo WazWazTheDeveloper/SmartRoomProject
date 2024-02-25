@@ -1,4 +1,3 @@
-import { Switch } from "@headlessui/react"
 import { TDeviceDataDeviceProperties } from "../interfaces/deviceData.interface"
 import { TAllMqttMessageType, TConnectionCheckResponse, TGetDeviceRequest, TGetDeviceResponse, TInitDeviceRequest, TInitDeviceRespone, TUpdateDataFromDeviceRequest, TUpdateDataToDeviceResponse } from "../interfaces/mqttMassge.interface"
 import { MQTT_LOG, logEvents } from "../middleware/logger"
@@ -7,6 +6,8 @@ import { publishMessage } from "../services/mqttClientService"
 import SwitchData from "../models/dataTypes/switchData"
 
 export function mqttMessageHandler(topic: string, message: TAllMqttMessageType) {
+    console.log(topic)
+    console.log(message)
     if (typeof topic != "string") return
     if (!message) return
     if (message.origin == 'server') return
