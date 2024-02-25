@@ -5,15 +5,17 @@ export default class MqttTopicObject implements IMqttTopicObject {
     _id: string
     topicName: string
     path: string
+    topicType: number
 
-    constructor(_id:string,topicName: string, path: string) {
+    constructor(_id:string,topicName: string, path: string,topicType: number) {
         this._id = _id;
         this.topicName = topicName;
         this.path = path;
+        this.topicType = topicType;
     }
 
-    static createNewMqttTopicObject(_id:string,topicName: string, path: string): MqttTopicObject {
-        const newDevice = new MqttTopicObject(_id, topicName, path)
+    static createNewMqttTopicObject(_id:string,topicName: string, path: string,topicType: number): MqttTopicObject {
+        const newDevice = new MqttTopicObject(_id, topicName, path, topicType)
         return newDevice
     }
 
@@ -23,6 +25,7 @@ export default class MqttTopicObject implements IMqttTopicObject {
             topicData._id,
             topicData.topicName,
             topicData.path,
+            topicData.topicType,
         )
         return newMqttTopic
     }
@@ -32,6 +35,7 @@ export default class MqttTopicObject implements IMqttTopicObject {
             _id: this._id,
             topicName: this.topicName,
             path: this.path,
+            topicType: this.topicType,
         }
 
         return json;
@@ -42,6 +46,7 @@ export default class MqttTopicObject implements IMqttTopicObject {
             _id: this._id,
             topicName: this.topicName,
             path: this.path,
+            topicType: this.topicType,
         }
 
         return json;
