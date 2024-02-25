@@ -495,3 +495,8 @@ export async function deleteDevice(_id: string) {
     };
     await deleteDocuments("devices", filter);
 }
+
+export async function queryDevices(fillter: mongoDB.Filter<any>, project: any = {}) {
+    let queryResult = await getDocuments<TDeviceJSON_DB>(COLLECTION_DEVICES, fillter, project)
+    return queryResult
+}
