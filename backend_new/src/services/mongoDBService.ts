@@ -198,7 +198,7 @@ export async function getDocumentsAggregate<DocumentType>(collectionStr: collect
     const findResultArr = await findResult.toArray() as DocumentType[];
 
     // log
-    logItem = `Search with aggregation:${JSON.stringify(aggregation)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+    logItem = `Search with aggregation:${JSON.stringify(aggregation,null,"\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
     logEvents(logItem, DB_LOG)
 
 

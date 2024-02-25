@@ -10,6 +10,7 @@ import {
     deleteDocuments,
     getCollection,
     getDocuments,
+    getDocumentsAggregate,
     updateDocument,
 } from "./mongoDBService";
 import { createNewMqttTopic } from "./mqttTopicService";
@@ -60,10 +61,10 @@ export async function createDevice(
     let functionResult: DeviceResult = { isSuccessful: false };
     let logItem = "";
     const _id = uuidv4();
-    const topicPath = `device.${_id}`;
+    const topicPath = `device/${_id}`;
 
     // create mqtt topic
-    const deviceTopicResult = await createNewMqttTopic(_id, topicPath);
+    const deviceTopicResult = await createNewMqttTopic(_id, topicPath,-1);
 
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
@@ -77,8 +78,9 @@ export async function createDevice(
         const config = dataTypeArray[i];
 
         const configTopicResult = await createNewMqttTopic(
-            `${_id}.${i}`,
-            `${topicPath}.${i}`
+            `${_id}/${i}`,
+            `${topicPath}/${i}`,
+            config.typeID
         );
         // check if created isSuccessful
         if (!configTopicResult.isSuccessful) {
@@ -281,47 +283,49 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                     },
                 };
                 operations.push(operation);
-            } else if (dataPropertyName == "mqttSecondaryTopicID") {
-                //type checking
-                if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
+            } 
+            // else if (dataPropertyName == "mqttSecondaryTopicID") {
+            //     //type checking
+            //     if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
 
-                if (changeItem.propertyToChange.operation == "add") {
-                    const filter = {
-                        _id: changeItem._id,
-                        "data.dataID": changeItem.propertyToChange.dataID,
-                    };
-                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                    {
-                        updateOne: {
-                            filter: filter,
-                            update: {
-                                $push: {
-                                    "data.$.mqttSecondaryTopicID": changeItem.propertyToChange.newValue,
-                                },
-                            },
-                        },
-                    };
-                    operations.push(operation);
-                }
-                else if (changeItem.propertyToChange.operation == "delete") {
-                    const filter = {
-                        _id: changeItem._id,
-                        "data.dataID": changeItem.propertyToChange.dataID,
-                    };
-                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                    {
-                        updateOne: {
-                            filter: filter,
-                            update: {
-                                $pull: {
-                                    "data.$.mqttSecondaryTopicID":  changeItem.propertyToChange.newValue,
-                                },
-                            },
-                        },
-                    };
-                    operations.push(operation);
-                } else return returnError(`changeList[${index}].propertyToChange.operation is not a valid option`)
-            } else if (typeID == SwitchData.TYPE_ID) {
+            //     if (changeItem.propertyToChange.operation == "add") {
+            //         const filter = {
+            //             _id: changeItem._id,
+            //             "data.dataID": changeItem.propertyToChange.dataID,
+            //         };
+            //         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+            //         {
+            //             updateOne: {
+            //                 filter: filter,
+            //                 update: {
+            //                     $push: {
+            //                         "data.$.mqttSecondaryTopicID": changeItem.propertyToChange.newValue,
+            //                     },
+            //                 },
+            //             },
+            //         };
+            //         operations.push(operation);
+            //     }
+            //     else if (changeItem.propertyToChange.operation == "delete") {
+            //         const filter = {
+            //             _id: changeItem._id,
+            //             "data.dataID": changeItem.propertyToChange.dataID,
+            //         };
+            //         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+            //         {
+            //             updateOne: {
+            //                 filter: filter,
+            //                 update: {
+            //                     $pull: {
+            //                         "data.$.mqttSecondaryTopicID":  changeItem.propertyToChange.newValue,
+            //                     },
+            //                 },
+            //             },
+            //         };
+            //         operations.push(operation);
+            //     } else return returnError(`changeList[${index}].propertyToChange.operation is not a valid option`)
+            // } 
+            else if (typeID == SwitchData.TYPE_ID) {
                 //type checking
                 if (!changeItem.propertyToChange.newValue) return returnError(`changeList[${index}].propertyToChange.newValue is undefined`)
                 if (dataPropertyName == "isOn") {
@@ -496,7 +500,7 @@ export async function deleteDevice(_id: string) {
     await deleteDocuments("devices", filter);
 }
 
-export async function queryDevices(fillter: mongoDB.Filter<any>, project: any = {}) {
-    let queryResult = await getDocuments<TDeviceJSON_DB>(COLLECTION_DEVICES, fillter, project)
+export async function aggregateDevices(aggregateArray: any[]) {
+    let queryResult = await getDocumentsAggregate<TDeviceJSON_DB>(COLLECTION_DEVICES, aggregateArray)
     return queryResult
 }

@@ -12,12 +12,12 @@ type MqttTopicResult = {
     mqttTopicObject: MqttTopicObject
 }
 
-export async function createNewMqttTopic(topicName: string, topicPath: string): Promise<MqttTopicResult> {
+export async function createNewMqttTopic(topicName: string, topicPath: string,topicType: number): Promise<MqttTopicResult> {
     let functionResult: MqttTopicResult = { isSuccessful: false };
     const _id = uuidv4()
 
     // create and insert mqtt topic
-    const mqttTopic = MqttTopicObject.createNewMqttTopicObject(_id,topicName, topicPath)
+    const mqttTopic = MqttTopicObject.createNewMqttTopicObject(_id,topicName, topicPath,topicType)
     const isSuccessful = await createDocument(COLLECTION_MQTT_TOPICS,mqttTopic.getAsJson_DB())
 
     // check if accepted by db
