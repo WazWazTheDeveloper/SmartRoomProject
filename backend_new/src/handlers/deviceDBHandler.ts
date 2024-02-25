@@ -8,39 +8,33 @@ import { TTask } from "../interfaces/task.interface";
 import { taskCheckHandler } from "./taskHandler";
 import * as MqttTopicService from "../services/mqttTopicService";
 import * as MqttClientService from "../services/mqttClientService";
+import { subscribeToNewDevice } from "./mqttDeviceSubscriptionsHandler";
 
-export async function deviceDBHandler(
-    changeEvent: mongoDB.ChangeStreamDocument
-) {
+/**
+ * @description - calls sub functions that handle the device collection changes
+ * 
+ * @param changeEvent - a change event form mongodb
+ */
+export async function deviceDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
     deviceTaskHandler(changeEvent);
-    updateDevice(changeEvent);
-    setupDevice(changeEvent);
-}
-
-async function setupDevice(changeEvent: mongoDB.ChangeStreamDocument) {
-    if (changeEvent.operationType != "insert") return;
-    if (typeof changeEvent.fullDocument.mqttTopicID != "string") return;
-    try {
-        let topicResult = await MqttTopicService.getMqttTopic(
-            changeEvent.fullDocument.mqttTopicID
-            );
-            if (topicResult.isSuccessful) {
-            MqttClientService.subscribeToTopic(topicResult.mqttTopicObject.path);
-        } else {
-            // TODO: add error
-        }
-    } catch (e) {
-        // TODO: add error
-    }
-    // subscribe to topics and stuff
+    onUpdateDevice(changeEvent);
+    subscribeToNewDevice(changeEvent);
 }
 
 // check if there is a need to update the device and if so updates it
-async function updateDevice(changeEvent: mongoDB.ChangeStreamDocument) {
+//IMPLEMENT
+async function onUpdateDevice(changeEvent: mongoDB.ChangeStreamDocument) {
     console.log("changeEvent");
 }
 
-// checks if updated field is a property check of a task and if so call taskCheckHandler()
+/**
+ * @description -
+ * the function calls a task check for tasks
+ * that are listening to updates from the updated device
+ * 
+ * @param changeEvent - a change event form mongodb
+ * @returns 
+ */
 async function deviceTaskHandler(changeEvent: mongoDB.ChangeStreamDocument) {
     if (changeEvent.operationType != "update") return;
     if (!changeEvent.updateDescription.updatedFields) return;

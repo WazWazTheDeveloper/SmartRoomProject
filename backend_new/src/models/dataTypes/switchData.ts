@@ -3,7 +3,7 @@ import { TDeviceData,  TSwitchData, TSwitchDataConfig } from "../../interfaces/d
 export default class SwitchData implements TSwitchData {
     static readonly TYPE_ID = 0
     mqttPrimeryTopicID: string
-    mqttSecondaryTopicID: string[]
+    // mqttSecondaryTopicID: string[]
     dataID: number
     iconName: string
     dataTitle: string
@@ -22,7 +22,7 @@ export default class SwitchData implements TSwitchData {
         onName: string,
         offName: string,
         mqttPrimeryTopicID: string,
-        mqttSecondaryTopicID: string[]
+        // mqttSecondaryTopicID: string[]
     ) {
         this.dataID = dataID
         this.iconName = iconName
@@ -33,7 +33,7 @@ export default class SwitchData implements TSwitchData {
         this.onName = onName
         this.offName = offName
         this.mqttPrimeryTopicID = mqttPrimeryTopicID;
-        this.mqttSecondaryTopicID = mqttSecondaryTopicID;
+        // this.mqttSecondaryTopicID = mqttSecondaryTopicID;
     }
 
     static createNewData(dataConfig: TSwitchDataConfig): SwitchData {
@@ -54,7 +54,7 @@ export default class SwitchData implements TSwitchData {
             onName,
             offName,
             mqttPrimeryTopicID,
-            []
+            // []
             )
 
         return newSwitchData;
@@ -70,7 +70,7 @@ export default class SwitchData implements TSwitchData {
             data.onName,
             data.offName,
             data.mqttPrimeryTopicID,
-            data.mqttSecondaryTopicID
+            // data.mqttSecondaryTopicID
             )
 
         return newSwitchData;
@@ -87,7 +87,7 @@ export default class SwitchData implements TSwitchData {
             offName : this.offName,
             typeID: SwitchData.TYPE_ID,
             mqttPrimeryTopicID : this.mqttPrimeryTopicID,
-            mqttSecondaryTopicID : this.mqttSecondaryTopicID,
+            // mqttSecondaryTopicID : this.mqttSecondaryTopicID,
         }
 
         return data;

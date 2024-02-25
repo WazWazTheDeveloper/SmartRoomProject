@@ -5,7 +5,7 @@ export type TDeviceData = {
     dataTitle: string
     isSensor: boolean
     mqttPrimeryTopicID: string
-    mqttSecondaryTopicID: string[]
+    // mqttSecondaryTopicID: string[]
 }
 
 export type TDeviceDeviceDataProperties = {
@@ -15,12 +15,12 @@ export type TDeviceDeviceDataProperties = {
 export type TDeviceDataDeviceProperties = {
     dataID: number
     mqttPrimeryTopicID?: string
-    mqttSecondaryTopicID?: string[]
+    // mqttSecondaryTopicID?: string[]
 }
 
 export type TDeviceDataConfig = {
     mqttPrimeryTopicID?: string
-    mqttSecondaryTopicID?: string[] // probably needs to be deleted
+    // mqttSecondaryTopicID?: string[] // probably needs to be deleted
     dataID: number
     typeID: number
     iconName?: string
@@ -31,15 +31,17 @@ export type TDeviceDataConfig = {
 export type TDeviceDataProperty = {
     dataPropertyName: "mqttPrimeryTopicID"
     newValue: string
-} | {
-    dataPropertyName: "mqttSecondaryTopicID"
-    operation: "add"
-    newValue: string
-} | {
-    dataPropertyName: "mqttSecondaryTopicID"
-    operation: "delete"
-    newValue: string
-} | {
+} | 
+// {
+//     dataPropertyName: "mqttSecondaryTopicID"
+//     operation: "add"
+//     newValue: string
+// } | {
+//     dataPropertyName: "mqttSecondaryTopicID"
+//     operation: "delete"
+//     newValue: string
+// } | 
+{
     dataPropertyName: "iconName"
     newValue: string
 } | {
