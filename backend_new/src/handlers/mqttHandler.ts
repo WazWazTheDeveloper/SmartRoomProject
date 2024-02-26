@@ -189,7 +189,25 @@ async function checkConnection(
     topic: string,
     message: TConnectionCheckResponse
 ) {
+    console.log(message)
+    // type checks
     if (typeof topic != "string") return;
+    if (topic == "server") return;
     if (!message) return;
     if (message.operation != "checkConnection") return;
+    
+    const updateList : DeviceService.TUpdateDeviceProperties[] = [{
+        _id : message.deviceID,
+        propertyToChange : {
+            propertyName : "isConnectedCheck",
+            newValue : true
+        }
+    },{
+        _id : message.deviceID,
+        propertyToChange : {
+            propertyName : "isConnected",
+            newValue : true
+        }
+    }]
+    DeviceService.updateDeviceProperties(updateList)
 }

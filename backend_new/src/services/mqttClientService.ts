@@ -3,7 +3,10 @@ import { MQTT_LOG, logEvents, logger } from "../middleware/logger";
 import { TAllMqttMessageType } from "../interfaces/mqttMassge.interface";
 
 let mqttClient: mqtt.MqttClient;
-export let subscribes: string[] = ["initDevice"];
+export let subscribes: string[] = [
+    process.env.MQTT_TOPIC_INIT_DEVICE as string,
+    process.env.MQTT_TOPIC_CHECK_CONNECTION as string,
+];
 let isReconnectInterval = false;
 let reconnectInterval: NodeJS.Timeout;
 
