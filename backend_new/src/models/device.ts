@@ -1,28 +1,38 @@
-import { TDeviceDataObject, TDevice, TDeviceJSON_DB } from '../interfaces/device.interface';
-import SwitchData from './dataTypes/switchData';
-import { DeviceDataTypes, DeviceDataTypesConfigs, TNumberData, TSwitchData } from '../interfaces/deviceData.interface';
-import { ERROR_LOG, logEvents } from '../middleware/logger';
-import NumberData from './dataTypes/numberData';
-import MultiStateButton from './dataTypes/multiStateButtonData';
+import {
+    TDeviceDataObject,
+    TDevice,
+    TDeviceJSON_DB,
+} from "../interfaces/device.interface";
+import SwitchData from "./dataTypes/switchData";
+import {
+    DeviceDataTypes,
+    DeviceDataTypesConfigs,
+    TNumberData,
+    TSwitchData,
+} from "../interfaces/deviceData.interface";
+import { ERROR_LOG, logEvents } from "../middleware/logger";
+import NumberData from "./dataTypes/numberData";
+import MultiStateButton from "./dataTypes/multiStateButtonData";
 
 export default class Device implements TDevice {
     //is accepted states
-    static readonly DEVICE_ACCEPTED_YES = 1
-    static readonly DEVICE_ACCEPTED_NO = -1
-    static readonly DEVICE_ACCEPTED_UNDEFINED = 0
-
+    static readonly DEVICE_ACCEPTED_YES = 1;
+    static readonly DEVICE_ACCEPTED_NO = -1;
+    static readonly DEVICE_ACCEPTED_UNDEFINED = 0;
 
     // types
     static readonly SWITCH_TYPE = 0;
     static readonly NUMBER_TYPE = 1;
     static readonly MULTI_STATE_BUTTON_TYPE = 2;
 
-    _id: string
-    deviceName: string
-    mqttTopicID: string
-    isAccepted: -1 | 0 | 1
-    isAdminOnly: boolean
-    data: (TDeviceDataObject)[]
+    _id: string;
+    deviceName: string;
+    mqttTopicID: string;
+    isAccepted: -1 | 0 | 1;
+    isAdminOnly: boolean;
+    data: TDeviceDataObject[];
+    isConnected: boolean;
+    isConnectedCheck: boolean;
 
     constructor(
         _id: string,
@@ -30,55 +40,84 @@ export default class Device implements TDevice {
         mqttTopicID: string,
         isAccepted: -1 | 0 | 1,
         isAdminOnly: boolean,
-        data: (TDeviceDataObject)[]) {
+        data: TDeviceDataObject[],
+        isConnected: boolean,
+        isConnectedCheck: boolean
+    ) {
         this._id = _id;
         this.mqttTopicID = mqttTopicID;
         this.isAccepted = isAccepted;
         this.isAdminOnly = isAdminOnly;
         this.data = data;
-        this.deviceName = deviceName
+        this.deviceName = deviceName;
+        this.isConnected = isConnected;
+        this.isConnectedCheck = isConnectedCheck;
     }
 
     // create device from with DeviceDataTypesConfigs
-    static createNewDevice(_id: string, deviceName: string, mqttTopicID: string, dataTypeArray: DeviceDataTypesConfigs[]): Device {
+    static createNewDevice(
+        _id: string,
+        deviceName: string,
+        mqttTopicID: string,
+        dataTypeArray: DeviceDataTypesConfigs[],
+    ): Device {
         // TODO: add data validation
-        
-        const isAccepted = Device.DEVICE_ACCEPTED_UNDEFINED
+
+        const isAccepted = Device.DEVICE_ACCEPTED_UNDEFINED;
         const isAdminOnly = false;
-        const data: (TDeviceDataObject)[] = []
+        const data: TDeviceDataObject[] = [];
 
         for (let dataID = 0; dataID < dataTypeArray.length; dataID++) {
             const dataConfig = dataTypeArray[dataID];
             const newData: TDeviceDataObject = Device.getNewData(dataConfig);
-            data.push(newData)
+            data.push(newData);
         }
 
-        const newDevice = new Device(_id, deviceName, mqttTopicID, isAccepted, isAdminOnly, data)
+        const newDevice = new Device(
+            _id,
+            deviceName,
+            mqttTopicID,
+            isAccepted,
+            isAdminOnly,
+            data,
+            false,
+            false
+        );
 
-        return newDevice
+        return newDevice;
     }
 
     // create device from TDeviceJSON_DB JSON object
     static createDeviceFromTDeviceJSON_DB(deviceData: TDeviceJSON_DB): Device {
         // TODO: add data validation
 
-        const data: (TDeviceDataObject)[] = []
+        const data: TDeviceDataObject[] = [];
         for (let dataID = 0; dataID < deviceData.data.length; dataID++) {
             const dataJSON = deviceData.data[dataID];
-            const newData: TDeviceDataObject = Device.getDataFromTDeviceJSON_DB(dataJSON);
-            data.push(newData)
+            const newData: TDeviceDataObject =
+                Device.getDataFromTDeviceJSON_DB(dataJSON);
+            data.push(newData);
         }
 
-        const newDevice = new Device(deviceData._id, deviceData.deviceName, deviceData.mqttTopicID, deviceData.isAccepted, deviceData.isAdminOnly, data)
+        const newDevice = new Device(
+            deviceData._id,
+            deviceData.deviceName,
+            deviceData.mqttTopicID,
+            deviceData.isAccepted,
+            deviceData.isAdminOnly,
+            data,
+            deviceData.isConnected,
+            deviceData.isConnectedCheck
+        );
 
-        return newDevice
+        return newDevice;
     }
 
     getAsJson_DB(): TDeviceJSON_DB {
-        const data = []
+        const data = [];
         for (let index = 0; index < this.data.length; index++) {
             const element = this.data[index];
-            data.push(element.getAsJson_DB())
+            data.push(element.getAsJson_DB());
         }
         let json = {
             _id: this._id,
@@ -87,9 +126,11 @@ export default class Device implements TDevice {
             isAdminOnly: this.isAdminOnly,
             data: data,
             deviceName: this.deviceName,
-        }
+            isConnected: this.isConnected,
+            isConnectedCheck: this.isConnectedCheck,
+        };
 
-        return json
+        return json;
     }
 
     getAsJson(): TDevice {
@@ -100,12 +141,16 @@ export default class Device implements TDevice {
             isAdminOnly: this.isAdminOnly,
             data: this.data,
             deviceName: this.deviceName,
-        }
+            isConnected: this.isConnected,
+            isConnectedCheck: this.isConnectedCheck,
+        };
 
-        return json
+        return json;
     }
 
-    private static getNewData(dataConfig: DeviceDataTypesConfigs): TDeviceDataObject {
+    private static getNewData(
+        dataConfig: DeviceDataTypesConfigs
+    ): TDeviceDataObject {
         switch (dataConfig.typeID) {
             case SwitchData.TYPE_ID:
                 return SwitchData.createNewData(dataConfig);
@@ -114,24 +159,32 @@ export default class Device implements TDevice {
             case MultiStateButton.TYPE_ID:
                 return MultiStateButton.createNewData(dataConfig);
             default:
-                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getNewData`
-                logEvents(err, ERROR_LOG)
-                throw new Error(err)
+                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getNewData`;
+                logEvents(err, ERROR_LOG);
+                throw new Error(err);
         }
     }
 
-    private static getDataFromTDeviceJSON_DB(dataConfig: DeviceDataTypes): TDeviceDataObject {
+    private static getDataFromTDeviceJSON_DB(
+        dataConfig: DeviceDataTypes
+    ): TDeviceDataObject {
         switch (dataConfig.typeID) {
             case SwitchData.TYPE_ID:
-                return SwitchData.createDataFromDeviceDataTypes(dataConfig as TSwitchData);
+                return SwitchData.createDataFromDeviceDataTypes(
+                    dataConfig as TSwitchData
+                );
             case NumberData.TYPE_ID:
-                return NumberData.createDataFromDeviceDataTypes(dataConfig as TNumberData);
+                return NumberData.createDataFromDeviceDataTypes(
+                    dataConfig as TNumberData
+                );
             case MultiStateButton.TYPE_ID:
-                return MultiStateButton.createDataFromDeviceDataTypes(dataConfig as MultiStateButton);
+                return MultiStateButton.createDataFromDeviceDataTypes(
+                    dataConfig as MultiStateButton
+                );
             default:
-                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getDataFromTDeviceJSON_DB`
-                logEvents(err, ERROR_LOG)
-                throw new Error(err)
+                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getDataFromTDeviceJSON_DB`;
+                logEvents(err, ERROR_LOG);
+                throw new Error(err);
         }
     }
 }

@@ -27,12 +27,12 @@ import { validate } from "node-cron";
 
 type DeviceResult =
     | {
-        isSuccessful: false;
-    }
+          isSuccessful: false;
+      }
     | {
-        isSuccessful: true;
-        device: Device;
-    };
+          isSuccessful: true;
+          device: Device;
+      };
 
 export async function initializeDeviceHandler(
     handler: (changeEvent: mongoDB.ChangeStreamDocument) => void
@@ -64,7 +64,7 @@ export async function createDevice(
     const topicPath = `device/${_id}`;
 
     // create mqtt topic
-    const deviceTopicResult = await createNewMqttTopic(_id, topicPath,-1);
+    const deviceTopicResult = await createNewMqttTopic(_id, topicPath, -1);
 
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
@@ -151,39 +151,53 @@ export type TUpdateDeviceProperties = {
     propertyToChange: TDeviceProperty;
 };
 type TUpdateDeviceReturn = {
-    isSuccessful: boolean
-    error: string
-}
+    isSuccessful: boolean;
+    error: string;
+};
 
 // TODO: add stuff from TDeviceDataProperty
-export async function updateDeviceProperties(changeList: TUpdateDeviceProperties[]): Promise<TUpdateDeviceReturn> {
+export async function updateDeviceProperties(
+    changeList: TUpdateDeviceProperties[]
+): Promise<TUpdateDeviceReturn> {
     function returnError(error: string): TUpdateDeviceReturn {
-        returnObj.error = error
-        return returnObj
+        returnObj.error = error;
+        return returnObj;
     }
 
     const operations: mongoDB.AnyBulkWriteOperation<JSONDBTypes>[] = [];
     const returnObj: TUpdateDeviceReturn = {
         isSuccessful: false,
-        error: ""
-    }
+        error: "",
+    };
     //checks
-    if (!changeList) return returnError("changeList is undefined")
-    if (!Array.isArray(changeList)) return returnError("changeList is not an array")
+    if (!changeList) return returnError("changeList is undefined");
+    if (!Array.isArray(changeList))
+        return returnError("changeList is not an array");
 
     for (let index = 0; index < changeList.length; index++) {
         const changeItem = changeList[index];
 
         //checks
-        if (!changeItem) return returnError(`changeList[${index}].changeItem is undefined`)
-        if (!changeItem._id) return returnError(`changeList[${index}]._id is undefined`)
-        if (!changeItem.propertyToChange) return returnError(`changeList[${index}].propertyToChange is undefined`)
-        if (typeof changeItem.propertyToChange.propertyName != "string") return returnError(`changeList[${index}].propertyName is not a string`)
+        if (!changeItem)
+            return returnError(`changeList[${index}].changeItem is undefined`);
+        if (!changeItem._id)
+            return returnError(`changeList[${index}]._id is undefined`);
+        if (!changeItem.propertyToChange)
+            return returnError(
+                `changeList[${index}].propertyToChange is undefined`
+            );
+        if (typeof changeItem.propertyToChange.propertyName != "string")
+            return returnError(
+                `changeList[${index}].propertyName is not a string`
+            );
 
-        const propertyName = changeItem.propertyToChange.propertyName
+        const propertyName = changeItem.propertyToChange.propertyName;
         if (propertyName == "deviceName" || propertyName == "mqttTopicID") {
             //type checking
-            if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
+            if (typeof changeItem.propertyToChange.newValue != "string")
+                return returnError(
+                    `changeList[${index}].propertyToChange.newValue is not a string`
+                );
 
             const filter = { _id: changeItem._id };
             const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
@@ -198,10 +212,12 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 },
             };
             operations.push(operation);
-
         } else if (propertyName == "isAccepted") {
             //type checking
-            if (typeof changeItem.propertyToChange.newValue != "number") return returnError(`changeList[${index}].propertyToChange.newValue is not a number`)
+            if (typeof changeItem.propertyToChange.newValue != "number")
+                return returnError(
+                    `changeList[${index}].propertyToChange.newValue is not a number`
+                );
 
             const filter = { _id: changeItem._id };
             const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
@@ -218,7 +234,10 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
             operations.push(operation);
         } else if (propertyName == "isAdminOnly") {
             //type checking
-            if (typeof changeItem.propertyToChange.newValue != "boolean") return returnError(`changeList[${index}].propertyToChange.newValue is not a boolean`)
+            if (typeof changeItem.propertyToChange.newValue != "boolean")
+                return returnError(
+                    `changeList[${index}].propertyToChange.newValue is not a boolean`
+                );
 
             const filter = { _id: changeItem._id };
             const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
@@ -233,18 +252,101 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 },
             };
             operations.push(operation);
+        } else if (propertyName == "isConnected") {
+            //type checking
+            if (typeof changeItem.propertyToChange.newValue != "boolean")
+                return returnError(
+                    `changeList[${index}].propertyToChange.dataID is not a boolean`
+                );
+
+                const filter = { _id: changeItem._id };
+                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                    updateOne: {
+                        filter: filter,
+                        update: {
+                            $set: {
+                                [propertyName]:
+                                    changeItem.propertyToChange.newValue,
+                            },
+                        },
+                    },
+                };
+                operations.push(operation);
+        } else if (propertyName == "isConnectedCheck") {
+            //type checking
+            if (typeof changeItem.propertyToChange.newValue != "boolean")
+                return returnError(
+                    `changeList[${index}].propertyToChange.dataID is not a boolean`
+                );
+
+                const filter = { _id: changeItem._id };
+                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                    updateOne: {
+                        filter: filter,
+                        update: {
+                            $set: {
+                                [propertyName]:
+                                    changeItem.propertyToChange.newValue,
+                            },
+                        },
+                    },
+                };
+                operations.push(operation);
         } else if (propertyName == "data") {
             //type checking
-            if (typeof changeItem.propertyToChange.dataID != "number") return returnError(`changeList[${index}].propertyToChange.dataID is not a number`)
-            if (typeof changeItem.propertyToChange.typeID != "number") return returnError(`changeList[${index}].propertyToChange.typeID is not a number`)
-            if (!changeItem.propertyToChange.dataPropertyName) return returnError(`changeList[${index}].propertyToChange.dataPropertyName is undefined`)
-            if (typeof changeItem.propertyToChange.dataPropertyName != "string") return returnError(`changeList[${index}].propertyToChange.dataPropertyName is not a string`)
+            if (typeof changeItem.propertyToChange.dataID != "number")
+                return returnError(
+                    `changeList[${index}].propertyToChange.dataID is not a number`
+                );
+            if (typeof changeItem.propertyToChange.typeID != "number")
+                return returnError(
+                    `changeList[${index}].propertyToChange.typeID is not a number`
+                );
+            if (!changeItem.propertyToChange.dataPropertyName)
+                return returnError(
+                    `changeList[${index}].propertyToChange.dataPropertyName is undefined`
+                );
+            if (typeof changeItem.propertyToChange.dataPropertyName != "string")
+                return returnError(
+                    `changeList[${index}].propertyToChange.dataPropertyName is not a string`
+                );
 
-            const dataPropertyName = changeItem.propertyToChange.dataPropertyName
+            const dataPropertyName =
+                changeItem.propertyToChange.dataPropertyName;
             const typeID = changeItem.propertyToChange.typeID;
 
-            if (dataPropertyName == "mqttPrimeryTopicID" || dataPropertyName == "iconName" || dataPropertyName == "dataTitle") {
-                if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
+            if (
+                dataPropertyName == "mqttPrimeryTopicID" ||
+                dataPropertyName == "iconName" ||
+                dataPropertyName == "dataTitle"
+            ) {
+                if (typeof changeItem.propertyToChange.newValue != "string")
+                    return returnError(
+                        `changeList[${index}].propertyToChange.newValue is not a string`
+                    );
+
+                const filter = {
+                    _id: changeItem._id,
+                    "data.dataID": changeItem.propertyToChange.dataID,
+                };
+                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                    updateOne: {
+                        filter: filter,
+                        update: {
+                            $set: {
+                                [`data.$.${dataPropertyName}`]:
+                                    changeItem.propertyToChange.newValue,
+                            },
+                        },
+                    },
+                };
+                operations.push(operation);
+            } else if (dataPropertyName == "isSensor") {
+                //type checking
+                if (typeof changeItem.propertyToChange.newValue != "boolean")
+                    return returnError(
+                        `changeList[${index}].propertyToChange.newValue is not a boolean`
+                    );
 
                 const filter = {
                     _id: changeItem._id,
@@ -263,27 +365,6 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 };
                 operations.push(operation);
             }
-            else if (dataPropertyName == "isSensor") {
-                //type checking
-                if (typeof changeItem.propertyToChange.newValue != "boolean") return returnError(`changeList[${index}].propertyToChange.newValue is not a boolean`)
-
-                const filter = {
-                    _id: changeItem._id,
-                    "data.dataID": changeItem.propertyToChange.dataID,
-                };
-                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
-                    updateOne: {
-                        filter: filter,
-                        update: {
-                            $set: {
-                                [`data.$.${dataPropertyName}`]:
-                                    changeItem.propertyToChange.newValue,
-                            },
-                        },
-                    },
-                };
-                operations.push(operation);
-            } 
             // else if (dataPropertyName == "mqttSecondaryTopicID") {
             //     //type checking
             //     if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
@@ -324,16 +405,32 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
             //         };
             //         operations.push(operation);
             //     } else return returnError(`changeList[${index}].propertyToChange.operation is not a valid option`)
-            // } 
+            // }
             else if (typeID == SwitchData.TYPE_ID) {
                 //type checking
-                if (!changeItem.propertyToChange.newValue) return returnError(`changeList[${index}].propertyToChange.newValue is undefined`)
+                if (!changeItem.propertyToChange.newValue)
+                    return returnError(
+                        `changeList[${index}].propertyToChange.newValue is undefined`
+                    );
                 if (dataPropertyName == "isOn") {
-                    if (typeof changeItem.propertyToChange.newValue != "boolean") return returnError(`changeList[${index}].propertyToChange.newValue is not a boolean`)
-                }
-                else if (dataPropertyName == "onName" || dataPropertyName == "offName") {
-                    if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
-                } else return returnError(`changeList[${index}].propertyToChange.dataPropertyName is not a valid option`)
+                    if (
+                        typeof changeItem.propertyToChange.newValue != "boolean"
+                    )
+                        return returnError(
+                            `changeList[${index}].propertyToChange.newValue is not a boolean`
+                        );
+                } else if (
+                    dataPropertyName == "onName" ||
+                    dataPropertyName == "offName"
+                ) {
+                    if (typeof changeItem.propertyToChange.newValue != "string")
+                        return returnError(
+                            `changeList[${index}].propertyToChange.newValue is not a string`
+                        );
+                } else
+                    return returnError(
+                        `changeList[${index}].propertyToChange.dataPropertyName is not a valid option`
+                    );
 
                 const filter = {
                     _id: changeItem._id,
@@ -351,16 +448,31 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                     },
                 };
                 operations.push(operation);
-            }
-            else if (typeID == NumberData.TYPE_ID) {
+            } else if (typeID == NumberData.TYPE_ID) {
                 //type checking
-                if (!changeItem.propertyToChange.newValue) return returnError(`changeList[${index}].propertyToChange.newValue is undefined`)
-                if (dataPropertyName == "currentValue" || dataPropertyName == "minValue" || dataPropertyName == "maxValue" || dataPropertyName == "jumpValue") {
-                    if (typeof changeItem.propertyToChange.newValue != "number") return returnError(`changeList[${index}].propertyToChange.newValue is not a number`)
-                }
-                else if (dataPropertyName == "symbol") {
-                    if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`)
-                } else return returnError(`changeList[${index}].propertyToChange.dataPropertyName is not a valid option`)
+                if (!changeItem.propertyToChange.newValue)
+                    return returnError(
+                        `changeList[${index}].propertyToChange.newValue is undefined`
+                    );
+                if (
+                    dataPropertyName == "currentValue" ||
+                    dataPropertyName == "minValue" ||
+                    dataPropertyName == "maxValue" ||
+                    dataPropertyName == "jumpValue"
+                ) {
+                    if (typeof changeItem.propertyToChange.newValue != "number")
+                        return returnError(
+                            `changeList[${index}].propertyToChange.newValue is not a number`
+                        );
+                } else if (dataPropertyName == "symbol") {
+                    if (typeof changeItem.propertyToChange.newValue != "string")
+                        return returnError(
+                            `changeList[${index}].propertyToChange.newValue is not a string`
+                        );
+                } else
+                    return returnError(
+                        `changeList[${index}].propertyToChange.dataPropertyName is not a valid option`
+                    );
 
                 const filter = {
                     _id: changeItem._id,
@@ -386,109 +498,199 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
 
                 if (dataPropertyName == "currentState") {
                     //type checking
-                    if (typeof changeItem.propertyToChange.newValue != "number") return returnError(`changeList[${index}].propertyToChange.newValue is not a number`)
+                    if (typeof changeItem.propertyToChange.newValue != "number")
+                        return returnError(
+                            `changeList[${index}].propertyToChange.newValue is not a number`
+                        );
 
-                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
-                        updateOne: {
-                            filter: filter,
-                            update: {
-                                $set: {
-                                    [`data.$.${dataPropertyName}`]:
-                                        changeItem.propertyToChange.newValue,
-                                },
-                            },
-                        },
-                    };
-                    operations.push(operation);
-                } else if (changeItem.propertyToChange.dataPropertyName == "stateList") {
-                    if (changeItem.propertyToChange.operation == "add") {
-                        //type checking
-                        if (!changeItem.propertyToChange.newState) return returnError(`changeList[${index}].propertyToChange.newState is undefined`)
-                        if (typeof changeItem.propertyToChange.newState.icon != "string") return returnError(`changeList[${index}].propertyToChange.newState.icon is not a string`)
-                        if (typeof changeItem.propertyToChange.newState.isIcon != "boolean") return returnError(`changeList[${index}].propertyToChange.newState.isIcon is not a boolean`)
-                        if (typeof changeItem.propertyToChange.newState.stateTitle != "string") return returnError(`changeList[${index}].propertyToChange.newState.stateTitle is not a string`)
-                        if (typeof changeItem.propertyToChange.newState.stateValue != "number") return returnError(`changeList[${index}].propertyToChange.newState.stateValue is not a number`)
-
-                        const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+                    const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
                         {
                             updateOne: {
                                 filter: filter,
                                 update: {
-                                    $push: {
-                                        "data.$.stateList":
-                                            changeItem.propertyToChange.newState,
+                                    $set: {
+                                        [`data.$.${dataPropertyName}`]:
+                                            changeItem.propertyToChange
+                                                .newValue,
                                     },
                                 },
                             },
                         };
-                        operations.push(operation);
-
-                    } else if (changeItem.propertyToChange.operation == "delete") {
+                    operations.push(operation);
+                } else if (
+                    changeItem.propertyToChange.dataPropertyName == "stateList"
+                ) {
+                    if (changeItem.propertyToChange.operation == "add") {
                         //type checking
-                        if (typeof changeItem.propertyToChange.stateValue != "number") return returnError(`changeList[${index}].propertyToChange.stateValue is not a number`)
+                        if (!changeItem.propertyToChange.newState)
+                            return returnError(
+                                `changeList[${index}].propertyToChange.newState is undefined`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.newState.icon !=
+                            "string"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.newState.icon is not a string`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.newState
+                                .isIcon != "boolean"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.newState.isIcon is not a boolean`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.newState
+                                .stateTitle != "string"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.newState.stateTitle is not a string`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.newState
+                                .stateValue != "number"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.newState.stateValue is not a number`
+                            );
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                        {
-                            updateOne: {
-                                filter: filter,
-                                update: {
-                                    $pull: {
-                                        "data.$.stateList": {
-                                            stateValue:
+                            {
+                                updateOne: {
+                                    filter: filter,
+                                    update: {
+                                        $push: {
+                                            "data.$.stateList":
                                                 changeItem.propertyToChange
-                                                    .stateValue,
+                                                    .newState,
                                         },
                                     },
                                 },
-                            },
-                        };
+                            };
                         operations.push(operation);
-                    } else if (changeItem.propertyToChange.operation == "update") {
+                    } else if (
+                        changeItem.propertyToChange.operation == "delete"
+                    ) {
                         //type checking
-                        if (!changeItem.propertyToChange.state) return returnError(`changeList[${index}].propertyToChange.state is undefined`)
-                        if (typeof changeItem.propertyToChange.state.stateValue != "number") return returnError(`changeList[${index}].propertyToChange.state.stateValue is not a number`)
-                        if (typeof changeItem.propertyToChange.state.isIcon != "boolean") return returnError(`changeList[${index}].propertyToChange.state.isIcon is not a boolean`)
-                        if (typeof changeItem.propertyToChange.state.stateTitle != "string") return returnError(`changeList[${index}].propertyToChange.state.stateTitle is not a string`)
-                        if (typeof changeItem.propertyToChange.state.icon != "string") return returnError(`changeList[${index}].propertyToChange.state.icon is not a string`)
+                        if (
+                            typeof changeItem.propertyToChange.stateValue !=
+                            "number"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.stateValue is not a number`
+                            );
+
+                        const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
+                            {
+                                updateOne: {
+                                    filter: filter,
+                                    update: {
+                                        $pull: {
+                                            "data.$.stateList": {
+                                                stateValue:
+                                                    changeItem.propertyToChange
+                                                        .stateValue,
+                                            },
+                                        },
+                                    },
+                                },
+                            };
+                        operations.push(operation);
+                    } else if (
+                        changeItem.propertyToChange.operation == "update"
+                    ) {
+                        //type checking
+                        if (!changeItem.propertyToChange.state)
+                            return returnError(
+                                `changeList[${index}].propertyToChange.state is undefined`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.state
+                                .stateValue != "number"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.state.stateValue is not a number`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.state.isIcon !=
+                            "boolean"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.state.isIcon is not a boolean`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.state
+                                .stateTitle != "string"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.state.stateTitle is not a string`
+                            );
+                        if (
+                            typeof changeItem.propertyToChange.state.icon !=
+                            "string"
+                        )
+                            return returnError(
+                                `changeList[${index}].propertyToChange.state.icon is not a string`
+                            );
 
                         const set: any = {};
-                        if (typeof changeItem.propertyToChange.state.isIcon == "boolean")
+                        if (
+                            typeof changeItem.propertyToChange.state.isIcon ==
+                            "boolean"
+                        )
                             set[`data.$[dataID].stateList.$[e].isIcon`] =
                                 changeItem.propertyToChange.state.isIcon;
-                        if (typeof changeItem.propertyToChange.state.icon == "string")
+                        if (
+                            typeof changeItem.propertyToChange.state.icon ==
+                            "string"
+                        )
                             set[`data.$[dataID].stateList.$[e].icon`] =
                                 changeItem.propertyToChange.state.icon;
-                        if (typeof changeItem.propertyToChange.state.stateTitle == "string")
+                        if (
+                            typeof changeItem.propertyToChange.state
+                                .stateTitle == "string"
+                        )
                             set[`data.$[dataID].stateList.$[e].stateTitle`] =
                                 changeItem.propertyToChange.state.stateTitle;
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                        {
-                            updateOne: {
-                                filter: filter,
-                                update: {
-                                    $set: set,
+                            {
+                                updateOne: {
+                                    filter: filter,
+                                    update: {
+                                        $set: set,
+                                    },
+                                    arrayFilters: [
+                                        {
+                                            "e.stateValue":
+                                                changeItem.propertyToChange
+                                                    .state.stateValue,
+                                        },
+                                        {
+                                            "dataID.dataID":
+                                                changeItem.propertyToChange
+                                                    .dataID,
+                                        },
+                                    ],
                                 },
-                                arrayFilters: [
-                                    {
-                                        "e.stateValue": changeItem.propertyToChange.state.stateValue,
-                                    }, {
-                                        "dataID.dataID": changeItem.propertyToChange.dataID,
-                                    }
-                                ],
-                            },
-                        };
+                            };
                         operations.push(operation);
-                    } else return returnError(`changeList[${index}].propertyToChange.operation is not a valid option`)
-                } else return returnError(`changeList[${index}].propertyToChange.dataPropertyName is not a valid option`)
+                    } else
+                        return returnError(
+                            `changeList[${index}].propertyToChange.operation is not a valid option`
+                        );
+                } else
+                    return returnError(
+                        `changeList[${index}].propertyToChange.dataPropertyName is not a valid option`
+                    );
             }
         }
-
     }
 
     await bulkWriteCollection(COLLECTION_DEVICES, operations);
-    returnObj.isSuccessful = true
-    return returnObj
+    returnObj.isSuccessful = true;
+    return returnObj;
 }
 
 export async function deleteDevice(_id: string) {
@@ -501,6 +703,9 @@ export async function deleteDevice(_id: string) {
 }
 
 export async function aggregateDevices(aggregateArray: any[]) {
-    let queryResult = await getDocumentsAggregate<TDeviceJSON_DB>(COLLECTION_DEVICES, aggregateArray)
-    return queryResult
+    let queryResult = await getDocumentsAggregate<TDeviceJSON_DB>(
+        COLLECTION_DEVICES,
+        aggregateArray
+    );
+    return queryResult;
 }
