@@ -5,7 +5,7 @@ import { TAllMqttMessageType } from "../interfaces/mqttMassge.interface";
 let mqttClient: mqtt.MqttClient;
 export let subscribes: string[] = [
     process.env.MQTT_TOPIC_INIT_DEVICE as string,
-    process.env.MQTT_TOPIC_CHECK_CONNECTION as string,
+    process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE as string,
 ];
 let isReconnectInterval = false;
 let reconnectInterval: NodeJS.Timeout;
