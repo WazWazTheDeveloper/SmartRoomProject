@@ -16,9 +16,9 @@ import { subscribeToNewDevice } from "./mqttDeviceSubscriptionsHandler";
  * @param changeEvent - a change event form mongodb
  */
 export async function deviceDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
-    deviceTaskHandler(changeEvent);
+    deviceTaskHandler(changeEvent); // done
+    subscribeToNewDevice(changeEvent); //done
     onUpdateDevice(changeEvent);
-    subscribeToNewDevice(changeEvent);
 }
 
 // check if there is a need to update the device and if so updates it
