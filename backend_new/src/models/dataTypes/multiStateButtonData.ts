@@ -5,7 +5,7 @@ export default class MultiStateButton implements TMultiStateButton {
     mqttPrimeryTopicID: string
     // mqttSecondaryTopicID: string[]
     dataID: number
-    typeID: number
+    typeID: 2
     iconName: string
     dataTitle: string
     isSensor: boolean
