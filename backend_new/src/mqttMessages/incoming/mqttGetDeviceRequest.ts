@@ -1,5 +1,9 @@
+import { TDeviceDataObject } from "../../interfaces/device.interface";
 import { TDeviceDataDeviceProperties } from "../../interfaces/deviceData.interface";
 import { TGetDeviceRequest, TGetDeviceResponse } from "../../interfaces/mqttMassge.interface";
+import MultiStateButton from "../../models/dataTypes/multiStateButtonData";
+import NumberData from "../../models/dataTypes/numberData";
+import SwitchData from "../../models/dataTypes/switchData";
 import * as DeviceService from "../../services/deviceService";
 import { publishMessage } from "../../services/mqttClientService";
 
@@ -27,6 +31,8 @@ export async function getDevice(topic: string, message: TGetDeviceRequest) {
                 mqttPrimeryTopicID: data.mqttPrimeryTopicID,
                 // mqttSecondaryTopicID: data.mqttSecondaryTopicID,
                 dataID: data.dataID,
+                typeID : data.typeID,
+                value: getData(data)
             });
         }
         const response: TGetDeviceResponse = {
@@ -46,5 +52,17 @@ export async function getDevice(topic: string, message: TGetDeviceRequest) {
             operation: "getDevice",
         };
         publishMessage(topic, response);
+    }
+}
+
+
+function getData(deviceData : TDeviceDataObject) {
+    switch (deviceData.typeID) {
+        case(SwitchData.TYPE_ID) :
+            return deviceData.isOn
+        case(NumberData.TYPE_ID) : 
+            return deviceData.currentValue
+        case(MultiStateButton.TYPE_ID) : 
+            return deviceData.currentState
     }
 }

@@ -1,4 +1,4 @@
-import { DeviceDataTypesConfigs, TDeviceDataDeviceProperties, TDeviceDeviceDataProperties, TDeviceDeviceDataPropertiesAny } from "./deviceData.interface"
+import { DeviceDataTypesConfigs, TDeviceDataDeviceProperties, TDeviceDeviceDataProperties } from "./deviceData.interface"
 
 export type TInitDeviceRequest = {
     operation: "initDevice"
@@ -37,19 +37,9 @@ export type TGetDeviceResponse = {
     isSuccessful: false
 })
 
-export type TUpdateDataFromDeviceRequest = {
-    origin: string
-    deviceID: string
-    operation: "updateServer"
-    dataID: number
-    typeID: number
-} & TDeviceDeviceDataPropertiesAny
+export type TUpdateDataFromDeviceRequest = string
 
-export type TUpdateDataToDeviceRequest = {
-    origin: "server"
-    operation: "updateDevice"
-    typeID: number
-} & TDeviceDeviceDataPropertiesAny
+export type TUpdateDataToDeviceRequest = string
 
 export type TUpdateDataToDeviceResponse = {
     origin: string
@@ -68,4 +58,4 @@ export type TConnectionCheckResponse = {
     deviceID: string
 }
 
-export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse
+export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse | string

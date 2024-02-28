@@ -11,26 +11,55 @@ export async function updateServer(
     topic: string,
     message: TUpdateDataFromDeviceRequest
 ) {
-    //TODO: message doesnt need to have a type only primitive type and update based on topic
-    if (typeof topic != "string") return;
-    if (!message) return;
-    if (message.operation != "updateServer") return;
-    if (typeof message.deviceID != "string") return;
-    if (typeof message.origin != "string") return;
-    if (typeof message.dataID != "number") return;
-    if (typeof message.typeID != "number") return;
 
-    const update: DeviceService.TUpdateDeviceProperties = {
-        _id: message.deviceID,
-        propertyToChange: {
-            dataID: message.dataID,
-            // @ts-ignore
-            typeID: message.typeID,
-            propertyName: "data",
-            dataPropertyName: message.dataPropertyName,
-            newValue: message.newValue,
+    let aggregates = [
+        {
+          $match: {
+            path: {
+              $in: [
+                "device/b897584b-731b-4a73-9475-299c3090f4b4/0",
+              ],
+            },
+          },
         },
-    };
+        {
+          $project:
+            {
+              _id: 1,
+            },
+        },
+        {
+          $lookup:
+            {
+              from: "devices",
+              localField: "_id",
+              foreignField: "data.mqttPrimeryTopicID",
+              as: "result0",
+            },
+        },
+        {
+          $unwind: {
+            path: "$result0",
+          }
+        },
+        {
+          $replaceRoot: {
+            newRoot: "$result0"
+          }
+        },
+      ]
 
-    await DeviceService.updateDeviceProperties([update]);
+    // const update: DeviceService.TUpdateDeviceProperties = {
+    //     _id: message.deviceID,
+    //     propertyToChange: {
+    //         dataID: message.dataID,
+    //         // @ts-ignore
+    //         typeID: message.typeID,
+    //         propertyName: "data",
+    //         dataPropertyName: message.dataPropertyName,
+    //         newValue: message.newValue,
+    //     },
+    // };
+
+    // await DeviceService.updateDeviceProperties([update]);
 }
