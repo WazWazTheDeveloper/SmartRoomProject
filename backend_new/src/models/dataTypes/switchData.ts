@@ -8,7 +8,7 @@ export default class SwitchData implements TSwitchData {
     iconName: string
     dataTitle: string
     isSensor: boolean
-    typeID: number
+    typeID: 0
     isOn: boolean
     onName: string
     offName: string

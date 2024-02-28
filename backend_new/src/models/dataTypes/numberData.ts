@@ -5,24 +5,24 @@ export default class NumberData implements TNumberData {
     mqttPrimeryTopicID: string
     // mqttSecondaryTopicID: string[]
     dataID:number
-    typeID:number
+    typeID:1
     iconName:string
     dataTitle:string
     isSensor: boolean
-    currentValue:Number
-    minValue:Number
-    maxValue:Number
-    jumpValue:Number
+    currentValue:number
+    minValue:number
+    maxValue:number
+    jumpValue:number
     symbol:string
     constructor(
         dataID:number,
         dataTitle:string,
         iconName:string,
         isSensor: boolean,
-        currentValue:Number,
-        minValue:Number,
-        maxValue:Number,
-        jumpValue:Number,
+        currentValue:number,
+        minValue:number,
+        maxValue:number,
+        jumpValue:number,
         symbol:string,
         mqttPrimeryTopicID: string,
         // mqttSecondaryTopicID: string[]
