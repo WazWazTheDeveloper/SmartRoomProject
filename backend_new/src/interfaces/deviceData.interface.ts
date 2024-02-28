@@ -5,7 +5,6 @@ export type TDeviceData = {
     dataTitle: string
     isSensor: boolean
     mqttPrimeryTopicID: string
-    // mqttSecondaryTopicID: string[]
 }
 
 export type TDeviceDeviceDataProperties = {
@@ -15,12 +14,12 @@ export type TDeviceDeviceDataProperties = {
 export type TDeviceDataDeviceProperties = {
     dataID: number
     mqttPrimeryTopicID?: string
-    // mqttSecondaryTopicID?: string[]
+    typeID: number
+    value: any
 }
 
 export type TDeviceDataConfig = {
     mqttPrimeryTopicID?: string
-    // mqttSecondaryTopicID?: string[] // probably needs to be deleted
     dataID: number
     typeID: number
     iconName?: string
@@ -31,17 +30,7 @@ export type TDeviceDataConfig = {
 export type TDeviceDataProperty = {
     dataPropertyName: "mqttPrimeryTopicID"
     newValue: string
-} | 
-// {
-//     dataPropertyName: "mqttSecondaryTopicID"
-//     operation: "add"
-//     newValue: string
-// } | {
-//     dataPropertyName: "mqttSecondaryTopicID"
-//     operation: "delete"
-//     newValue: string
-// } | 
-{
+} | {
     dataPropertyName: "iconName"
     newValue: string
 } | {
@@ -60,11 +49,6 @@ export type TSwitchData = {
     onName: string
     offName: string
 } & TDeviceData
-
-export type TSwitchDeviceDataProperties = {
-    dataPropertyName : "isOn"
-    newValue : boolean
-}
 
 export type TSwitchDataConfig = {
     isOn?: boolean
@@ -87,23 +71,18 @@ export type TSwitchDataProperty = ({
 }
 
 export type TNumberData = {
-    currentValue: Number
-    minValue: Number
-    maxValue: Number
-    jumpValue: Number
+    currentValue: number
+    minValue: number
+    maxValue: number
+    jumpValue: number
     symbol: string
 } & TDeviceData
 
-export type TNumberDeviceDataProperties = {
-    dataPropertyName : "currentValue"
-    newValue : Number
-}
-
 export type TNumberDataConfig = {
-    currentValue?: Number
-    minValue?: Number
-    maxValue?: Number
-    jumpValue?: Number
+    currentValue?: number
+    minValue?: number
+    maxValue?: number
+    jumpValue?: number
     symbol?: string
 } & TDeviceDataConfig
 
@@ -132,11 +111,6 @@ export type TMultiStateButton = {
     currentState: number
     stateList: TStateItem[]
 } & TDeviceData
-
-export type TMultiStateButtonDeviceDataProperties = {
-    dataPropertyName : "currentValue"
-    newValue : Number
-}
 
 export type TMultiStateButtonConfig = {
     currentState?: number
@@ -176,5 +150,3 @@ export type TStateItem = {
 }
 
 export type TDeviceDataProperties = TSwitchDataProperty | TNumberDataProperty | TMultiStateButtonProperty
-
-export type TDeviceDeviceDataPropertiesAny = TMultiStateButtonDeviceDataProperties | TSwitchDeviceDataProperties | TNumberDeviceDataProperties;
