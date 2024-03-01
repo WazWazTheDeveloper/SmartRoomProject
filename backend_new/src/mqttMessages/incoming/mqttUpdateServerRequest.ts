@@ -1,5 +1,12 @@
 import { TUpdateDataFromDeviceRequest } from "../../interfaces/mqttMassge.interface";
+import MultiStateButton from "../../models/dataTypes/multiStateButtonData";
+import NumberData from "../../models/dataTypes/numberData";
+import SwitchData from "../../models/dataTypes/switchData";
 import * as DeviceService from "../../services/deviceService";
+import {
+    getDevicesUsingTopic,
+    getTopicIDsByPath,
+} from "../../services/mqttTopicService";
 
 /**
  * @description handles device requests to update the state of device on the server
@@ -7,59 +14,53 @@ import * as DeviceService from "../../services/deviceService";
  * @param message message send via mqtt
  * @returns void
  */
-export async function updateServer(
+export async function updateServerRequest(
     topic: string,
     message: TUpdateDataFromDeviceRequest
 ) {
+    const topicIDs = await getTopicIDsByPath(topic);
+    const deviceToUpdates = await getDevicesUsingTopic(topic);
+    const updateList: DeviceService.TUpdateDeviceProperties[] = [];
+    console.log(topicIDs);
+    console.log(deviceToUpdates);
 
-    let aggregates = [
-        {
-          $match: {
-            path: {
-              $in: [
-                "device/b897584b-731b-4a73-9475-299c3090f4b4/0",
-              ],
-            },
-          },
-        },
-        {
-          $project:
-            {
-              _id: 1,
-            },
-        },
-        {
-          $lookup:
-            {
-              from: "devices",
-              localField: "_id",
-              foreignField: "data.mqttPrimeryTopicID",
-              as: "result0",
-            },
-        },
-        {
-          $unwind: {
-            path: "$result0",
-          }
-        },
-        {
-          $replaceRoot: {
-            newRoot: "$result0"
-          }
-        },
-      ]
+    for (let i = 0; i < deviceToUpdates.length; i++) {
+        const device = deviceToUpdates[i];
+        for (let j = 0; j < device.data.length; j++) {
+            const deviceData = device.data[j];
+            if (!topicIDs.includes(deviceData.mqttPrimeryTopicID)) continue;
+            const dataPropertyName = getDataPropertyName(deviceData.typeID);
+            if (!dataPropertyName) continue;
 
-    // const update: DeviceService.TUpdateDeviceProperties = {
-    //     _id: message.deviceID,
-    //     propertyToChange: {
-    //         dataID: message.dataID,
-    //         // @ts-ignore
-    //         typeID: message.typeID,
-    //         propertyName: "data",
-    //         dataPropertyName: message.dataPropertyName,
-    //         newValue: message.newValue,
-    //     },
-    // };
+            const update: DeviceService.TUpdateDeviceProperties = {
+                _id: device._id,
+                propertyToChange: {
+                    dataID: deviceData.dataID,
+                    // @ts-ignore
+                    typeID: deviceData.typeID,
+                    propertyName: "data",
+                    // @ts-ignore
+                    dataPropertyName: dataPropertyName,
+                    newValue: message,
+                },
+            };
+            updateList.push(update);
+        }
+    }
 
-    // await DeviceService.updateDeviceProperties([update]);
+    console.log(updateList);
+    await DeviceService.updateDeviceProperties(updateList);
+}
+
+function getDataPropertyName(typeID: number): string | undefined {
+    switch (typeID) {
+        case SwitchData.TYPE_ID:
+            return "isOn";
+        case NumberData.TYPE_ID:
+            return "currentValue";
+        case MultiStateButton.TYPE_ID:
+            return "currentState";
+        default:
+            return undefined;
+    }
 }

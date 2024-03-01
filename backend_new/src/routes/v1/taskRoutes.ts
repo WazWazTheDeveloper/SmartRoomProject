@@ -1,5 +1,5 @@
 import express = require('express')
-import * as taskController from '../../restControllers/v1/taskController';
+import * as taskController from '../../controllers/v1/taskController';
 
 export const taskRouter:express.Router = express.Router()
 

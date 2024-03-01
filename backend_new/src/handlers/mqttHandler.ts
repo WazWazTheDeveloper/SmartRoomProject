@@ -10,7 +10,7 @@ import { MQTT_LOG, logEvents } from "../middleware/logger";
 import { initDevice } from "../mqttMessages/incoming/mqttInitDeviceRequest";
 import { getDevice } from "../mqttMessages/incoming/mqttGetDeviceRequest";
 import { checkConnection } from "../mqttMessages/incoming/mqttCheckConnectionResponse";
-import { updateServer } from "../mqttMessages/incoming/mqttUpdateServerRequest";
+import { updateServerRequest } from "../mqttMessages/incoming/mqttUpdateServerRequest";
 
 /**
  * @description supposed to be called by the mqtt client when a message is recived and routes the message to the correct funciton
@@ -26,6 +26,12 @@ export function mqttMessageHandler(
     console.log(message);
     if (typeof topic != "string") return;
     if (!message) return;
+
+    if(typeof message == "string" || typeof message == "number") {
+        updateServerRequest(topic,message);
+        return
+    }
+
     if (message.origin == "server") return;
 
     if (message.operation == "initDevice") {
@@ -50,9 +56,9 @@ export function mqttMessageHandler(
         case "updateDevice":
             updateDevice(topic, message as TUpdateDataToDeviceResponse);
             break;
-        case "updateServer":
-            updateServer(topic, message as TUpdateDataFromDeviceRequest);
-            break;
+        // case "updateServer":
+        //     updateServer(topic, message as TUpdateDataFromDeviceRequest);
+        //     break;
         default:
             //@ts-ignore
             let logItem = `unknown operation: ${message.operation}`;
