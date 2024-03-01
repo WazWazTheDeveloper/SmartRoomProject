@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
-import { DB_LOG, ERROR_LOG, logEvents } from "../middleware/logger";
+import { DB_LOG, logEvents } from "../middleware/logger";
 import MqttTopicObject from "../models/mqttTopicObject";
 import {
     COLLECTION_MQTT_TOPICS,
-    COLLECTION_TASKS,
     collections,
     createDocument,
     getDocuments,

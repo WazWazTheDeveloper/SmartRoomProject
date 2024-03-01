@@ -48,12 +48,10 @@ export type TUpdateDataToDeviceResponse = {
 }
 
 export type TConnectionCheckRequest = {
-    origin: "server"
     operation: "checkConnection"
 }
 
 export type TConnectionCheckResponse = {
-    origin: string
     operation: "checkConnection"
     deviceID: string
 }
