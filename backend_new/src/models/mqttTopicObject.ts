@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { IMqttTopicObject, TMqttTopicObjectJSON_DB } from "../interfaces/mqttTopicObject.interface";
 
 export default class MqttTopicObject implements IMqttTopicObject {
