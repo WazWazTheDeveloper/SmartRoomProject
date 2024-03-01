@@ -1,7 +1,6 @@
 import * as DeviceService from "../services/deviceService";
 import * as MqttClientService from "../services/mqttClientService";
 import * as mongoDB from "mongodb";
-import * as MqttTopicService from "../services/mqttTopicService";
 
 /**
  * @description 
