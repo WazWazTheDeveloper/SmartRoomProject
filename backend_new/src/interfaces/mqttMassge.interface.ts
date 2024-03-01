@@ -37,7 +37,7 @@ export type TGetDeviceResponse = {
     isSuccessful: false
 })
 
-export type TUpdateDataFromDeviceRequest = string
+export type TUpdateDataFromDeviceRequest = string | number
 
 export type TUpdateDataToDeviceRequest = string
 
@@ -58,4 +58,4 @@ export type TConnectionCheckResponse = {
     deviceID: string
 }
 
-export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse | string
+export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse | string | number
