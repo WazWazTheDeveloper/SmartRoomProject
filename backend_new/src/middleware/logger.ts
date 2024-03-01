@@ -1,9 +1,8 @@
 
-import { Express, Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as date from 'date-fns'
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import path from 'path'
 import { v4 as uuidv4 } from 'uuid';
 
 export const ERROR_LOG = "error_log"

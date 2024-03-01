@@ -37,6 +37,7 @@ export function stopScheduledTask(id: string) {
 }
 
 export function isCronValid(cronExpression: string) {
+    // can be replaced with cron.validate()
     var cronregex = new RegExp(/(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/);
     return cronregex.test(cronExpression);
 }

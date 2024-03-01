@@ -11,7 +11,6 @@ export async function checkConnection(
     topic: string,
     message: TConnectionCheckResponse
 ) {
-    // TODO: add diffrect topic for lesteining and puslishing
     // type checks
     if (typeof topic != "string") return;
     if(topic != process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE) return

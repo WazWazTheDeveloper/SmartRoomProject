@@ -11,7 +11,6 @@ import {
     getCollection,
     getDocuments,
     getDocumentsAggregate,
-    updateDocument,
 } from "./mongoDBService";
 import { createNewMqttTopic } from "./mqttTopicService";
 import {
@@ -23,7 +22,6 @@ import { deleteAllProperyChecksOfDevice } from "./taskService";
 import SwitchData from "../models/dataTypes/switchData";
 import NumberData from "../models/dataTypes/numberData";
 import MultiStateButton from "../models/dataTypes/multiStateButtonData";
-import { validate } from "node-cron";
 
 type DeviceResult =
     | {

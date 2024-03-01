@@ -1,5 +1,3 @@
-import { TDeviceProperty } from "../interfaces/device.interface";
-import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface";
 import { TTask, TTaskProperty } from "../interfaces/task.interface";
 import { Task } from "../models/task";
 import * as DeviceService from "../services/deviceService";

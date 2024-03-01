@@ -1,5 +1,5 @@
 import mqtt from "mqtt";
-import { MQTT_LOG, logEvents, logger } from "../middleware/logger";
+import { MQTT_LOG, logEvents} from "../middleware/logger";
 import { TAllMqttMessageType } from "../interfaces/mqttMassge.interface";
 
 let mqttClient: mqtt.MqttClient;
