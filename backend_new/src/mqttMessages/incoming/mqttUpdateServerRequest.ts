@@ -3,10 +3,7 @@ import MultiStateButton from "../../models/dataTypes/multiStateButtonData";
 import NumberData from "../../models/dataTypes/numberData";
 import SwitchData from "../../models/dataTypes/switchData";
 import * as DeviceService from "../../services/deviceService";
-import {
-    getDevicesUsingTopic,
-    getTopicIDsByPath,
-} from "../../services/mqttTopicService";
+import { getDevicesUsingTopic, getTopicIDsByPath, getTypeOfTopic, } from "../../services/mqttTopicService";
 
 /**
  * @description handles device requests to update the state of device on the server
@@ -14,21 +11,31 @@ import {
  * @param message message send via mqtt
  * @returns void
  */
-export async function updateServerRequest(
-    topic: string,
-    message: TUpdateDataFromDeviceRequest
-) {
-    const topicIDs = await getTopicIDsByPath(topic);
+export async function updateServerRequest(topic: string, message: TUpdateDataFromDeviceRequest) {
+
+    const topics = await getTopicIDsByPath(topic);
     const deviceToUpdates = await getDevicesUsingTopic(topic);
     const updateList: DeviceService.TUpdateDeviceProperties[] = [];
-    console.log(topicIDs);
-    console.log(deviceToUpdates);
+
+    //check type of message
+    const topicType = topics[0].topicType
+    const typeOfTopic = getTypeOfTopic(topicType)
+    console.log(typeOfTopic)
+    if(typeOfTopic != "any") {
+        if(typeof message != typeOfTopic) return
+    }
+
+    const topicIDs : string[]= []
+    for (let i = 0; i < topics.length; i++) {
+        const id = topics[i]._id;
+        topicIDs.push(id);
+    }
 
     for (let i = 0; i < deviceToUpdates.length; i++) {
         const device = deviceToUpdates[i];
         for (let j = 0; j < device.data.length; j++) {
             const deviceData = device.data[j];
-            if (!topicIDs.includes(deviceData.mqttPrimeryTopicID)) continue;
+            if (!topicIDs.includes(deviceData.mqttTopicID)) continue;
             const dataPropertyName = getDataPropertyName(deviceData.typeID);
             if (!dataPropertyName) continue;
 

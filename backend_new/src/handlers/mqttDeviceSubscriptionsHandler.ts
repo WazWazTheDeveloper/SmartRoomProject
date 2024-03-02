@@ -15,7 +15,7 @@ export async function initDeviceSubscriptions() {
         {
             $lookup: {
                 from: "mqttTopics",
-                localField: "data.mqttPrimeryTopicID",
+                localField: "data.mqttTopicID",
                 foreignField: "_id",
                 as: "data.mqttPrimeryTopicPath",
             },
@@ -72,7 +72,7 @@ export async function subscribeToNewDevice(changeEvent: mongoDB.ChangeStreamDocu
         {
             $lookup: {
                 from: "mqttTopics",
-                localField: "data.mqttPrimeryTopicID",
+                localField: "data.mqttTopicID",
                 foreignField: "_id",
                 as: "data.mqttPrimeryTopicPath",
             },
