@@ -2,10 +2,6 @@ import { Request, Response } from "express";
 import { DeviceDataTypesConfigs } from "../../interfaces/deviceData.interface";
 import * as deviceService from "../../services/deviceService"
 
-
-import { COLLECTION_DEVICES, COLLECTION_TASKS, getDocuments } from "../../services/mongoDBService";
-import { TTask } from "../../interfaces/task.interface";
-
 export async function createNewDevice(req: Request, res: Response) {
     let { deviceName, dataTypeArray } = req.body;
     if (!dataTypeArray || !Array.isArray(dataTypeArray)) {

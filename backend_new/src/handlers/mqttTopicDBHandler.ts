@@ -1,7 +1,7 @@
 import * as mongoDB from "mongodb";
 
 /**
- * @description - calls sub functions that handle the mqtt topic collection changes
+ * @description - handle the mqtt topic collection changes
  * 
  * @param changeEvent - a change event form mongodb
  */
