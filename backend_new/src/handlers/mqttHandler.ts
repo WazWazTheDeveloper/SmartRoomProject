@@ -1,9 +1,4 @@
-import {
-    TAllMqttMessageType,
-    TConnectionCheckResponse,
-    TGetDeviceRequest,
-    TInitDeviceRequest,
-} from "../interfaces/mqttMassge.interface";
+import { TAllMqttMessageType, TConnectionCheckResponse, TGetDeviceRequest, TInitDeviceRequest, } from "../interfaces/mqttMassge.interface";
 import { MQTT_LOG, logEvents } from "../middleware/logger";
 import { initDevice } from "../mqttMessages/incoming/mqttInitDeviceRequest";
 import { getDevice } from "../mqttMessages/incoming/mqttGetDeviceRequest";

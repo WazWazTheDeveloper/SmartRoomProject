@@ -2,21 +2,9 @@ import { v4 as uuidv4 } from "uuid";
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface";
 import { ERROR_LOG, logEvents } from "../middleware/logger";
 import Device from "../models/device";
-import {
-    COLLECTION_DEVICES,
-    JSONDBTypes,
-    bulkWriteCollection,
-    createDocument,
-    deleteDocuments,
-    getCollection,
-    getDocuments,
-    getDocumentsAggregate,
-} from "./mongoDBService";
+import { COLLECTION_DEVICES, JSONDBTypes, bulkWriteCollection, createDocument, deleteDocuments, getCollection, getDocuments, getDocumentsAggregate, } from "./mongoDBService";
 import { createNewMqttTopic } from "./mqttTopicService";
-import {
-    TDeviceJSON_DB,
-    TDeviceProperty,
-} from "../interfaces/device.interface";
+import { TDeviceJSON_DB, TDeviceProperty, } from "../interfaces/device.interface";
 import * as mongoDB from "mongodb";
 import { deleteAllProperyChecksOfDevice } from "./taskService";
 import SwitchData from "../models/dataTypes/switchData";
@@ -58,7 +46,7 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
 
     // create mqtt topic
     const deviceTopicResult = await createNewMqttTopic(_id, topicPath, -1);
-    const deviceTopicResulta = await createNewMqttTopic(_id+"a", topicPath, -1);
+    const deviceTopicResulta = await createNewMqttTopic(_id + "a", topicPath, -1);
 
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
@@ -217,8 +205,8 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                     filter: filter,
                     update: [{
                         $set: {
-                            previousTopicID : "$mqttTopicID",
-                            [propertyName]:changeItem.propertyToChange.newValue,
+                            previousTopicID: "$mqttTopicID",
+                            [propertyName]: changeItem.propertyToChange.newValue,
                         },
                     }]
                 },

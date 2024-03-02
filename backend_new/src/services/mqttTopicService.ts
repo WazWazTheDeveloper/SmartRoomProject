@@ -1,19 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { DB_LOG, logEvents } from "../middleware/logger";
 import MqttTopicObject from "../models/mqttTopicObject";
-import {
-    COLLECTION_MQTT_TOPICS,
-    collections,
-    createDocument,
-    getCollection,
-    getDocuments,
-    getDocumentsAggregate,
-    updateDocument,
-} from "./mongoDBService";
-import {
-    TMqttTopicObjectJSON_DB,
-    TMqttTopicProperty,
-} from "../interfaces/mqttTopicObject.interface";
+import {COLLECTION_MQTT_TOPICS,collections,createDocument,getCollection,getDocuments,getDocumentsAggregate,updateDocument,} from "./mongoDBService";
+import {TMqttTopicObjectJSON_DB,TMqttTopicProperty,} from "../interfaces/mqttTopicObject.interface";
 import { UpdateFilter } from "mongodb";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
 import * as mongoDB from "mongodb";

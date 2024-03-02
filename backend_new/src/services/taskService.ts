@@ -135,10 +135,10 @@ export async function updateTaskProperty(_id: string, propertyList: TTaskPropert
         else if (element.taskPropertyName == "isOn") {
             updateIsOn(_id, element)
         }
-        else if(element.taskPropertyName == "isRepeating") {
+        else if (element.taskPropertyName == "isRepeating") {
             updateIsRepeating(_id, element)
         }
-        else if(element.taskPropertyName == "taskName"){
+        else if (element.taskPropertyName == "taskName") {
             updateTaskName(_id, element)
         }
     }
@@ -368,22 +368,22 @@ async function updateIsOn(taskID: string, propertyItem: TTaskProperty) {
 
 async function updateTaskName(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "taskName") return
-    
+
     const updateFilter = {
         $set: { taskName: propertyItem.newValue }
     }
-    
+
     const filter = { _id: taskID }
     await updateDocument(COLLECTION_TASKS, filter, updateFilter);
 }
 
 async function updateIsRepeating(taskID: string, propertyItem: TTaskProperty) {
     if (propertyItem.taskPropertyName != "isRepeating") return
-    
+
     const updateFilter = {
         $set: { isRepeating: propertyItem.newValue }
     }
-    
+
     const filter = { _id: taskID }
     await updateDocument(COLLECTION_TASKS, filter, updateFilter);
 }
