@@ -17,8 +17,8 @@ import { sendDevicePropertiesOfDevice } from "../mqttMessages/outgoing/mqttGetDe
  * @param changeEvent - a change event form mongodb
  */
 export async function deviceDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
-    deviceTaskHandler(changeEvent); // done
-    subscribeToNewDevice(changeEvent); //done
+    deviceTaskHandler(changeEvent);
+    subscribeToNewDevice(changeEvent);
     onUpdateDevice(changeEvent);
 }
 
