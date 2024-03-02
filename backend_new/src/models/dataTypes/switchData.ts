@@ -2,7 +2,7 @@ import { TDeviceData,  TSwitchData, TSwitchDataConfig } from "../../interfaces/d
 
 export default class SwitchData implements TSwitchData {
     static readonly TYPE_ID = 0
-    mqttPrimeryTopicID: string
+    mqttTopicID: string
     // mqttSecondaryTopicID: string[]
     dataID: number
     iconName: string
@@ -21,7 +21,7 @@ export default class SwitchData implements TSwitchData {
         isOn: boolean,
         onName: string,
         offName: string,
-        mqttPrimeryTopicID: string,
+        mqttTopicID: string,
         // mqttSecondaryTopicID: string[]
     ) {
         this.dataID = dataID
@@ -32,7 +32,7 @@ export default class SwitchData implements TSwitchData {
         this.isOn = isOn
         this.onName = onName
         this.offName = offName
-        this.mqttPrimeryTopicID = mqttPrimeryTopicID;
+        this.mqttTopicID = mqttTopicID;
         // this.mqttSecondaryTopicID = mqttSecondaryTopicID;
     }
 
@@ -43,7 +43,7 @@ export default class SwitchData implements TSwitchData {
         const isOn = dataConfig.isOn ? dataConfig.isOn : false;
         const onName = dataConfig.onName ? dataConfig.onName : "";
         const offName = dataConfig.onName ? dataConfig.onName : "";
-        const mqttPrimeryTopicID = dataConfig.mqttPrimeryTopicID ? dataConfig.mqttPrimeryTopicID : "";
+        const mqttTopicID = dataConfig.mqttTopicID ? dataConfig.mqttTopicID : "";
 
         const newSwitchData = new SwitchData(
             dataConfig.dataID,
@@ -53,7 +53,7 @@ export default class SwitchData implements TSwitchData {
             isOn,
             onName,
             offName,
-            mqttPrimeryTopicID,
+            mqttTopicID,
             // []
             )
 
@@ -69,7 +69,7 @@ export default class SwitchData implements TSwitchData {
             data.isOn,
             data.onName,
             data.offName,
-            data.mqttPrimeryTopicID,
+            data.mqttTopicID,
             // data.mqttSecondaryTopicID
             )
 
@@ -86,7 +86,7 @@ export default class SwitchData implements TSwitchData {
             onName : this.onName,
             offName : this.offName,
             typeID: SwitchData.TYPE_ID,
-            mqttPrimeryTopicID : this.mqttPrimeryTopicID,
+            mqttTopicID : this.mqttTopicID,
             // mqttSecondaryTopicID : this.mqttSecondaryTopicID,
         }
 

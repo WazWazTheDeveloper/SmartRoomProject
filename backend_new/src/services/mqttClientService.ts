@@ -100,6 +100,7 @@ export function unsubscribeFromTopic(mqttTopicPath: string) {
 }
 
 export function publishMessage(topic: string, message: TAllMqttMessageType) {
+    // add a check to check if type of message is correct for that type of topic
     mqttClient.publish(topic, JSON.stringify(message));
     let logItem = `published massage to topic ${topic}:\t
                             ${JSON.stringify(message, null, "\t")}`;

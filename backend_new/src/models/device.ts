@@ -33,16 +33,18 @@ export default class Device implements TDevice {
     data: TDeviceDataObject[];
     isConnected: boolean;
     isConnectedCheck: boolean;
+    previousTopicID: string;
 
     constructor(
         _id: string,
         deviceName: string,
         mqttTopicID: string,
+        previousTopicID: string,
         isAccepted: -1 | 0 | 1,
         isAdminOnly: boolean,
         data: TDeviceDataObject[],
         isConnected: boolean,
-        isConnectedCheck: boolean
+        isConnectedCheck: boolean,
     ) {
         this._id = _id;
         this.mqttTopicID = mqttTopicID;
@@ -52,6 +54,7 @@ export default class Device implements TDevice {
         this.deviceName = deviceName;
         this.isConnected = isConnected;
         this.isConnectedCheck = isConnectedCheck;
+        this.previousTopicID = previousTopicID;
     }
 
     // create device from with DeviceDataTypesConfigs
@@ -77,6 +80,7 @@ export default class Device implements TDevice {
             _id,
             deviceName,
             mqttTopicID,
+            "",
             isAccepted,
             isAdminOnly,
             data,
@@ -103,6 +107,7 @@ export default class Device implements TDevice {
             deviceData._id,
             deviceData.deviceName,
             deviceData.mqttTopicID,
+            deviceData.previousTopicID,
             deviceData.isAccepted,
             deviceData.isAdminOnly,
             data,
@@ -122,6 +127,7 @@ export default class Device implements TDevice {
         let json = {
             _id: this._id,
             mqttTopicID: this.mqttTopicID,
+            previousTopicID: this.previousTopicID,
             isAccepted: this.isAccepted,
             isAdminOnly: this.isAdminOnly,
             data: data,
@@ -137,6 +143,7 @@ export default class Device implements TDevice {
         let json: TDevice = {
             _id: this._id,
             mqttTopicID: this.mqttTopicID,
+            previousTopicID: this.previousTopicID,
             isAccepted: this.isAccepted,
             isAdminOnly: this.isAdminOnly,
             data: this.data,

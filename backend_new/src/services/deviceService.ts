@@ -25,16 +25,14 @@ import MultiStateButton from "../models/dataTypes/multiStateButtonData";
 
 type DeviceResult =
     | {
-          isSuccessful: false;
-      }
+        isSuccessful: false;
+    }
     | {
-          isSuccessful: true;
-          device: Device;
-      };
+        isSuccessful: true;
+        device: Device;
+    };
 
-export async function initializeDeviceHandler(
-    handler: (changeEvent: mongoDB.ChangeStreamDocument) => void
-) {
+export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.ChangeStreamDocument) => void) {
     let collection: mongoDB.Collection<TDeviceJSON_DB>;
     try {
         collection = (await getCollection(
@@ -52,10 +50,7 @@ export async function initializeDeviceHandler(
     return true;
 }
 
-export async function createDevice(
-    deviceName: string,
-    dataTypeArray: DeviceDataTypesConfigs[]
-): Promise<DeviceResult> {
+export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
     let functionResult: DeviceResult = { isSuccessful: false };
     let logItem = "";
     const _id = uuidv4();
@@ -63,6 +58,7 @@ export async function createDevice(
 
     // create mqtt topic
     const deviceTopicResult = await createNewMqttTopic(_id, topicPath, -1);
+    const deviceTopicResulta = await createNewMqttTopic(_id+"a", topicPath, -1);
 
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
@@ -87,7 +83,7 @@ export async function createDevice(
             return functionResult;
         }
 
-        config.mqttPrimeryTopicID = configTopicResult.mqttTopicObject._id;
+        config.mqttTopicID = configTopicResult.mqttTopicObject._id;
     }
 
     // create Device and insert into db
@@ -154,9 +150,7 @@ type TUpdateDeviceReturn = {
 };
 
 // TODO: add stuff from TDeviceDataProperty
-export async function updateDeviceProperties(
-    changeList: TUpdateDeviceProperties[]
-): Promise<TUpdateDeviceReturn> {
+export async function updateDeviceProperties(changeList: TUpdateDeviceProperties[]): Promise<TUpdateDeviceReturn> {
     function returnError(error: string): TUpdateDeviceReturn {
         returnObj.error = error;
         return returnObj;
@@ -190,7 +184,7 @@ export async function updateDeviceProperties(
             );
 
         const propertyName = changeItem.propertyToChange.propertyName;
-        if (propertyName == "deviceName" || propertyName == "mqttTopicID") {
+        if (propertyName == "deviceName") {
             //type checking
             if (typeof changeItem.propertyToChange.newValue != "string")
                 return returnError(
@@ -207,6 +201,26 @@ export async function updateDeviceProperties(
                                 changeItem.propertyToChange.newValue,
                         },
                     },
+                },
+            };
+            operations.push(operation);
+        } else if (propertyName == "mqttTopicID") {
+            //type checking
+            if (typeof changeItem.propertyToChange.newValue != "string")
+                return returnError(
+                    `changeList[${index}].propertyToChange.newValue is not a string`
+                );
+
+            const filter = { _id: changeItem._id };
+            const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                updateOne: {
+                    filter: filter,
+                    update: [{
+                        $set: {
+                            previousTopicID : "$mqttTopicID",
+                            [propertyName]:changeItem.propertyToChange.newValue,
+                        },
+                    }]
                 },
             };
             operations.push(operation);
@@ -257,19 +271,19 @@ export async function updateDeviceProperties(
                     `changeList[${index}].propertyToChange.dataID is not a boolean`
                 );
 
-                const filter = { _id: changeItem._id };
-                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
-                    updateOne: {
-                        filter: filter,
-                        update: {
-                            $set: {
-                                [propertyName]:
-                                    changeItem.propertyToChange.newValue,
-                            },
+            const filter = { _id: changeItem._id };
+            const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                updateOne: {
+                    filter: filter,
+                    update: {
+                        $set: {
+                            [propertyName]:
+                                changeItem.propertyToChange.newValue,
                         },
                     },
-                };
-                operations.push(operation);
+                },
+            };
+            operations.push(operation);
         } else if (propertyName == "isConnectedCheck") {
             //type checking
             if (typeof changeItem.propertyToChange.newValue != "boolean")
@@ -277,19 +291,19 @@ export async function updateDeviceProperties(
                     `changeList[${index}].propertyToChange.dataID is not a boolean`
                 );
 
-                const filter = { _id: changeItem._id };
-                const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
-                    updateOne: {
-                        filter: filter,
-                        update: {
-                            $set: {
-                                [propertyName]:
-                                    changeItem.propertyToChange.newValue,
-                            },
+            const filter = { _id: changeItem._id };
+            const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
+                updateOne: {
+                    filter: filter,
+                    update: {
+                        $set: {
+                            [propertyName]:
+                                changeItem.propertyToChange.newValue,
                         },
                     },
-                };
-                operations.push(operation);
+                },
+            };
+            operations.push(operation);
         } else if (propertyName == "data") {
             //type checking
             if (typeof changeItem.propertyToChange.dataID != "number")
@@ -314,7 +328,7 @@ export async function updateDeviceProperties(
             const typeID = changeItem.propertyToChange.typeID;
 
             if (
-                dataPropertyName == "mqttPrimeryTopicID" ||
+                dataPropertyName == "mqttTopicID" ||
                 dataPropertyName == "iconName" ||
                 dataPropertyName == "dataTitle"
             ) {
@@ -502,18 +516,18 @@ export async function updateDeviceProperties(
                         );
 
                     const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                        {
-                            updateOne: {
-                                filter: filter,
-                                update: {
-                                    $set: {
-                                        [`data.$.${dataPropertyName}`]:
-                                            changeItem.propertyToChange
-                                                .newValue,
-                                    },
+                    {
+                        updateOne: {
+                            filter: filter,
+                            update: {
+                                $set: {
+                                    [`data.$.${dataPropertyName}`]:
+                                        changeItem.propertyToChange
+                                            .newValue,
                                 },
                             },
-                        };
+                        },
+                    };
                     operations.push(operation);
                 } else if (
                     changeItem.propertyToChange.dataPropertyName == "stateList"
@@ -554,18 +568,18 @@ export async function updateDeviceProperties(
                             );
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                            {
-                                updateOne: {
-                                    filter: filter,
-                                    update: {
-                                        $push: {
-                                            "data.$.stateList":
-                                                changeItem.propertyToChange
-                                                    .newState,
-                                        },
+                        {
+                            updateOne: {
+                                filter: filter,
+                                update: {
+                                    $push: {
+                                        "data.$.stateList":
+                                            changeItem.propertyToChange
+                                                .newState,
                                     },
                                 },
-                            };
+                            },
+                        };
                         operations.push(operation);
                     } else if (
                         changeItem.propertyToChange.operation == "delete"
@@ -580,20 +594,20 @@ export async function updateDeviceProperties(
                             );
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                            {
-                                updateOne: {
-                                    filter: filter,
-                                    update: {
-                                        $pull: {
-                                            "data.$.stateList": {
-                                                stateValue:
-                                                    changeItem.propertyToChange
-                                                        .stateValue,
-                                            },
+                        {
+                            updateOne: {
+                                filter: filter,
+                                update: {
+                                    $pull: {
+                                        "data.$.stateList": {
+                                            stateValue:
+                                                changeItem.propertyToChange
+                                                    .stateValue,
                                         },
                                     },
                                 },
-                            };
+                            },
+                        };
                         operations.push(operation);
                     } else if (
                         changeItem.propertyToChange.operation == "update"
@@ -653,26 +667,26 @@ export async function updateDeviceProperties(
                                 changeItem.propertyToChange.state.stateTitle;
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
-                            {
-                                updateOne: {
-                                    filter: filter,
-                                    update: {
-                                        $set: set,
-                                    },
-                                    arrayFilters: [
-                                        {
-                                            "e.stateValue":
-                                                changeItem.propertyToChange
-                                                    .state.stateValue,
-                                        },
-                                        {
-                                            "dataID.dataID":
-                                                changeItem.propertyToChange
-                                                    .dataID,
-                                        },
-                                    ],
+                        {
+                            updateOne: {
+                                filter: filter,
+                                update: {
+                                    $set: set,
                                 },
-                            };
+                                arrayFilters: [
+                                    {
+                                        "e.stateValue":
+                                            changeItem.propertyToChange
+                                                .state.stateValue,
+                                    },
+                                    {
+                                        "dataID.dataID":
+                                            changeItem.propertyToChange
+                                                .dataID,
+                                    },
+                                ],
+                            },
+                        };
                         operations.push(operation);
                     } else
                         return returnError(

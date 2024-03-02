@@ -4,22 +4,22 @@ export type TDeviceData = {
     iconName: string
     dataTitle: string
     isSensor: boolean
-    mqttPrimeryTopicID: string
+    mqttTopicID: string
 }
 
 export type TDeviceDeviceDataProperties = {
-    mqttPrimeryTopicID?: string
+    mqttTopicID?: string
 }
 
 export type TDeviceDataDeviceProperties = {
     dataID: number
-    mqttPrimeryTopicID?: string
+    mqttTopicID?: string
     typeID: number
     value: any
 }
 
 export type TDeviceDataConfig = {
-    mqttPrimeryTopicID?: string
+    mqttTopicID?: string
     dataID: number
     typeID: number
     iconName?: string
@@ -28,7 +28,7 @@ export type TDeviceDataConfig = {
 }
 
 export type TDeviceDataProperty = {
-    dataPropertyName: "mqttPrimeryTopicID"
+    dataPropertyName: "mqttTopicID"
     newValue: string
 } | {
     dataPropertyName: "iconName"

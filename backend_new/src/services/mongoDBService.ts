@@ -43,6 +43,9 @@ export async function connectToDatabase() {
     collections.mqttTopics = mqttTopics;
     collections.tasks = tasks;
 
+    // index path
+    mqttTopics.createIndex({path:1},{unique:true});
+    
     logEvents(`Successfully connected to database`, DB_LOG)
 }
 

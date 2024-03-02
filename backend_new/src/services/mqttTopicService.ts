@@ -5,6 +5,7 @@ import {
     COLLECTION_MQTT_TOPICS,
     collections,
     createDocument,
+    getCollection,
     getDocuments,
     getDocumentsAggregate,
     updateDocument,
@@ -15,15 +16,16 @@ import {
 } from "../interfaces/mqttTopicObject.interface";
 import { UpdateFilter } from "mongodb";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
+import * as mongoDB from "mongodb";
 
 type MqttTopicResult =
     | {
-          isSuccessful: false;
-      }
+        isSuccessful: false;
+    }
     | {
-          isSuccessful: true;
-          mqttTopicObject: MqttTopicObject;
-      };
+        isSuccessful: true;
+        mqttTopicObject: MqttTopicObject;
+    };
 
 export async function createNewMqttTopic(
     topicName: string,
@@ -90,10 +92,7 @@ export async function getMqttTopic(_id: string): Promise<MqttTopicResult> {
     return functionResult;
 }
 
-export async function updateMqttTopic(
-    _id: string,
-    propertyList: TMqttTopicProperty[]
-) {
+export async function updateMqttTopic(_id: string, propertyList: TMqttTopicProperty[]) {
     const deviceCollection = collections.mqttTopics;
 
     //create update obj from propertyList
@@ -127,7 +126,7 @@ export async function getDevicesUsingTopic(topicPath: string) {
             $lookup: {
                 from: "devices",
                 localField: "_id",
-                foreignField: "data.mqttPrimeryTopicID",
+                foreignField: "data.mqttTopicID",
                 as: "result0",
             },
         },
@@ -149,7 +148,7 @@ export async function getDevicesUsingTopic(topicPath: string) {
 
     return result;
 }
-export async function getTopicIDsByPath(path: string): Promise<string[]> {
+export async function getTopicIDsByPath(path: string) {
     const aggregationList = [
         {
             $match: {
@@ -159,20 +158,47 @@ export async function getTopicIDsByPath(path: string): Promise<string[]> {
         {
             $project: {
                 _id: 1,
+                topicType: 1
             },
         },
     ];
 
-    const result = await getDocumentsAggregate<{ _id: string }>(
+    const result = await getDocumentsAggregate<{ _id: string, topicType: number }>(
         COLLECTION_MQTT_TOPICS,
         aggregationList
     );
-    const topicIDs: string[] = [];
 
-    for (let i = 0; i < result.length; i++) {
-        const topidID = result[i]._id;
-        topicIDs.push(topidID);
+
+    return result;
+}
+
+export async function initializeMqttTopicHandler(handler: (changeEvent: mongoDB.ChangeStreamDocument) => void) {
+    let collection: mongoDB.Collection<TDeviceJSON_DB>;
+    try {
+        collection = (await getCollection(COLLECTION_MQTT_TOPICS)) as mongoDB.Collection<TDeviceJSON_DB>;
+    } catch (e) {
+        // TODO: maybe add ERROR LOG
+        console.log(e);
+        return false;
     }
 
-    return topicIDs;
+    const changeStream = collection.watch();
+    changeStream.on("change", handler);
+
+    return true;
+}
+
+export function getTypeOfTopic(topicType: number) {
+    switch (topicType) {
+        case -1:
+            return "any"
+        case 0:
+            return "boolean"
+        case 1:
+            return "number"
+        case 2:
+            return "number"
+        default :
+            // TODO: throw error
+    }
 }

@@ -2,7 +2,7 @@ import { TNumberData, TNumberDataConfig } from "../../interfaces/deviceData.inte
 
 export default class NumberData implements TNumberData {
     static readonly TYPE_ID = 1
-    mqttPrimeryTopicID: string
+    mqttTopicID: string
     // mqttSecondaryTopicID: string[]
     dataID:number
     typeID:1
@@ -24,7 +24,7 @@ export default class NumberData implements TNumberData {
         maxValue:number,
         jumpValue:number,
         symbol:string,
-        mqttPrimeryTopicID: string,
+        mqttTopicID: string,
         // mqttSecondaryTopicID: string[]
     ){
         this.currentValue = currentValue;
@@ -37,7 +37,7 @@ export default class NumberData implements TNumberData {
         this.dataTitle = dataTitle;
         this.isSensor = isSensor;
         this.typeID = NumberData.TYPE_ID;
-        this.mqttPrimeryTopicID = mqttPrimeryTopicID;
+        this.mqttTopicID = mqttTopicID;
         // this.mqttSecondaryTopicID = mqttSecondaryTopicID;
     }
 
@@ -50,7 +50,7 @@ export default class NumberData implements TNumberData {
         const maxValue = dataConfig.maxValue ? dataConfig.maxValue : 100;
         const jumpValue = dataConfig.jumpValue ? dataConfig.jumpValue : 1;
         const symbol = dataConfig.symbol ? dataConfig.symbol : "";
-        const mqttPrimeryTopicID = dataConfig.mqttPrimeryTopicID ? dataConfig.mqttPrimeryTopicID : "";
+        const mqttTopicID = dataConfig.mqttTopicID ? dataConfig.mqttTopicID : "";
 
         const newNumberData = new NumberData(
             dataConfig.dataID,
@@ -62,7 +62,7 @@ export default class NumberData implements TNumberData {
             maxValue,
             jumpValue,
             symbol,
-            mqttPrimeryTopicID,
+            mqttTopicID,
             // []
             )
 
@@ -80,7 +80,7 @@ export default class NumberData implements TNumberData {
             data.maxValue,
             data.jumpValue,
             data.symbol,
-            data.mqttPrimeryTopicID,
+            data.mqttTopicID,
             // data.mqttSecondaryTopicID
             )
 
@@ -99,7 +99,7 @@ export default class NumberData implements TNumberData {
             iconName:this.iconName,
             dataTitle:this.dataTitle,
             isSensor: this.isSensor,
-            mqttPrimeryTopicID : this.mqttPrimeryTopicID,
+            mqttTopicID : this.mqttTopicID,
             // mqttSecondaryTopicID : this.mqttSecondaryTopicID,
         }
         return json;
