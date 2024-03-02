@@ -17,6 +17,10 @@ export type TDeviceProperty =
           newValue: string;
       }
     | {
+          propertyName: "previousTopicID";
+          newValue: string;
+      }
+    | {
           propertyName: "isAccepted";
           newValue: -1 | 0 | 1;
       }
@@ -40,6 +44,7 @@ export type TDevice = {
     _id: string;
     deviceName: string;
     mqttTopicID: string;
+    previousTopicID: string;
     isAccepted: -1 | 0 | 1;
     isAdminOnly: boolean;
     data: TDeviceDataObject[];
@@ -51,6 +56,7 @@ export type TDeviceJSON_DB = {
     _id: string;
     deviceName: string;
     mqttTopicID: string;
+    previousTopicID: string;
     isAccepted: -1 | 0 | 1;
     isAdminOnly: boolean;
     data: DeviceDataTypes[];

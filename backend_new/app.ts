@@ -6,11 +6,13 @@ import { deviceDBHandler } from "./src/handlers/deviceDBHandler";
 import { taskCheckHandler } from "./src/handlers/taskHandler";
 import { connectToDatabase } from "./src/services/mongoDBService";
 import { initializeDeviceHandler } from "./src/services/deviceService";
-import { initializeTasksFromDB, updateTaskProperty } from "./src/services/taskService";
+import { initializeTasksFromDB} from "./src/services/taskService";
 import { routerv1 } from './src/routes/v1/router';
 import { mqttMessageHandler } from './src/handlers/mqttHandler';
 import { initializeMqttClient } from './src/services/mqttClientService';
 import { initDeviceSubscriptions } from './src/handlers/mqttDeviceSubscriptionsHandler';
+import { initializeMqttTopicHandler } from './src/services/mqttTopicService';
+import { mqttTopicDBHandler } from './src/handlers/mqttTopicDBHandler';
 
 const app = express();
 app.use(logger)
@@ -24,6 +26,7 @@ async function startServer(): Promise<void> {
     await connectToDatabase()
     await initializeDeviceHandler(deviceDBHandler);
     await initializeTasksFromDB(taskCheckHandler);
+    await initializeMqttTopicHandler(mqttTopicDBHandler)
     initializeMqttClient(mqttMessageHandler);
 
     startListeningToReqests()
