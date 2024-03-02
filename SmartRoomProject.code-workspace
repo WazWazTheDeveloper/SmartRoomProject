@@ -5,17 +5,9 @@
 			"path": "."
 		},
 		{
-			"name": "arduinoCodeController",
-			"path": "arduinoCodeController"
+			"name": "client_new",
+			"path": "client_new"
 		}
 	],
-	"settings": {
-		"files.associations": {
-			"array": "cpp",
-			"string_view": "cpp",
-			"ranges": "cpp",
-			"type_traits": "cpp",
-			"string": "cpp"
-		}
-	}
+	"settings": {}
 }
