@@ -15,7 +15,7 @@ char uuid[37] = {'\0'};
 // setup
 void setupWifi();
 boolean setupMqtt();
-bool createDevices();
+bool setupDeviceObjects();
 
 // uuid stuff
 void readUUID();
@@ -39,7 +39,16 @@ void setup()
 
     setupWifi();
     setupMqtt();
-    // config setup
+    deviceSetup();
+
+    // check if devices can be created and if not stall the device
+    if (!setupDeviceObjects())
+    {
+        Serial.print("Can't create devices, check cofiguration");
+        // setRedLed(true);
+        while (true)
+            ;
+    }
 
     // check if config is ok
 }
@@ -49,7 +58,9 @@ void loop()
     if (!mqttClient.connected())
     {
         setupMqtt();
+        return;
     }
+    
 }
 
 void setupWifi()
@@ -88,32 +99,45 @@ boolean setupMqtt()
     return 0;
 }
 
-void onMqttMessage(int messageSize) {
-
+void onMqttMessage(int messageSize)
+{
+    if (mqttClient.messageTopic().compareTo(connectionCheckRequestTopic))
+    {
+        Serial.println(F("recived connection check request"));
+        sendIsConnected();
+        return;
+    }
 }
 
-void subscribeTopics() {
-    
+void subscribeTopics()
+{
 }
 
-void unsubscribeTopics() {
-    
+void unsubscribeTopics()
+{
+}
+
+void sendIsConnected()
+{
 }
 
 // eerpom
-void readUUID() {
+void readUUID()
+{
     EEPROM.get(0, uuid);
     Serial.println("read UUID form eeprom");
     uuid[36] = '\0';
 }
 
-void writeUUID() {
+void writeUUID()
+{
     EEPROM.put(0, uuid);
     EEPROM.end();
     Serial.println("wrote UUID to eeprom");
 }
 
-void clearUUID(){
+void clearUUID()
+{
     for (int i = 0; i < 37; i++)
     {
         EEPROM.write(i, 0);
@@ -124,6 +148,12 @@ void clearUUID(){
     Serial.println("cleared eeprom");
 }
 
-boolean getUUID() {
-    
+boolean getUUID()
+{
+}
+
+// device object stuff
+bool setupDeviceObjects()
+{
+    // createDevices() in old
 }
