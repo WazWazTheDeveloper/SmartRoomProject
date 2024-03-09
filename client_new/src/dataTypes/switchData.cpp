@@ -1,22 +1,30 @@
 #include "SwitchData.h"
 
-SwitchData::SwitchData(int dataId)
+SwitchData::SwitchData(int _dataId)
 {
     typeId = 0;
-    dataId = dataId;
+    dataId = _dataId;
     isOn = false;
+    mqttTopic = "\0";
 }
 
-void SwitchData::setData(bool newState)
+void SwitchData::setData(bool newState, bool updateHardware, bool updateServer)
 {
     if (isOn != newState)
     {
         isOn = newState;
-        // onUpdateCallback(dataAt, dataType);
+        if (updateHardware)
+        {
+            updateHardwareFunc(dataId);
+        }
+        if (updateServer)
+        {
+            updateServerFunc(dataId);
+        }
     }
 }
 
-void SwitchData::getData(bool &boolPointer)
+void SwitchData::getData(bool *boolPointer)
 {
-    boolPointer = isOn;
+    *boolPointer = isOn;
 }
