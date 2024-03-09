@@ -258,7 +258,7 @@ boolean getUUID()
     JsonArray arr = root.createNestedArray("deviceType");
     root.createNestedArray("extraConfigurations");
 
-    doc["deviceName"] = device_name;
+    doc["deviceName"] = deviceName;
 
     for (size_t i = 0; i < sizeof(deviceType) / sizeof(deviceType[0]); i++)
     {

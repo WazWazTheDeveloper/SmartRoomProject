@@ -2,12 +2,14 @@
 #define SwitchData_h
 #include "DataObject.h"
 
-class SwitchData : public DataObject {
-    private:
-        bool isOn;
-    public:
-        SwitchData(int dataId);
-        void setData(bool newState);
-        void getData(bool& boolPointer);
+class SwitchData : public DataObject
+{
+private:
+    bool isOn;
+
+public:
+    SwitchData(int _dataId);
+    void setData(bool newState,bool updateHardware, bool updateServer);
+    void getData(bool *boolPointer);
 };
 #endif

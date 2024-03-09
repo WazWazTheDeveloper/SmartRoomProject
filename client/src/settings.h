@@ -4,7 +4,7 @@
 
 char *wifi_ssid = ("home");            // wifi ssid
 char *wifi_password = ("0525611397");  // wifi password
-char *device_name = ("Test device");   // device name
+char *deviceName = ("Test device");   // device name
 const char broker[] = ("10.0.0.12");   // mqtt broker ip
 const char serverip[] = ("10.0.0.12"); // server ip
 int port = 1883;                       // mqtt broker port
