@@ -46,7 +46,6 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
 
     // create mqtt topic
     const deviceTopicResult = await createNewMqttTopic(_id, topicPath, -1);
-    const deviceTopicResulta = await createNewMqttTopic(_id + "a", topicPath, -1);
 
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
