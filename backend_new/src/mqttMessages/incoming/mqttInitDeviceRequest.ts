@@ -30,6 +30,7 @@ export async function initDevice(topic: string, message: TInitDeviceRequest) {
         deviceName,
         message.dataTypeArray
     );
+    
     if (result.isSuccessful) {
         const response: TInitDeviceRespone = {
             isSuccessful: true,
