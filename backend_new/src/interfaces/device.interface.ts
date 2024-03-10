@@ -9,39 +9,40 @@ import {
 
 export type TDeviceProperty =
     | {
-          propertyName: "deviceName";
-          newValue: string;
-      }
+        propertyName: "deviceName";
+        newValue: string;
+    }
     | {
-          propertyName: "mqttTopicID";
-          newValue: string;
-      }
+        propertyName: "mqttTopicID";
+        newValue: string;
+    }
     | {
-          propertyName: "previousTopicID";
-          newValue: string;
-      }
+        propertyName: "previousTopicID";
+        newValue: string;
+    }
     | {
-          propertyName: "isAccepted";
-          newValue: -1 | 0 | 1;
-      }
+        propertyName: "isAccepted";
+        newValue: -1 | 0 | 1;
+    }
     | {
-          propertyName: "isAdminOnly";
-          newValue: boolean;
-      }
+        propertyName: "isAdminOnly";
+        newValue: boolean;
+    }
     | ({
-          propertyName: "data";
-      } & TDeviceDataProperties)
+        propertyName: "data";
+    } & TDeviceDataProperties)
     | {
-          propertyName: "isConnected";
-          newValue: boolean;
-      }
+        propertyName: "isConnected";
+        newValue: boolean;
+    }
     | {
-          propertyName: "isConnectedCheck";
-          newValue: boolean;
-      };
+        propertyName: "isConnectedCheck";
+        newValue: boolean;
+    };
 
 export type TDevice = {
     _id: string;
+    deviceTargetID: string;
     deviceName: string;
     mqttTopicID: string;
     previousTopicID: string;
@@ -54,6 +55,7 @@ export type TDevice = {
 
 export type TDeviceJSON_DB = {
     _id: string;
+    deviceTargetID: string;
     deviceName: string;
     mqttTopicID: string;
     previousTopicID: string;
