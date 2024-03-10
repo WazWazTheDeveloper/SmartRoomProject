@@ -1,3 +1,6 @@
+#ifndef SETTINGS_HPP
+#define SETTINGS_HPP
+
 #include "pinSettings.cpp"
 #include "dataObject.h"
 
@@ -15,6 +18,8 @@ int brokerPort = 1883; // mqtt broker port
 char *connectionCheckRequestTopic = ("checkConnectionRequest");
 char *connectionCheckResponseTopic = ("checkConnectionResponse");
 char *initDeviceTopic = ("initDevice");
+
+//delays
 unsigned long requestDelay = 5000; //init device delay between requests
 
 const int deviceType[] = {0,1,2}; // device types array
@@ -26,3 +31,5 @@ DataObject *deviecDataArr[3];
 void deviceSetup() {
     
 }
+
+#endif SETTINGS_HPP
