@@ -3,8 +3,8 @@ import { DeviceDataTypesConfigs } from "../../interfaces/deviceData.interface";
 import * as deviceService from "../../services/deviceService"
 
 export async function createNewDevice(req: Request, res: Response) {
-    let { deviceName, dataTypeArray } = req.body;
-    if (!dataTypeArray || !Array.isArray(dataTypeArray)) {
+    let { deviceName, dataTypeArray, origin } = req.body;
+    if (!dataTypeArray || !Array.isArray(dataTypeArray) || typeof origin != "string") {
         res.status(400).json("invalid request")
         return
     }
@@ -13,8 +13,9 @@ export async function createNewDevice(req: Request, res: Response) {
         deviceName = "unnamed device"
     }
 
+    // TODO: add origin
     try {
-        let device = await deviceService.createDevice(deviceName, dataTypeArray as DeviceDataTypesConfigs[])
+        let device = await deviceService.createDevice(deviceName,origin, dataTypeArray as DeviceDataTypesConfigs[])
         if (device.isSuccessful) {
             res.status(200);
             res.send(device.device._id);

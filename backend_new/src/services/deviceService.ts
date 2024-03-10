@@ -38,11 +38,13 @@ export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.Cha
     return true;
 }
 
-export async function createDevice(deviceName: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
+export async function createDevice(deviceName: string,deviceTargetID: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
     let functionResult: DeviceResult = { isSuccessful: false };
     let logItem = "";
     const _id = uuidv4();
     const topicPath = `device/${_id}`;
+
+    // TODO: remove all other devices with deviceTargetID
 
     // create mqtt topic
     const deviceTopicResult = await createNewMqttTopic(_id, topicPath, -1);
@@ -76,6 +78,7 @@ export async function createDevice(deviceName: string, dataTypeArray: DeviceData
     // create Device and insert into db
     const newDevice = Device.createNewDevice(
         _id,
+        deviceTargetID,
         deviceName,
         deviceTopicResult.mqttTopicObject._id,
         dataTypeArray

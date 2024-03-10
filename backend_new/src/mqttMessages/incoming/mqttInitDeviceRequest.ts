@@ -28,6 +28,7 @@ export async function initDevice(topic: string, message: TInitDeviceRequest) {
 
     let result = await DeviceService.createDevice(
         deviceName,
+        message.origin,
         message.dataTypeArray
     );
     
