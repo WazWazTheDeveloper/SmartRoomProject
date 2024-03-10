@@ -26,6 +26,7 @@ export default class Device implements TDevice {
     static readonly MULTI_STATE_BUTTON_TYPE = 2;
 
     _id: string;
+    deviceTargetID: string;
     deviceName: string;
     mqttTopicID: string;
     isAccepted: -1 | 0 | 1;
@@ -37,6 +38,7 @@ export default class Device implements TDevice {
 
     constructor(
         _id: string,
+        deviceTargetID: string,
         deviceName: string,
         mqttTopicID: string,
         previousTopicID: string,
@@ -47,6 +49,7 @@ export default class Device implements TDevice {
         isConnectedCheck: boolean,
     ) {
         this._id = _id;
+        this.deviceTargetID = deviceTargetID;
         this.mqttTopicID = mqttTopicID;
         this.isAccepted = isAccepted;
         this.isAdminOnly = isAdminOnly;
@@ -60,6 +63,7 @@ export default class Device implements TDevice {
     // create device from with DeviceDataTypesConfigs
     static createNewDevice(
         _id: string,
+        deviceTargetID: string,
         deviceName: string,
         mqttTopicID: string,
         dataTypeArray: DeviceDataTypesConfigs[],
@@ -78,6 +82,7 @@ export default class Device implements TDevice {
 
         const newDevice = new Device(
             _id,
+            deviceTargetID,
             deviceName,
             mqttTopicID,
             "",
@@ -105,6 +110,7 @@ export default class Device implements TDevice {
 
         const newDevice = new Device(
             deviceData._id,
+            deviceData.deviceTargetID,
             deviceData.deviceName,
             deviceData.mqttTopicID,
             deviceData.previousTopicID,
@@ -126,6 +132,7 @@ export default class Device implements TDevice {
         }
         let json = {
             _id: this._id,
+            deviceTargetID:this.deviceTargetID,
             mqttTopicID: this.mqttTopicID,
             previousTopicID: this.previousTopicID,
             isAccepted: this.isAccepted,
@@ -142,6 +149,7 @@ export default class Device implements TDevice {
     getAsJson(): TDevice {
         let json: TDevice = {
             _id: this._id,
+            deviceTargetID:this.deviceTargetID,
             mqttTopicID: this.mqttTopicID,
             previousTopicID: this.previousTopicID,
             isAccepted: this.isAccepted,
