@@ -15,8 +15,8 @@ void subscribeTopics();
 void unsubscribeTopics();
 void sendInitDevice();
 void receiveInitDevice(int messageSize);
-void requestInitDevice();
-void receiveInitDevice();
+void requestGetDevice();
+void receiveGetDevice();
 
 MqttClient mqttClient(wifiClient);
 
@@ -140,10 +140,30 @@ void receiveInitDevice(int messageSize)
     mqttClient.unsubscribe(initDeviceTopic);
 }
 
-void requestInitDevice()
+void requestGetDevice()
 {
+    mqttClient.subscribe(initDeviceTopic);
+
+    JsonDocument doc;
+    doc["operation"] = "initDevice";
+    doc["origin"] = deviceTargetID;
+    doc["deviceID"] = uuid;
+
+    char data[384];
+
+    doc.shrinkToFit();
+
+    serializeJson(doc, data);
+
+    mqttClient.beginMessage(initDeviceTopic); // topic
+    mqttClient.print(data);
+    mqttClient.endMessage();
+
+    Serial.println("device init request send");
+
+    doc.clear();
 }
-void receiveInitDevice()
+void receiveGetDevice()
 {
 }
 
