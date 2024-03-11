@@ -13,7 +13,6 @@ export async function createNewDevice(req: Request, res: Response) {
         deviceName = "unnamed device"
     }
 
-    // TODO: add origin
     try {
         let device = await deviceService.createDevice(deviceName,origin, dataTypeArray as DeviceDataTypesConfigs[])
         if (device.isSuccessful) {
