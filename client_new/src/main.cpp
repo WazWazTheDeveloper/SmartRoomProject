@@ -86,7 +86,7 @@ void loop()
         if (millis() - lastRequestedDataMillis > requestDelay)
         {
             lastRequestedDataMillis = millis();
-            requestInitDevice();
+            requestGetDevice();
         }
         hasData = true;
         return;
