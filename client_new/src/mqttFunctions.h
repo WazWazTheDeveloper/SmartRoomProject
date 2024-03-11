@@ -145,7 +145,7 @@ void requestGetDevice()
     mqttClient.subscribe(initDeviceTopic);
 
     JsonDocument doc;
-    doc["operation"] = "initDevice";
+    doc["operation"] = "getDevice";
     doc["origin"] = deviceTargetID;
     doc["deviceID"] = uuid;
 
@@ -163,8 +163,49 @@ void requestGetDevice()
 
     doc.clear();
 }
-void receiveGetDevice()
+
+void receiveGetDevice(int messageSize)
 {
+    byte input[1024] = {0};
+    mqttClient.readBytes(input, messageSize);
+    JsonDocument doc;
+
+    DeserializationError error = deserializeJson(doc, input);
+
+    if (error)
+    {
+        Serial.print("deserializeJson() failed: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    const char *origin = doc["origin"];           // "server"
+    bool isSuccessful = doc["isSuccessful"];      // true
+    const char *deviceID = doc["deviceID"];       // "08382d24-e09e-48f9-b2b4-bec3c3b84f4e"
+    const char *operation = doc["operation"];     // "getDevice"
+    const char *mqttTopicID = doc["mqttTopicID"]; // "44bd9cf5-59d1-44f5-bc86-cf849fd2ceec"
+
+    if(strcmp(deviceID,uuid) != 0 ) return;
+    if(strcmp(operation,"getDevice") != 0 ) return;
+    if(strcmp(origin,"server") != 0 ) return;
+    if(!isSuccessful) return;
+
+    //set mqttTopicID
+
+    JsonArray data = doc["data"];
+
+    for (size_t i = 0; i < deviceTypeCount; i++)
+    {
+        JsonObject dataItem = data[i];
+        const char *data_0_mqttTopicID = dataItem["mqttTopicID"]; // "03ac584a-ef6c-442e-9125-de4224dee260"
+        int data_0_dataID = dataItem["dataID"];                   // 0
+        int data_0_typeID = dataItem["typeID"];                   // 0
+        bool data_0_value = dataItem["value"];                    // false
+
+        //check each item in deviecDataArr and insert data into arr;
+    }
+
+    mqttClient.unsubscribe(initDeviceTopic);
 }
 
 #endif MQTTFUNCTIONS_HPP
