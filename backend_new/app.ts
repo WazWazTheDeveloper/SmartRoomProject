@@ -35,7 +35,7 @@ async function startServer(): Promise<void> {
 
 function startListeningToReqests(): void {
     let server = app.listen(process.env.SERVER_PORT, () => {
-        // TODO: logger this:
+        // TODO: log this:
         console.log(`listening on port ${process.env.SERVER_PORT}`)
     })
 

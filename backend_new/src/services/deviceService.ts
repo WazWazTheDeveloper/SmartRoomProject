@@ -139,7 +139,7 @@ type TUpdateDeviceReturn = {
     error: string;
 };
 
-// TODO: add stuff from TDeviceDataProperty
+// TODO: add stuff from TDeviceDataProperty(previousTopicID)
 export async function updateDeviceProperties(changeList: TUpdateDeviceProperties[]): Promise<TUpdateDeviceReturn> {
     function returnError(error: string): TUpdateDeviceReturn {
         returnObj.error = error;
