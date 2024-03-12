@@ -12,11 +12,12 @@ void sendIsConnected();
 void updateServer(int dataIndex);
 void logToMqtt();
 void subscribeTopics();
-void unsubscribeTopics();
+void unsubscribeTopic(char *topic);
+void subscribeTopic(char *topic);
 void sendInitDevice();
 void receiveInitDevice(int messageSize);
 void requestGetDevice();
-void receiveGetDevice();
+void receiveGetDevice(int messageSize);
 
 MqttClient mqttClient(wifiClient);
 
@@ -33,13 +34,14 @@ boolean setupMqtt()
     }
     Serial.println(F("connected to mqtt server"));
     mqttClient.subscribe(connectionCheckRequestTopic);
-    mqttClient.onMessage(onMqttMessage);
     subscribeTopics();
+    mqttClient.onMessage(onMqttMessage);
     return 1;
 }
 
 void onMqttMessage(int messageSize)
 {
+    Serial.println(mqttClient.messageTopic());
     if (mqttClient.messageTopic().compareTo(connectionCheckRequestTopic) == 0)
     {
         Serial.println(F("recived connection check request"));
@@ -48,18 +50,51 @@ void onMqttMessage(int messageSize)
     }
     else if (mqttClient.messageTopic().compareTo(initDeviceTopic) == 0)
     {
-        Serial.println(F("recived init device response"));
+        Serial.println(F("recived message from `initDevice`"));
         receiveInitDevice(messageSize);
+        return;
+    }
+    else if (mqttClient.messageTopic().compareTo(getDataTopic) == 0)
+    {
+        Serial.println(F("recived message from `getData`"));
+        receiveGetDevice(messageSize);
         return;
     }
 }
 
 void subscribeTopics()
 {
+
+    subscribeTopic(mqttTopic);
+    for (size_t i = 0; i < deviceTypeCount; i++)
+    {
+        char topic[108] = {"\0"};
+        if (deviecDataArr[i] != NULL)
+        {
+            deviecDataArr[i]->getTopic(topic);
+            subscribeTopic(topic);
+        }
+    }
 }
 
-void unsubscribeTopics()
+void unsubscribeTopic(char *topic)
 {
+    if (strcmp(topic, "\0") == 0)
+        return;
+        // mqttClient.unsubscribe(topic);
+    Serial.print(mqttClient.unsubscribe(topic));
+    Serial.print(" :unsubscribed from: ");
+    Serial.println(topic);
+}
+
+void subscribeTopic(char *topic)
+{
+    if (strcmp(topic, "\0") == 0)
+        return;
+        // mqttClient.subscribe(topic);
+    Serial.print(mqttClient.subscribe(topic));
+    Serial.print(" :subscribed to: ");
+    Serial.println(topic);
 }
 
 void sendIsConnected()
@@ -142,7 +177,7 @@ void receiveInitDevice(int messageSize)
 
 void requestGetDevice()
 {
-    mqttClient.subscribe(initDeviceTopic);
+    mqttClient.subscribe(getDataTopic);
 
     JsonDocument doc;
     doc["operation"] = "getDevice";
@@ -155,7 +190,7 @@ void requestGetDevice()
 
     serializeJson(doc, data);
 
-    mqttClient.beginMessage(initDeviceTopic); // topic
+    mqttClient.beginMessage(getDataTopic); // topic
     mqttClient.print(data);
     mqttClient.endMessage();
 
@@ -194,42 +229,57 @@ void receiveGetDevice(int messageSize)
     if (!isSuccessful)
         return;
 
-    int mqttTopicLength = strlen(deviceID);
+    unsubscribeTopic(mqttTopic);
+    int mqttTopicLength = strlen(mqttTopicStr) +1;
     strncpy(mqttTopic, mqttTopicStr, mqttTopicLength);
+    subscribeTopic(mqttTopic);
 
     JsonArray data = doc["data"];
 
-    int updated = 0;
     for (size_t i = 0; i < deviceTypeCount; i++)
     {
         JsonObject dataItem = data[i];
-        const char *data_0_mqttTopicID = dataItem["mqttTopicID"]; // "03ac584a-ef6c-442e-9125-de4224dee260"
-        int data_0_dataID = dataItem["dataID"];                   // 0
-        int data_0_typeID = dataItem["typeID"];                   // 0
-        bool data_0_value = dataItem["value"];                    // false
+        const char *data_0_mqttTopicPath = dataItem["mqttTopicPath"]; // "03ac584a-ef6c-442e-9125-de4224dee260"
+        int data_0_dataID = dataItem["dataID"];                       // 0
+        int data_0_typeID = dataItem["typeID"];                       // 0
 
         if (deviecDataArr[i]->getDataId() != data_0_dataID ||
-            deviecDataArr[i]->getTypeId() != data_0_typeID) return;
-        
+            deviecDataArr[i]->getTypeId() != data_0_typeID)
+        {
+            Serial.println("invalid data type or id");
+            return;
+        }
+
+        // unsub from old
+        char oldTopic[108] = {"\0"};
+        deviecDataArr[i]->getTopic(oldTopic);
+        // Serial.println("oldTopic");
+        // Serial.println(oldTopic);
+        unsubscribeTopic(oldTopic);
+
+        char topic[108];
+        size_t destination_size = 108;
+        snprintf(topic, destination_size, "%s", data_0_mqttTopicPath);
+        deviecDataArr[i]->setTopic(topic);
+        subscribeTopic(topic);
+
         switch (data_0_typeID)
         {
         case 0:
-            deviecDataArr[i]->setData(dataItem["value"].as<bool>(),true,false);
+            deviecDataArr[i]->setData(dataItem["value"].as<bool>(), true, false);
             break;
         case 1:
-            deviecDataArr[i]->setData(dataItem["value"].as<int>(),true,false);
+            deviecDataArr[i]->setData(dataItem["value"].as<int>(), true, false);
             break;
         case 2:
-            deviecDataArr[i]->setData(dataItem["value"].as<int>(),true,false);
+            deviecDataArr[i]->setData(dataItem["value"].as<int>(), true, false);
             break;
         default:
             return;
         }
-
-        // check each item in deviecDataArr and insert data into arr;
     }
-
-    mqttClient.unsubscribe(initDeviceTopic);
+    Serial.println("got data from server");
+    mqttClient.unsubscribe(getDataTopic);
 }
 
 #endif MQTTFUNCTIONS_HPP

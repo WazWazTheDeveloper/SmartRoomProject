@@ -8,6 +8,6 @@ unsigned long lastUUIDReset = 0;
 bool hasData = false;
 
 char uuid[37] = {'\0'};
-char mqttTopic[72] = {'\0'};
+char mqttTopic[108] = {'\0'};
 
 #endif GLOBALVARIABLES_HPP

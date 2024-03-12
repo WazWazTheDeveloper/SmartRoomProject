@@ -10,7 +10,7 @@ class DataObject
 protected:
     int typeId;
     int dataId;
-    char *mqttTopic;
+    char mqttTopic[108];
     updateServerCallback updateServerFunc;
     updateHardwareCallback updateHardwareFunc;
 
