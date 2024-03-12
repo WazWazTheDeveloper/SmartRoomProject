@@ -5,7 +5,7 @@ SwitchData::SwitchData(int _dataId)
     typeId = 0;
     dataId = _dataId;
     isOn = false;
-    mqttTopic = "\0";
+    mqttTopic[0] = '\0';
 }
 
 void SwitchData::setData(bool newState, bool updateHardware, bool updateServer)

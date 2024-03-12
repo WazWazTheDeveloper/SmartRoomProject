@@ -5,7 +5,7 @@ NumberData::NumberData(int _dataId)
     typeId = 1;
     dataId = _dataId;
     value = 0;
-    mqttTopic = "\0";
+    mqttTopic[0] = '\0';
 }
 
 void NumberData::setData(int newValue, bool updateHardware, bool updateServer)
