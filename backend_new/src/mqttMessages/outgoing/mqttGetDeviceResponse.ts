@@ -16,49 +16,57 @@ import { getMqttTopic } from "../../services/mqttTopicService";
  */
 export async function sendDevicePropertiesMQTTRequest(topic: string, message: TGetDeviceRequest) {
     const result = await DeviceService.getDevice(message.deviceID);
-    if (result.isSuccessful) {
-        const topicPathResult = await getMqttTopic(result.device.mqttTopicID)
-        if(topicPathResult.isSuccessful) {
-            //get all topics from device
-            const dataArr: TDeviceDataDeviceProperties[] = [];
-            for (let i = 0; i < result.device.data.length; i++) {
-                const data = result.device.data[i];
-                dataArr.push({
-                    mqttTopicID: data.mqttTopicID,
-                    // mqttSecondaryTopicID: data.mqttSecondaryTopicID,
-                    dataID: data.dataID,
-                    typeID: data.typeID,
-                    value: getData(data)
-                });
-            }
-            const response: TGetDeviceResponse = {
-                origin: "server",
-                isSuccessful: true,
-                deviceID: message.deviceID,
-                operation: "getDevice",
-                // mqttTopicID: result.device.mqttTopicID,
-                mqttTopic: topicPathResult.mqttTopicObject.path,
-                data: dataArr,
-            };
-            publishMessage(topic, response);
-        }else {
-            const response: TGetDeviceResponse = {
-                origin: "server",
-                isSuccessful: false,
-                deviceID: message.deviceID,
-                operation: "getDevice",
-            };
-            publishMessage(topic, response);
-        }
-    } else {
-        const response: TGetDeviceResponse = {
-            origin: "server",
-            isSuccessful: false,
-            deviceID: message.deviceID,
-            operation: "getDevice",
-        };
-        publishMessage(topic, response);
+    if (!result.isSuccessful) {
+        returnFalse(topic, message)
+        return
     }
+
+    const topicPathResult = await getMqttTopic(result.device.mqttTopicID)
+    if (!topicPathResult.isSuccessful) {
+        returnFalse(topic, message)
+        return
+    }
+
+    //get all topics from device
+    const dataArr: TDeviceDataDeviceProperties[] = [];
+    for (let i = 0; i < result.device.data.length; i++) {
+        const data = result.device.data[i];
+
+        const dataTopicPathResult = await getMqttTopic(data.mqttTopicID)
+        if (!dataTopicPathResult.isSuccessful) {
+            returnFalse(topic, message);
+            return;
+        }
+
+        dataArr.push({
+            // mqttTopicID: data.mqttTopicID,
+            mqttTopicPath: dataTopicPathResult.mqttTopicObject.path,
+            // mqttSecondaryTopicID: data.mqttSecondaryTopicID,
+            dataID: data.dataID,
+            typeID: data.typeID,
+            value: getData(data)
+        });
+    }
+    const response: TGetDeviceResponse = {
+        origin: "server",
+        isSuccessful: true,
+        deviceID: message.deviceID,
+        operation: "getDevice",
+        // mqttTopicID: result.device.mqttTopicID,
+        mqttTopic: topicPathResult.mqttTopicObject.path,
+        data: dataArr,
+    };
+    publishMessage(topic, response);
+}
+
+function returnFalse(topic: string, message: TGetDeviceRequest) {
+    const response: TGetDeviceResponse = {
+        origin: "server",
+        isSuccessful: false,
+        deviceID: message.deviceID,
+        operation: "getDevice",
+    };
+    publishMessage(topic, response);
 }
 
 /**
@@ -71,7 +79,7 @@ export async function sendDevicePropertiesOfDevice(topic: string, deviceID: stri
     const result = await DeviceService.getDevice(deviceID);
     if (result.isSuccessful) {
         const topicPathResult = await getMqttTopic(result.device.mqttTopicID)
-        if(topicPathResult.isSuccessful) {
+        if (topicPathResult.isSuccessful) {
             //get all topics from device
             const dataArr: TDeviceDataDeviceProperties[] = [];
             for (let i = 0; i < result.device.data.length; i++) {
@@ -94,7 +102,7 @@ export async function sendDevicePropertiesOfDevice(topic: string, deviceID: stri
                 data: dataArr,
             };
             publishMessage(topic, response);
-        }else {
+        } else {
             const response: TGetDeviceResponse = {
                 origin: "server",
                 isSuccessful: false,

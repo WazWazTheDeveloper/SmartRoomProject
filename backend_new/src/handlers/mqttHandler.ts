@@ -35,7 +35,7 @@ export function mqttMessageHandler(
 
     if (message.origin == "server") return;
     if (message.operation == "initDevice") {
-        -initDevice(topic, message as TInitDeviceRequest);
+        initDevice(topic, message as TInitDeviceRequest);
         return;
     }
     if (message.operation == "getDevice") {

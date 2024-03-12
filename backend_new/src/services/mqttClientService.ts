@@ -6,6 +6,7 @@ let mqttClient: mqtt.MqttClient;
 export let subscribes: string[] = [
     process.env.MQTT_TOPIC_INIT_DEVICE as string,
     process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE as string,
+    process.env.MQTT_TOPIC_GET_DATA as string,
 ];
 let isReconnectInterval = false;
 let reconnectInterval: NodeJS.Timeout;
