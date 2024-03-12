@@ -33,7 +33,8 @@ export type TGetDeviceResponse = {
 } & (({
     isSuccessful: true,
     data: TDeviceDataDeviceProperties[]
-} & TDeviceDeviceDataProperties) | {
+    mqttTopic: string
+} & TDeviceDeviceDataProperties) | { //TDeviceDeviceDataProperties is not neccecery
     isSuccessful: false
 })
 
