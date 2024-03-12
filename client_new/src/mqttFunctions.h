@@ -179,21 +179,27 @@ void receiveGetDevice(int messageSize)
         return;
     }
 
-    const char *origin = doc["origin"];           // "server"
-    bool isSuccessful = doc["isSuccessful"];      // true
-    const char *deviceID = doc["deviceID"];       // "08382d24-e09e-48f9-b2b4-bec3c3b84f4e"
-    const char *operation = doc["operation"];     // "getDevice"
-    const char *mqttTopicID = doc["mqttTopicID"]; // "44bd9cf5-59d1-44f5-bc86-cf849fd2ceec"
+    const char *origin = doc["origin"];          // "server"
+    bool isSuccessful = doc["isSuccessful"];     // true
+    const char *deviceID = doc["deviceID"];      // "08382d24-e09e-48f9-b2b4-bec3c3b84f4e"
+    const char *operation = doc["operation"];    // "getDevice"
+    const char *mqttTopicStr = doc["mqttTopic"]; // "44bd9cf5-59d1-44f5-bc86-cf849fd2ceec"
 
-    if(strcmp(deviceID,uuid) != 0 ) return;
-    if(strcmp(operation,"getDevice") != 0 ) return;
-    if(strcmp(origin,"server") != 0 ) return;
-    if(!isSuccessful) return;
+    if (strcmp(deviceID, uuid) != 0)
+        return;
+    if (strcmp(operation, "getDevice") != 0)
+        return;
+    if (strcmp(origin, "server") != 0)
+        return;
+    if (!isSuccessful)
+        return;
 
-    //set mqttTopicID
+    int mqttTopicLength = strlen(deviceID);
+    strncpy(mqttTopic, mqttTopicStr, mqttTopicLength);
 
     JsonArray data = doc["data"];
 
+    int updated = 0;
     for (size_t i = 0; i < deviceTypeCount; i++)
     {
         JsonObject dataItem = data[i];
@@ -202,7 +208,25 @@ void receiveGetDevice(int messageSize)
         int data_0_typeID = dataItem["typeID"];                   // 0
         bool data_0_value = dataItem["value"];                    // false
 
-        //check each item in deviecDataArr and insert data into arr;
+        if (deviecDataArr[i]->getDataId() != data_0_dataID ||
+            deviecDataArr[i]->getTypeId() != data_0_typeID) return;
+        
+        switch (data_0_typeID)
+        {
+        case 0:
+            deviecDataArr[i]->setData(dataItem["value"].as<bool>(),true,false);
+            break;
+        case 1:
+            deviecDataArr[i]->setData(dataItem["value"].as<int>(),true,false);
+            break;
+        case 2:
+            deviecDataArr[i]->setData(dataItem["value"].as<int>(),true,false);
+            break;
+        default:
+            return;
+        }
+
+        // check each item in deviecDataArr and insert data into arr;
     }
 
     mqttClient.unsubscribe(initDeviceTopic);
