@@ -5,7 +5,7 @@ MultiStateButtonData::MultiStateButtonData(int _dataId)
     typeId = 2;
     dataId = _dataId;
     value = 0;
-    mqttTopic = "\0";
+    mqttTopic[0] = '\0';
 }
 
 void MultiStateButtonData::setData(int newValue, bool updateHardware, bool updateServer)

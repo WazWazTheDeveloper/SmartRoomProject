@@ -18,6 +18,7 @@ int brokerPort = 1883; // mqtt broker port
 char *connectionCheckRequestTopic = ("checkConnectionRequest");
 char *connectionCheckResponseTopic = ("checkConnectionResponse");
 char *initDeviceTopic = ("initDevice");
+char *getDataTopic = ("getData");
 
 //delays
 unsigned long requestDelay = 5000; //init device delay between requests
