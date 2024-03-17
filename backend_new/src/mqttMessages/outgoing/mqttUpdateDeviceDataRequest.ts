@@ -21,7 +21,12 @@ export async function updateDeviceData(topic: string, device: Device, dataIndex:
 
     // get data
     //@ts-ignore
-    const data: string | number = device.data[dataIndex][dataPropertyName];
+    let data: string | number | boolean = device.data[dataIndex][dataPropertyName];
+
+    // convert boolean to int
+    if(typeof data == "boolean") {
+        data = data ? 1 : 0;
+    }
 
     MqttClientService.publishMessage(topic, data);
 }
