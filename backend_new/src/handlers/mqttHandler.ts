@@ -15,8 +15,6 @@ export function mqttMessageHandler(
     topic: string,
     message: string
 ) {
-    console.log(topic)
-    console.log(message)
     if (typeof topic != "string") return;
     if (!message) return;
 
@@ -44,7 +42,6 @@ export function mqttMessageHandler(
         let logItem = `unknown operation: ${message.operation}`;
         logEvents(logItem, MQTT_LOG);
     } catch (e) {
-        console.log("test")
         if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE && typeof message == "string") {
             checkConnection(topic, message);
             return;
