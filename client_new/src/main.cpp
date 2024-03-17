@@ -10,7 +10,6 @@
 #include "./dataTypes/numberData.h"
 #include "./dataTypes/multiStateButtonData.h"
 
-
 // setup
 bool setupDeviceObjects();
 
@@ -115,7 +114,7 @@ bool setupDeviceObjects()
             break;
         }
         deviecDataArr[i]->setUpdateServer(updateServer);
-        // deviecDataArr[i] -> setupdateHardware(updateServer); TODO: add this
+        deviecDataArr[i]->setupdateHardware(updateServer);
     }
 
     return true;
