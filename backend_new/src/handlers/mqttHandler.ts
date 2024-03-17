@@ -1,4 +1,4 @@
-import { TAllMqttMessageType, TConnectionCheckResponse, TGetDeviceRequest, TInitDeviceRequest, } from "../interfaces/mqttMassge.interface";
+import { TAllMqttMessageType, TGetDeviceRequest, TInitDeviceRequest, } from "../interfaces/mqttMassge.interface";
 import { MQTT_LOG, logEvents } from "../middleware/logger";
 import { initDevice } from "../mqttMessages/incoming/mqttInitDeviceRequest";
 import { getDevice } from "../mqttMessages/incoming/mqttGetDeviceRequest";
@@ -21,6 +21,13 @@ export function mqttMessageHandler(
     if (!message) return;
 
     try {
+        // for some reason "1" is a valid json string got JSON.parse
+        // so I trigger the catch block manually 
+        // maybe there will be a need to check for "true" string in the future
+        if (isNumeric(message)) {
+            throw "not a string"
+        }
+
         let messageJson: TAllMqttMessageType = JSON.parse(message.toString());
 
         if (messageJson.origin == "server") return;
@@ -37,7 +44,8 @@ export function mqttMessageHandler(
         let logItem = `unknown operation: ${message.operation}`;
         logEvents(logItem, MQTT_LOG);
     } catch (e) {
-        if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE) {
+        console.log("test")
+        if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE && typeof message == "string") {
             checkConnection(topic, message);
             return;
         }
@@ -48,7 +56,13 @@ export function mqttMessageHandler(
         }
 
         //@ts-ignore
-        let logItem = `unknown operation: ${message}`;
+        let logItem = `unknown message: ${message}`;
         logEvents(logItem, MQTT_LOG);
     }
+}
+
+function isNumeric(str : string) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(Number(str)) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
 }
