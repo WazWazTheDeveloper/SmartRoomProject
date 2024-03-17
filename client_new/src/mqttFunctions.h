@@ -18,6 +18,8 @@ void sendInitDevice();
 void receiveInitDevice(int messageSize);
 void requestGetDevice();
 void receiveGetDevice(int messageSize);
+void receiveDataFromServer(int messageSize, int dataId);
+void receiveUpdateToDeviceInfo(int messageSize);
 
 MqttClient mqttClient(wifiClient);
 
@@ -60,6 +62,19 @@ void onMqttMessage(int messageSize)
         receiveGetDevice(messageSize);
         return;
     }
+    for (size_t i = 0; i < deviceTypeCount; i++)
+    {
+        char topic[108] = {"\0"};
+        if (deviecDataArr[i] != NULL)
+        {
+            char updateTopic[108] = {"\0"};
+            deviecDataArr[i]->getTopic(updateTopic);
+            if (mqttClient.messageTopic().compareTo(updateTopic) == 0)
+            {
+                receiveDataFromServer(messageSize, i);
+            }
+        }
+    }
 }
 
 void subscribeTopics()
@@ -81,7 +96,6 @@ void unsubscribeTopic(char *topic)
 {
     if (strcmp(topic, "\0") == 0)
         return;
-    // mqttClient.unsubscribe(topic);
     Serial.print(mqttClient.unsubscribe(topic));
     Serial.print(" :unsubscribed from: ");
     Serial.println(topic);
@@ -91,7 +105,6 @@ void subscribeTopic(char *topic)
 {
     if (strcmp(topic, "\0") == 0)
         return;
-    // mqttClient.subscribe(topic);
     Serial.print(mqttClient.subscribe(topic));
     Serial.print(" :subscribed to: ");
     Serial.println(topic);
@@ -108,6 +121,46 @@ void sendIsConnected()
 
 void updateServer(int dataId)
 {
+    for (size_t i = 0; i < deviceTypeCount; i++)
+    {
+        int _dataId = deviecDataArr[i]->getDataId();
+        if (dataId == _dataId)
+        {
+            char updateTopic[108] = {"\0"};
+            deviecDataArr[i]->getTopic(updateTopic);
+            mqttClient.beginMessage(updateTopic); // topic
+
+            // TODO: add types here
+            switch (deviecDataArr[i]->getTypeId())
+            {
+            case 0:
+            {
+                bool _data = false;
+                deviecDataArr[i]->getData(&_data);
+                mqttClient.print(_data);
+                break;
+            }
+            case 1:
+            {
+                int _data = 0;
+                deviecDataArr[i]->getData(&_data);
+                mqttClient.print(_data);
+                break;
+            }
+            case 2:
+            {
+                int _data = 0;
+                deviecDataArr[i]->getData(&_data);
+                mqttClient.print(_data);
+                break;
+            }
+            }
+
+            mqttClient.endMessage();
+
+            Serial.println("updated server");
+        }
+    }
 }
 
 void sendInitDevice()
@@ -266,6 +319,7 @@ void receiveGetDevice(int messageSize)
         deviecDataArr[i]->setTopic(topic);
         subscribeTopic(topic);
 
+        // TODO: add types here
         switch (data_0_typeID)
         {
         case 0:
@@ -283,6 +337,32 @@ void receiveGetDevice(int messageSize)
     }
     Serial.println("got data from server");
     mqttClient.unsubscribe(getDataTopic);
+}
+
+// IMPLEMENT
+void receiveDataFromServer(int messageSize, int dataId)
+{
+    switch (deviecDataArr[dataId]->getTypeId())
+    {
+    case 0:
+    {
+        break;
+    }
+    case 1:
+    {
+        break;
+    }
+    case 2:
+    {
+        break;
+    }
+    }
+    
+}
+
+// IMPLEMENT
+void receiveUpdateToDeviceInfo(int messageSize)
+{
 }
 
 #endif MQTTFUNCTIONS_HPP
