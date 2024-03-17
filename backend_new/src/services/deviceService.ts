@@ -152,7 +152,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
         error: "",
     };
     //checks
-    if (!changeList) return returnError("changeList is undefined");
+    if (typeof changeList == "undefined") return returnError("changeList is undefined");
     if (!Array.isArray(changeList))
         return returnError("changeList is not an array");
 
@@ -160,11 +160,11 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
         const changeItem = changeList[index];
 
         //checks
-        if (!changeItem)
+        if (typeof changeItem == "undefined")
             return returnError(`changeList[${index}].changeItem is undefined`);
-        if (!changeItem._id)
+        if (typeof changeItem._id == "undefined")
             return returnError(`changeList[${index}]._id is undefined`);
-        if (!changeItem.propertyToChange)
+        if (typeof changeItem.propertyToChange == "undefined")
             return returnError(
                 `changeList[${index}].propertyToChange is undefined`
             );
@@ -304,7 +304,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 return returnError(
                     `changeList[${index}].propertyToChange.typeID is not a number`
                 );
-            if (!changeItem.propertyToChange.dataPropertyName)
+            if (typeof changeItem.propertyToChange.dataPropertyName == "undefined")
                 return returnError(
                     `changeList[${index}].propertyToChange.dataPropertyName is undefined`
                 );
@@ -410,7 +410,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
             // }
             else if (typeID == SwitchData.TYPE_ID) {
                 //type checking
-                if (!changeItem.propertyToChange.newValue)
+                if (typeof changeItem.propertyToChange.newValue == "undefined")
                     return returnError(
                         `changeList[${index}].propertyToChange.newValue is undefined`
                     );
@@ -452,7 +452,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 operations.push(operation);
             } else if (typeID == NumberData.TYPE_ID) {
                 //type checking
-                if (!changeItem.propertyToChange.newValue)
+                if (typeof changeItem.propertyToChange.newValue == "undefined")
                     return returnError(
                         `changeList[${index}].propertyToChange.newValue is undefined`
                     );
@@ -524,7 +524,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 ) {
                     if (changeItem.propertyToChange.operation == "add") {
                         //type checking
-                        if (!changeItem.propertyToChange.newState)
+                        if (typeof changeItem.propertyToChange.newState == "undefined")
                             return returnError(
                                 `changeList[${index}].propertyToChange.newState is undefined`
                             );
@@ -603,7 +603,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                         changeItem.propertyToChange.operation == "update"
                     ) {
                         //type checking
-                        if (!changeItem.propertyToChange.state)
+                        if (typeof changeItem.propertyToChange.state == "undefined")
                             return returnError(
                                 `changeList[${index}].propertyToChange.state is undefined`
                             );
