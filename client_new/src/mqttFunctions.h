@@ -41,7 +41,7 @@ boolean setupMqtt()
 
 void onMqttMessage(int messageSize)
 {
-    Serial.println(mqttClient.messageTopic());
+    // Serial.println(mqttClient.messageTopic());
     if (mqttClient.messageTopic().compareTo(connectionCheckRequestTopic) == 0)
     {
         Serial.println(F("recived connection check request"));
@@ -81,7 +81,7 @@ void unsubscribeTopic(char *topic)
 {
     if (strcmp(topic, "\0") == 0)
         return;
-        // mqttClient.unsubscribe(topic);
+    // mqttClient.unsubscribe(topic);
     Serial.print(mqttClient.unsubscribe(topic));
     Serial.print(" :unsubscribed from: ");
     Serial.println(topic);
@@ -91,7 +91,7 @@ void subscribeTopic(char *topic)
 {
     if (strcmp(topic, "\0") == 0)
         return;
-        // mqttClient.subscribe(topic);
+    // mqttClient.subscribe(topic);
     Serial.print(mqttClient.subscribe(topic));
     Serial.print(" :subscribed to: ");
     Serial.println(topic);
@@ -99,6 +99,11 @@ void subscribeTopic(char *topic)
 
 void sendIsConnected()
 {
+    mqttClient.beginMessage(connectionCheckResponseTopic); // topic
+    mqttClient.print(uuid);
+    mqttClient.endMessage();
+
+    Serial.println("connection check completed");
 }
 
 void updateServer(int dataId)
@@ -230,7 +235,7 @@ void receiveGetDevice(int messageSize)
         return;
 
     unsubscribeTopic(mqttTopic);
-    int mqttTopicLength = strlen(mqttTopicStr) +1;
+    int mqttTopicLength = strlen(mqttTopicStr) + 1;
     strncpy(mqttTopic, mqttTopicStr, mqttTopicLength);
     subscribeTopic(mqttTopic);
 
@@ -253,8 +258,6 @@ void receiveGetDevice(int messageSize)
         // unsub from old
         char oldTopic[108] = {"\0"};
         deviecDataArr[i]->getTopic(oldTopic);
-        // Serial.println("oldTopic");
-        // Serial.println(oldTopic);
         unsubscribeTopic(oldTopic);
 
         char topic[108];
