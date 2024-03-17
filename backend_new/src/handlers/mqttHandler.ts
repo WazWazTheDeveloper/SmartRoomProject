@@ -13,39 +13,42 @@ import { updateServerRequest } from "../mqttMessages/incoming/mqttUpdateServerRe
  */
 export function mqttMessageHandler(
     topic: string,
-    message: TAllMqttMessageType
+    message: string
 ) {
-    console.log(topic);
-    console.log(message);
+    console.log(topic)
+    console.log(message)
     if (typeof topic != "string") return;
     if (!message) return;
 
-    //device update server
-    if (typeof message == "string" || typeof message == "number") {
-        updateServerRequest(topic, message);
-        return;
-    }
+    try {
+        let messageJson: TAllMqttMessageType = JSON.parse(message.toString());
 
-    //device response to connection check
-    if (message.operation == "checkConnection") {
-        checkConnection(topic, message as TConnectionCheckResponse);
-        return;
-    }
-    if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE) return;
+        if (messageJson.origin == "server") return;
+        if (messageJson.operation == "initDevice") {
+            initDevice(topic, messageJson as TInitDeviceRequest);
+            return;
+        }
+        if (messageJson.operation == "getDevice") {
+            getDevice(topic, messageJson as TGetDeviceRequest);
+            return;
+        }
 
-    if (message.origin == "server") return;
-    if (message.operation == "initDevice") {
-        initDevice(topic, message as TInitDeviceRequest);
-        return;
-    }
-    if (message.operation == "getDevice") {
-        getDevice(topic, message as TGetDeviceRequest);
-        return;
-    }
+        //@ts-ignore
+        let logItem = `unknown operation: ${message.operation}`;
+        logEvents(logItem, MQTT_LOG);
+    } catch (e) {
+        if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE) {
+            checkConnection(topic, message);
+            return;
+        }
+        //device update server
+        if (typeof message == "string" || typeof message == "number") {
+            updateServerRequest(topic, message);
+            return;
+        }
 
-    if (topic == process.env.MQTT_TOPIC_INIT_DEVICE) return;
-
-    //@ts-ignore
-    let logItem = `unknown operation: ${message.operation}`;
-    logEvents(logItem, MQTT_LOG);
+        //@ts-ignore
+        let logItem = `unknown operation: ${message}`;
+        logEvents(logItem, MQTT_LOG);
+    }
 }

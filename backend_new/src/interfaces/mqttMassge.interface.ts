@@ -57,4 +57,4 @@ export type TConnectionCheckResponse = {
     deviceID: string
 }
 
-export type TAllMqttMessageType = TConnectionCheckResponse | TConnectionCheckRequest | TUpdateDataToDeviceResponse | TUpdateDataToDeviceRequest | TUpdateDataFromDeviceRequest | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse | string | number
+export type TAllMqttMessageType = TUpdateDataToDeviceResponse | TGetDeviceRequest | TInitDeviceRespone | TInitDeviceRequest | TGetDeviceResponse
