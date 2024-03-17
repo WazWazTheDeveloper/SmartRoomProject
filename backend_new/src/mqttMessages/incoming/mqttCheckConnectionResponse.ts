@@ -9,25 +9,25 @@ import * as DeviceService from "../../services/deviceService";
  */
 export async function checkConnection(
     topic: string,
-    message: TConnectionCheckResponse
+    message: string
 ) {
     // type checks
     if (typeof topic != "string") return;
     if(topic != process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE) return
-    if (topic == "server") return;
+    // if (topic == "server") return;
     if (!message) return;
-    if (message.operation != "checkConnection") return;
-
+    // if (message.operation != "checkConnection") return;
+    console.log("adasdasdasdasdasdasdasd")
     const updateList: DeviceService.TUpdateDeviceProperties[] = [
         {
-            _id: message.deviceID,
+            _id: message,
             propertyToChange: {
                 propertyName: "isConnectedCheck",
                 newValue: true,
             },
         },
         {
-            _id: message.deviceID,
+            _id: message,
             propertyToChange: {
                 propertyName: "isConnected",
                 newValue: true,
