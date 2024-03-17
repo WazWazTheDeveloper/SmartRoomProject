@@ -11,7 +11,7 @@ import { getDevicesUsingTopic, getTopicIDsByPath, getTypeOfTopic, } from "../../
  * @param message message send via mqtt
  * @returns void
  */
-export async function updateServerRequest(topic: string, message: TUpdateDataFromDeviceRequest) {
+export async function updateServerRequest(topic: string, message: string | number) {
 
     const topics = await getTopicIDsByPath(topic);
     const deviceToUpdates = await getDevicesUsingTopic(topic);
