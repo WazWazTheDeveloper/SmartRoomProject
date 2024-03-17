@@ -12,7 +12,7 @@ let isReconnectInterval = false;
 let reconnectInterval: NodeJS.Timeout;
 
 export function initializeMqttClient(
-    mqttMessageHandler: (topic: string, message: TAllMqttMessageType) => void
+    mqttMessageHandler: (topic: string, message: string) => void
 ) {
     mqttClient = mqtt.connect(
         `mqtt://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`,
@@ -63,11 +63,12 @@ export function initializeMqttClient(
 
     mqttClient.on("message", (topic: string, message: Buffer) => {
         try {
-            let messageJson = JSON.parse(message.toString());
+            let messageString = message.toString()
+            // let messageJson = JSON.parse(message.toString());
             let logItem = `recived massage from topic ${topic}:\t
-                                    ${JSON.stringify(messageJson, null, "\t")}`;
+                                    ${messageString}`;
             logEvents(logItem, MQTT_LOG);
-            mqttMessageHandler(topic, messageJson);
+            mqttMessageHandler(topic, messageString);
         } catch (e) {
             let logItem = `error: ${e} in massage from topic ${topic}:\t
             ${message}`;
@@ -100,7 +101,7 @@ export function unsubscribeFromTopic(mqttTopicPath: string) {
     return true;
 }
 
-export function publishMessage(topic: string, message: TAllMqttMessageType) {
+export function publishMessage(topic: string, message: TAllMqttMessageType | string | number) {
     // add a check to check if type of message is correct for that type of topic
     mqttClient.publish(topic, JSON.stringify(message));
     let logItem = `published massage to topic ${topic}:\t
