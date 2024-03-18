@@ -339,36 +339,51 @@ void receiveGetDevice(int messageSize)
     mqttClient.unsubscribe(getDataTopic);
 }
 
-// IMPLEMENT
 void receiveDataFromServer(int messageSize, int dataIndex)
 {
     int typeId = deviecDataArr[dataIndex]->getTypeId();
     byte input[1024] = {0};
-    mqttClient.readString();
+    mqttClient.readBytes(input, messageSize);
     switch (typeId)
     {
     case 0:
     {
-        // TODO check if data is "0" of just string
-        int data = atoi((const char*)input);
+        int data = atoi((const char *)input);
         bool bData = false;
-        if(data == 1){
+        if (data == 1)
+        {
             bData = true;
-        } else if(data == 0 && messageSize == 1 && (char)input[0] == '0') {
+        }
+        else if (data == 0 && messageSize == 1 && (char)input[0] == '0')
+        {
             bData = false;
-        } else {
+        }
+        else
+        {
             return;
         }
 
-        deviecDataArr[dataIndex]->setData(bData,true,false);
+        deviecDataArr[dataIndex]->setData(bData, true, false);
         break;
     }
     case 1:
     {
+        int data = atoi((const char *)input);
+
+        // if data is 0 and string is not "0" return
+        if (!((data == 0 && messageSize == 1 && (char)input[0] == '0') || data >= 1 || data <= 1))
+            return;
+        deviecDataArr[dataIndex]->setData(data, true, false);
         break;
     }
     case 2:
     {
+        int data = atoi((const char *)input);
+
+        // if data is 0 and string is not "0" return
+        if (!((data == 0 && messageSize == 1 && (char)input[0] == '0') || data >= 1 || data <= 1))
+            return;
+        deviecDataArr[dataIndex]->setData(data, true, false);
         break;
     }
     }
