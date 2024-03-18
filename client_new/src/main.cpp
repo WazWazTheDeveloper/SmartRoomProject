@@ -57,7 +57,9 @@ void loop()
 
     if (!mqttClient.connected())
     {
-        // TODO: add delay between trys
+        if (millis() - lastMQTTConnectionAttemptMillis < 1000)
+            return;
+            
         setupMqtt();
         return;
     }
@@ -120,7 +122,6 @@ bool setupDeviceObjects()
     return true;
 }
 
-
-void updateHardware(int dataId) {
-
+void updateHardware(int dataId)
+{
 }
