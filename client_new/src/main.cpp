@@ -13,7 +13,7 @@
 // setup
 bool setupDeviceObjects();
 
-// uuid stuff
+void updateHardware(int dataId);
 
 void IRAM_ATTR resetUUIDInterrupt()
 {
@@ -114,8 +114,13 @@ bool setupDeviceObjects()
             break;
         }
         deviecDataArr[i]->setUpdateServer(updateServer);
-        deviecDataArr[i]->setupdateHardware(updateServer);
+        deviecDataArr[i]->setupdateHardware(updateHardware);
     }
 
     return true;
+}
+
+
+void updateHardware(int dataId) {
+
 }
