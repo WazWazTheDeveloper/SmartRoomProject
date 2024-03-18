@@ -3,6 +3,7 @@
 
 unsigned long lastRequestedUUIDMillis = 0;
 unsigned long lastRequestedDataMillis = 0;
+unsigned long lastMQTTConnectionAttemptMillis = 0;
 bool isResetUUID = false;
 unsigned long lastUUIDReset = 0;
 bool hasData = false;
