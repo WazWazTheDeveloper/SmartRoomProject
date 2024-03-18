@@ -27,8 +27,8 @@ export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.Cha
             "devices"
         )) as mongoDB.Collection<TDeviceJSON_DB>;
     } catch (e) {
-        // TODO: maybe add ERROR LOG
-        console.log(e);
+        let logItem = `Failed to initialize device handler: ${e}`;
+        logEvents(logItem, ERROR_LOG);
         return false;
     }
 
