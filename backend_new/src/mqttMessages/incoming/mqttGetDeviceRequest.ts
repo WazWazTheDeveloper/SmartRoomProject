@@ -8,7 +8,6 @@ import { sendDevicePropertiesMQTTRequest } from "../outgoing/mqttGetDeviceRespon
  * @returns void
  */
 export async function getDevice(topic: string, message: TGetDeviceRequest) {
-    // TODO: add device data as well when requesting data
     if (typeof topic != "string") return;
     if (!message) return;
     if (message.operation != "getDevice") return;

@@ -6,6 +6,9 @@ import {TMqttTopicObjectJSON_DB,TMqttTopicProperty,} from "../interfaces/mqttTop
 import { UpdateFilter } from "mongodb";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
 import * as mongoDB from "mongodb";
+import SwitchData from "../models/dataTypes/switchData";
+import NumberData from "../models/dataTypes/numberData";
+import MultiStateButton from "../models/dataTypes/multiStateButtonData";
 
 type MqttTopicResult =
     | {
@@ -181,13 +184,13 @@ export function getTypeOfTopic(topicType: number) {
     switch (topicType) {
         case -1:
             return "any"
-        case 0:
+        case SwitchData.TYPE_ID:
             return "boolean"
-        case 1:
+        case NumberData.TYPE_ID:
             return "number"
-        case 2:
+        case MultiStateButton.TYPE_ID:
             return "number"
         default :
-            // TODO: throw error
+            throw "unknown topicType"
     }
 }

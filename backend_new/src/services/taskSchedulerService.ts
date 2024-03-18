@@ -8,7 +8,6 @@ type TScheduledTask = {
 
 const scheduledTasks: TScheduledTask[] = []
 
-// TODO: add logs
 export function addScheduledTask(cronExpression: string, id: string, func: () => void) {
     // check if valid cron expression
     if (!isCronValid(cronExpression)){
