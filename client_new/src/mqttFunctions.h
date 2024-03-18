@@ -18,7 +18,7 @@ void sendInitDevice();
 void receiveInitDevice(int messageSize);
 void requestGetDevice();
 void receiveGetDevice(int messageSize);
-void receiveDataFromServer(int messageSize, int dataId);
+void receiveDataFromServer(int messageSize, int dataIndex);
 void receiveUpdateToDeviceInfo(int messageSize);
 
 MqttClient mqttClient(wifiClient);
@@ -340,12 +340,27 @@ void receiveGetDevice(int messageSize)
 }
 
 // IMPLEMENT
-void receiveDataFromServer(int messageSize, int dataId)
+void receiveDataFromServer(int messageSize, int dataIndex)
 {
-    switch (deviecDataArr[dataId]->getTypeId())
+    int typeId = deviecDataArr[dataIndex]->getTypeId();
+    byte input[1024] = {0};
+    mqttClient.readString();
+    switch (typeId)
     {
     case 0:
     {
+        // TODO check if data is "0" of just string
+        int data = atoi((const char*)input);
+        bool bData = false;
+        if(data == 1){
+            bData = true;
+        } else if(data == 0 && messageSize == 1 && (char)input[0] == '0') {
+            bData = false;
+        } else {
+            return;
+        }
+
+        deviecDataArr[dataIndex]->setData(bData,true,false);
         break;
     }
     case 1:
@@ -357,7 +372,6 @@ void receiveDataFromServer(int messageSize, int dataId)
         break;
     }
     }
-    
 }
 
 // IMPLEMENT
