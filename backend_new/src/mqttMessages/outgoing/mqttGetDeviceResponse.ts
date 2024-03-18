@@ -39,9 +39,7 @@ export async function sendDevicePropertiesMQTTRequest(topic: string, message: TG
         }
 
         dataArr.push({
-            // mqttTopicID: data.mqttTopicID,
             mqttTopicPath: dataTopicPathResult.mqttTopicObject.path,
-            // mqttSecondaryTopicID: data.mqttSecondaryTopicID,
             dataID: data.dataID,
             typeID: data.typeID,
             value: getData(data)
@@ -77,49 +75,41 @@ function returnFalse(topic: string, message: TGetDeviceRequest) {
  */
 export async function sendDevicePropertiesOfDevice(topic: string, deviceID: string) {
     const result = await DeviceService.getDevice(deviceID);
-    if (result.isSuccessful) {
-        const topicPathResult = await getMqttTopic(result.device.mqttTopicID)
-        if (topicPathResult.isSuccessful) {
-            //get all topics from device
-            const dataArr: TDeviceDataDeviceProperties[] = [];
-            for (let i = 0; i < result.device.data.length; i++) {
-                const data = result.device.data[i];
-                dataArr.push({
-                    mqttTopicID: data.mqttTopicID,
-                    // mqttSecondaryTopicID: data.mqttSecondaryTopicID,
-                    dataID: data.dataID,
-                    typeID: data.typeID,
-                    value: getData(data)
-                });
-            }
-            const response: TGetDeviceResponse = {
-                origin: "server",
-                isSuccessful: true,
-                deviceID: deviceID,
-                operation: "getDevice",
-                mqttTopic: topicPathResult.mqttTopicObject.path,
-                // mqttTopicID: result.device.mqttTopicID,
-                data: dataArr,
-            };
-            publishMessage(topic, response);
-        } else {
-            const response: TGetDeviceResponse = {
-                origin: "server",
-                isSuccessful: false,
-                deviceID: deviceID,
-                operation: "getDevice",
-            };
-            publishMessage(topic, response);
-        }
-    } else {
-        const response: TGetDeviceResponse = {
-            origin: "server",
-            isSuccessful: false,
-            deviceID: deviceID,
-            operation: "getDevice",
-        };
-        publishMessage(topic, response);
+    if (!result.isSuccessful) {
+        return
     }
+    const topicPathResult = await getMqttTopic(result.device.mqttTopicID)
+    if (!topicPathResult.isSuccessful) {
+        return
+    }
+    //get all topics from device
+    const dataArr: TDeviceDataDeviceProperties[] = [];
+    for (let i = 0; i < result.device.data.length; i++) {
+        const data = result.device.data[i];
+
+        const dataTopicPathResult = await getMqttTopic(data.mqttTopicID)
+        if (!dataTopicPathResult.isSuccessful) {
+            return;
+        }
+
+        dataArr.push({
+            mqttTopicPath: dataTopicPathResult.mqttTopicObject.path,
+            dataID: data.dataID,
+            typeID: data.typeID,
+            value: getData(data)
+        });
+    }
+
+    const response: TGetDeviceResponse = {
+        origin: "server",
+        isSuccessful: true,
+        deviceID: deviceID,
+        operation: "getDevice",
+        mqttTopic: topicPathResult.mqttTopicObject.path,
+        // mqttTopicID: result.device.mqttTopicID,
+        data: dataArr,
+    };
+    publishMessage(topic, response);
 }
 
 
