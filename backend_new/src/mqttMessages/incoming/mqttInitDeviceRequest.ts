@@ -32,7 +32,6 @@ export async function initDevice(topic: string, message: TInitDeviceRequest) {
         message.dataTypeArray
     );
     
-    // TODO: move this part to oncreatehandler
     if (result.isSuccessful) {
         const response: TInitDeviceRespone = {
             isSuccessful: true,

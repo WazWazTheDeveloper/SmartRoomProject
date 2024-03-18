@@ -13,7 +13,6 @@ export type TDeviceDeviceDataProperties = {
 
 export type TDeviceDataDeviceProperties = {
     dataID: number
-    mqttTopicID?: string
     mqttTopicPath?: string
     typeID: number
     value: any
