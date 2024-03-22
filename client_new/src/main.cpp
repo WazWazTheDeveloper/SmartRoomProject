@@ -92,6 +92,8 @@ void loop()
         hasData = true;
         return;
     }
+
+    deviceLoop();
 }
 
 // device object stuff
@@ -99,7 +101,6 @@ bool setupDeviceObjects()
 {
     for (size_t i = 0; i < deviceTypeCount; i++)
     {
-
         switch (deviceType[i])
         {
         case 0:
@@ -122,6 +123,7 @@ bool setupDeviceObjects()
     return true;
 }
 
-void updateHardware(int dataId)
+void updateHardware(int dataIndex)
 {
+    updateHardwareArr[dataIndex](dataIndex);
 }
