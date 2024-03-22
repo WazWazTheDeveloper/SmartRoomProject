@@ -3,3 +3,7 @@
 //**************************************************************************************************/
 
 #define RESET_DEVICE_PIN 4
+
+// LED STRIP 1
+#define LED_STRIP_1_PIN 5
+#define LED_STRIP_1_NUMBER_OF_LEDS 72
