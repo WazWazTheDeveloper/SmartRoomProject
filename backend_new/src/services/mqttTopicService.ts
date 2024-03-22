@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { DB_LOG, logEvents } from "../middleware/logger";
 import MqttTopicObject from "../models/mqttTopicObject";
-import {COLLECTION_MQTT_TOPICS,collections,createDocument,getCollection,getDocuments,getDocumentsAggregate,updateDocument,} from "./mongoDBService";
+import {COLLECTION_MQTT_TOPICS,bulkWriteCollection,collections,createDocument,getCollection,getDocuments,getDocumentsAggregate,updateDocument,} from "./mongoDBService";
 import {TMqttTopicObjectJSON_DB,TMqttTopicProperty,} from "../interfaces/mqttTopicObject.interface";
 import { UpdateFilter } from "mongodb";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
@@ -92,14 +92,23 @@ export async function updateMqttTopic(_id: string, propertyList: TMqttTopicPrope
     for (let index = 0; index < propertyList.length; index++) {
         const property = propertyList[index];
         set[property.propertyName] = property.newValue;
+        if(property.propertyName == "path") {
+            set["previousPath"] = "$path";
+        }
     }
 
-    const updateFilter: UpdateFilter<TMqttTopicObjectJSON_DB> = {
-        $set: { set },
-    };
-
     const filter = { _id: _id };
-    await updateDocument(COLLECTION_MQTT_TOPICS, filter, updateFilter);
+
+    const operations = [{
+        updateOne: {
+            filter: filter,
+            update: [{
+                $set: set,
+            }]
+        },
+    }]
+
+    await bulkWriteCollection(COLLECTION_MQTT_TOPICS, operations)
 }
 
 export async function getDevicesUsingTopic(topicPath: string) {
