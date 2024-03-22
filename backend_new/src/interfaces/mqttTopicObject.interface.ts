@@ -5,10 +5,6 @@ export type TMqttTopicProperty = {
 {
     propertyName: "path"
     newValue: string
-}|
-{
-    propertyName: "previousPath"
-    newValue: string
 }
 
 export interface IMqttTopicObject {
