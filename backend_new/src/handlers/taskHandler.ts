@@ -36,17 +36,44 @@ export async function taskCheckHandler(taskID: string) {
         const element = task.timeChecks[i];
         if (!element.isTrue) return
     }
+    const changeList: DeviceService.TUpdateDeviceProperties[] = []
 
     for (let i = 0; i < task.todoTasks.length; i++) {
         const element = task.todoTasks[i];
-        let update = {
-            propertyName : element.propertyName,
-            newValue : element.newValue
+        const update : DeviceService.TUpdateDeviceProperties = {
+            _id : element.deviceID,
+            propertyToChange: {
+                 dataID : element.dataID,
+                 propertyName : "data",
+                 newValue:element.newValue,
+                 //@ts-ignore
+                 dataPropertyName : element.propertyName
+            }
         }
+        changeList.push(update);
     }
-    // do the todo list
-    // turn off if is not repeating
-    console.log("test");
+    
+    
+    //turn off if is not repeating
+    const updateList: TTaskProperty[] = []
+    if(task.isRepeating) {
+        // turn on task
+        const update: TTaskProperty = {
+            taskPropertyName: "isOn",
+            newValue : true
+        }
+        updateList.push(update)
+    } else {
+        // turn off task
+        const update: TTaskProperty = {
+            taskPropertyName: "isOn",
+            newValue : false
+        }
+        updateList.push(update)
+    }
+    await updateTaskProperty(task._id,updateList)
+    
+    await DeviceService.updateDeviceProperties(changeList)
 }
 
 function checkEqual(value: any, valueToCompare: any) {
