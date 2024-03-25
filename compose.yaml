@@ -1,13 +1,13 @@
 services:
   backend:
-    container_name: 'backend_new'
-    build: /backend_new
+    container_name: 'controller'
+    build: /controller
     tty: true
     ports:
       - 5000:5000
     volumes:
-      - ./backend_new:/backend
-      - /backend/node_modules/
+      - ./controller:/controller
+      - /controller/node_modules/
     environment:
       - MQTT_HOST=emqx
       - MQTT_PORT=1883
