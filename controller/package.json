@@ -1,5 +1,5 @@
 {
-  "name": "smart_room_backend",
+  "name": "controller",
   "version": "1.0.0",
   "description": "",
   "main": "app.ts",
