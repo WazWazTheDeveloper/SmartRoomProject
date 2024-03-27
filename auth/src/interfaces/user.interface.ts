@@ -1,26 +1,13 @@
-export type User = {
+import { TPermission } from "./permission.interface"
+
+export type TUser = {
     _id: string
     username: string
     password: string
-    permissions: Permission[]
+    permissions: TPermission[]
     permissionGroups: string[]
     isAdmin: boolean
     isActive: boolean
     lastActiveDate: number
     creationDate: number
-}
-
-export type Permission = {
-    type: "topic" | "device" | "task" | "PermissionGroup" | "users"
-    objectId: string
-    read: boolean
-    write: boolean
-    delete: boolean
-}
-
-export type PermissionGroup = {
-    _id: string
-    groupName: string
-    groupDescription: string
-    permissions: Permission[]
 }
