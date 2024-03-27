@@ -34,6 +34,23 @@ services:
     networks:
       - mongoCluster
 
+  account_service:
+    container_name: 'account_service'
+    build: /accountService
+    tty: true
+    ports:
+      - 5002:5002
+    volumes:
+      - ./accountService:/accountService
+      - /accountService/node_modules/
+    environment:
+      - NODE_ENV='development'
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+    networks:
+      - mongoCluster
+
   # backend:
   #   container_name: 'backend_new'
   #   build: /backend_new
