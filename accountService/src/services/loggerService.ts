@@ -2,10 +2,10 @@ import winston from 'winston';
 import * as date from 'date-fns'
 import { v4 as uuidv4 } from 'uuid';
 
-const logFormat = winston.format.printf(({ level, message}) => {
+const logFormat = winston.format.printf(({ level, message,service}) => {
     const dateTime = `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
 
-    return `${dateTime}\t${uuidv4()}\t${level}: ${message}`;
+    return `${dateTime}\t${uuidv4()}\t[${service}]\t${level}: ${message}`;
 });
 
 const loggerDBLevel = "silly"
