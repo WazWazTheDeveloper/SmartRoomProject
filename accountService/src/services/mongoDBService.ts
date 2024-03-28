@@ -67,6 +67,7 @@ async function attemptConnecting() {
         loggerDB.error("attempting to connect to database")
         await database.client.connect();
     } catch (e) {
+        database.isConnecting = false;
         loggerDB.warn(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
         setTimeout(async () => {
             attemptConnecting()
