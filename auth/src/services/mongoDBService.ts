@@ -41,35 +41,3 @@ export async function connectToDatabase() {
         await client.close();
     }
 }
-
-// TODO: fishish
-export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
-    let isSuccessful = false;
-    const _id = uuidv4()
-    let logItem = "";
-
-    // check if db collection exist
-    let collection: collectionTypes | undefined = collections[collectionStr]
-    if (!collection) {
-        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        loggerDB.error(err)
-        throw new Error(err)
-    }
-
-    // create and insert mqtt topic
-    const insertResult = await collection?.insertOne(documentJSON);
-
-    // check if accepted by db
-    if (insertResult.acknowledged) {
-        logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
-        isSuccessful = true
-    }
-    else {
-        logItem = `Failed to insert document with the _id: ${insertResult.insertedId} to ${collection.namespace}\t
-        ${JSON.stringify(documentJSON, null, "\t")}`
-        isSuccessful = false
-
-    }
-
-    return isSuccessful
-}

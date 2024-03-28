@@ -2,6 +2,8 @@ import express = require('express');
 const cookieParser = require('cookie-parser')
 import bodyParser = require('body-parser');
 import { loggerDB } from './src/services/loggerService';
+import { createNewUser } from './src/services/userService';
+import { connectToDatabase } from './src/services/mongoDBService';
 
 const app = express();
 
@@ -10,6 +12,7 @@ app.use(bodyParser.json());
 app.use(cookieParser())
 
 async function startServer(): Promise<void> {
+    await connectToDatabase()
     startListeningToReqests()
 }
 
@@ -18,17 +21,10 @@ function startListeningToReqests(): void {
         // TODO: log this:
         console.log(`listening on port ${process.env.SERVER_PORT}`)
     })
-
-    loggerDB.log({
-        level: "info",
-        message: "test2s"
-    })
-
-    
-    loggerDB.log({
-        level: "info",
-        message: "test2s"
-    })
+    setInterval(()=>{
+        console.log('test')
+        createNewUser("test","test")
+    },2000)
 }
 
 startServer();

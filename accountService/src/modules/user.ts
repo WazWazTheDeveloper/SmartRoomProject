@@ -1,6 +1,6 @@
 import { getTime } from "date-fns";
-import { TPermission } from "../interfaces/permission.interface";
 import { TUser } from "../interfaces/user.interface";
+import { TPermission } from "../interfaces/permission.interface";
 
 export class User implements TUser {
     _id: string
