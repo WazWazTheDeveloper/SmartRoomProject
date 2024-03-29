@@ -1,43 +1,87 @@
 import * as mongoDB from "mongodb";
-import * as dotenv from "dotenv";
 import { v4 as uuidv4 } from 'uuid';
 import { TUser } from "../interfaces/user.interface";
-import { TPermissionGroup } from "../interfaces/permissionGroup.interface";
 import { loggerDB } from "./loggerService";
 
 type TCollection = {
     users?: mongoDB.Collection<TUser>
-    permissionGroups?: mongoDB.Collection<TPermissionGroup>
 }
 
-type collectionNames = "users" | "permissionGroups"
+type collectionNames = "users"
 
 type collectionTypes =
-    mongoDB.Collection<TUser> |
-    mongoDB.Collection<TPermissionGroup>
+    mongoDB.Collection<TUser>
+
+const database = {
+    client: new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
+        pkFactory: { createPk: () => uuidv4() }
+    }),
+    isConnected: false,
+    isConnecting: false
+}
+
 
 export const collections: TCollection = {}
 
 export async function connectToDatabase() {
-    const client: mongoDB.MongoClient = new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
-        pkFactory: { createPk: () => uuidv4() }
-    });
-
-    try{
-
-        await client.connect();
-        
-        // init collections and db
-        const db: mongoDB.Db = client.db(process.env.DATABASE_NAME as string);
-        const users: mongoDB.Collection<TUser> = db.collection<TUser>(process.env.DATABASE_COLLECTION_USERS as string);
-        const permissionGroups: mongoDB.Collection<TPermissionGroup> = db.collection<TPermissionGroup>(process.env.DATABASE_COLLECTION_PERMISSION_GROUPS as string);
-        
-        collections.users = users
-        collections.permissionGroups = permissionGroups
-        
+    database.client.on("open", () => {
+        database.isConnecting = false;
+        database.isConnected = true
         loggerDB.info("Successfully connected to users database")
-    }finally {
-        loggerDB.warn("Closing connection to users database")
-        await client.close();
+        // init collections and db
+        const db: mongoDB.Db = database.client.db(process.env.DATABASE_NAME as string);
+        const users: mongoDB.Collection<TUser> = db.collection<TUser>(process.env.DATABASE_COLLECTION_USERS as string);
+
+        collections.users = users
+    })
+
+    database.client.on("serverHeartbeatFailed", () => {
+        if (database.isConnecting) return
+
+        database.isConnected = false
+        loggerDB.error("connection to database closed attempting to reconnect in 5 secends")
+        setTimeout(async () => {
+            attemptToConnect()
+        }, 5000)
+    })
+
+    await attemptToConnect()
+}
+
+async function attemptToConnect() {
+    if (database.isConnecting) return
+
+    try {
+        database.isConnecting = true;
+        loggerDB.info("attempting to connect to database")
+        await database.client.connect();
+    } catch (e) {
+        database.isConnecting = false;
+        loggerDB.error(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
+        setTimeout(async () => {
+            attemptToConnect()
+        }, 5000)
     }
+}
+
+export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
+    let logItem = "";
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found at mongoDBService.ts at getDocuments"
+        loggerDB.error(err);
+        throw new Error(err)
+    }
+
+    //query
+    const findResult = collection.find(fillter).project(project)
+    const findResultArr = await findResult.toArray() as DocumentType[];
+
+    // log
+    logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+    loggerDB.verbose(logItem)
+
+    return findResultArr
 }

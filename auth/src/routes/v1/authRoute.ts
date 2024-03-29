@@ -1,6 +1,6 @@
 import express from "express"
+import { login } from "../../controllers/v1/authController";
 
-const router: express.Router = express.Router();
+export const loginRouter: express.Router = express.Router();
 
-router.route("signup").post();
-router.route("login").post();
+loginRouter.route("/").post(login);
