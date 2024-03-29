@@ -13,11 +13,11 @@ const loggerDBLevel = "silly"
 export const loggerDB = winston.createLogger({
     level: loggerDBLevel,
     format: winston.format.json(),
-    defaultMeta: { service: 'account-service' },
+    defaultMeta: { service: 'auth-service' },
     transports: [
-        new winston.transports.File({ filename: './logs/db_error.log', level: 'error' }),
-        new winston.transports.File({ filename: './logs/db_info.log', level: 'info' }),
-        new winston.transports.File({ filename: './logs/db_verbose.log', level: 'verbose' }),
+        new winston.transports.File({ filename: `./logs/auth_error${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'error' }),
+        new winston.transports.File({ filename: `./logs/auth_info${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'info' }),
+        new winston.transports.File({ filename: `./logs/auth_verbose${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'verbose' }),
     ],
 });
 

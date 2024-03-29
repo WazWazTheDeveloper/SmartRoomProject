@@ -15,9 +15,9 @@ export const loggerDB = winston.createLogger({
     format: winston.format.json(),
     defaultMeta: { service: 'account-service' },
     transports: [
-        new winston.transports.File({ filename: './logs/db_error.log', level: 'error' }),
-        new winston.transports.File({ filename: './logs/db_info.log', level: 'info' }),
-        new winston.transports.File({ filename: './logs/db_verbose.log', level: 'verbose' }),
+        new winston.transports.File({ filename: `./logs/db_error${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'error' }),
+        new winston.transports.File({ filename: `./logs/db_info${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'info' }),
+        new winston.transports.File({ filename: `./logs/db_verbose${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'verbose' }),
     ],
 });
 
