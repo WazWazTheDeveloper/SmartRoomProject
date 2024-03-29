@@ -3,15 +3,24 @@ import { User } from "../../modules/user";
 import { getDocuments } from "../../services/mongoDBService";
 import { TUser } from "../../interfaces/user.interface";
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { VerifyErrors } from 'jsonwebtoken';
 
+
+type JWTData = {
+    userdata: {
+        username: string
+    }
+}
 export async function login(req: Request, res: Response) {
     const { username, password } = req.body;
+    // check that all field exist
+    // TODO: add type checking
     if (!username || !password) {
         res.status(400).json('All fields are required')
         return
     }
 
+    // get all user with username
     let userArr: User[] = []
     try {
         const fillter = { username: username };
@@ -24,36 +33,56 @@ export async function login(req: Request, res: Response) {
         return
     }
 
+    // check that account exist
+    if (userArr.length == 0) {
+        res.status(400).json('bad username of password')
+        return
+    }
+
+    // check that only one use exist with said user name
     if (userArr.length != 1) {
         res.status(500).json('500 Internal Server Error')
         return
     }
 
     const user = userArr[0]
-    const response = await bcrypt.compare(password, user.password)
-    if (!response) {
-        res.status(401).json('bad password')
+
+    // check if account is active
+    if (!user.isActive) {
+        res.status(403).json('account disabled')
         return
     }
 
-    const accessToken = jwt.sign({
-        userData: {
+    // check password
+    const response = await bcrypt.compare(password, user.password)
+    if (!response) {
+        res.status(400).json('bad username of password')
+        return
+    }
+
+    const payload: JWTData = {
+        userdata: {
             username: user.username
         }
-    },
+    }
+
+    const accessToken = jwt.sign(
+        payload,
         process.env.ACCESS_TOKEN_SECRET as string,
         {
             expiresIn: '1h'
         })
 
 
+    const refreshPayload: JWTData = {
+        userdata: {
+            username: user.username
+        }
+    }
+
     const refreshTokenToken = jwt.sign(
-        {
-            userData: {
-                username: user.username
-            }
-        },
-        process.env.ACCESS_TOKEN_SECRET as string,
+        refreshPayload,
+        process.env.REFRESH_TOKEN_SECRET as string,
         {
             expiresIn: '1d'
         })
@@ -63,8 +92,73 @@ export async function login(req: Request, res: Response) {
         refreshTokenToken, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24,
-        //TODO: change this to true
         secure: true,
     })
-    res.json({accessToken})
+    res.json({ accessToken })
+}
+
+export async function refreshToken(req: Request, res: Response) {
+    const cookies = req.cookies;
+    // check that cookie exist
+    if (!cookies.jwtRefreshTokenToken) return res.status(401).json({ message: 'Unauthorized' })
+
+    const refreshToken = cookies.jwtRefreshTokenToken
+
+    jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET as string,
+        async (err: VerifyErrors | null, decoded: any) => {
+            const paylaod = decoded as JWTData
+
+            if (err) {
+                res.status(403).json({ message: 'Forbidden' })
+                return
+            }
+
+            // get all user with username
+            let userArr: User[] = []
+            try {
+                const fillter = { username: paylaod.userdata.username };
+                userArr = await getDocuments<TUser>(
+                    "users",
+                    fillter
+                );
+            } catch (err) {
+                res.status(500).json('500 Internal Server Error')
+                return
+            }
+
+            // check that account exist
+            if (userArr.length == 0) {
+                res.status(400).json('bad username of password')
+                return
+            }
+
+            // check that only one use exist with said user name
+            if (userArr.length != 1) {
+                res.status(500).json('500 Internal Server Error')
+                return
+            }
+
+            const user = userArr[0]
+
+            // check if account is active
+            if (!user.isActive) {
+                res.status(403).json('account disabled')
+                return
+            }
+
+            const jwtData = {
+                userInfo: {
+                    username: user.username,
+                }
+            }
+            const accessToken = jwt.sign(
+                jwtData,
+                process.env.ACCESS_TOKEN_SECRET as string,
+                { expiresIn: '1d' }
+            )
+
+            res.json({ accessToken })
+        })
 }
