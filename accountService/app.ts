@@ -21,10 +21,10 @@ function startListeningToReqests(): void {
         // TODO: log this:
         console.log(`listening on port ${process.env.SERVER_PORT}`)
     })
-    setInterval(()=>{
-        console.log('test')
-        createNewUser("test","test")
-    },2000)
+    // setInterval(()=>{
+        // console.log('test')
+        createNewUser("admin","admin")
+    // },2000)
 }
 
 startServer();

@@ -1,19 +1,8 @@
 import * as mongoDB from "mongodb";
-import * as dotenv from "dotenv";
 import { v4 as uuidv4 } from 'uuid';
 import { TUser } from "../interfaces/user.interface";
 import { TPermissionGroup } from "../interfaces/permissionGroup.interface";
 import { loggerDB } from "./loggerService";
-import { error } from "console";
-import { cli } from "winston/lib/winston/config";
-
-const database = {
-    client: new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
-        pkFactory: { createPk: () => uuidv4() }
-    }),
-    isConnected: false,
-    isConnecting: false
-}
 
 type TCollection = {
     users?: mongoDB.Collection<TUser>
@@ -26,11 +15,16 @@ type collectionTypes =
     mongoDB.Collection<TUser> |
     mongoDB.Collection<TPermissionGroup>
 
-export const collections: TCollection = {}
+const database = {
+    client: new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
+        pkFactory: { createPk: () => uuidv4() }
+    }),
+    isConnected: false,
+    isConnecting: false
+}
 
-// const client: mongoDB.MongoClient = new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
-//     pkFactory: { createPk: () => uuidv4() }
-// });
+
+export const collections: TCollection = {}
 
 export async function connectToDatabase() {
     database.client.on("open", () => {
@@ -44,6 +38,8 @@ export async function connectToDatabase() {
 
         collections.users = users
         collections.permissionGroups = permissionGroups
+
+        users.createIndex({ username: 1 }, { unique: true });
     })
 
     database.client.on("serverHeartbeatFailed", () => {
@@ -52,25 +48,25 @@ export async function connectToDatabase() {
         database.isConnected = false
         loggerDB.error("connection to database closed attempting to reconnect in 5 secends")
         setTimeout(async () => {
-            attemptConnecting()
+            attemptToConnect()
         }, 5000)
     })
 
-    await attemptConnecting()
+    await attemptToConnect()
 }
 
-async function attemptConnecting() {
+async function attemptToConnect() {
     if (database.isConnecting) return
 
     try {
         database.isConnecting = true;
-        loggerDB.error("attempting to connect to database")
+        loggerDB.info("attempting to connect to database")
         await database.client.connect();
     } catch (e) {
         database.isConnecting = false;
-        loggerDB.warn(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
+        loggerDB.error(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
         setTimeout(async () => {
-            attemptConnecting()
+            attemptToConnect()
         }, 5000)
     }
 }
@@ -92,12 +88,9 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
         throw new Error(err)
     }
 
-    console.log("boop");
-
     // create and insert mqtt topic
     try {
         const insertResult = await collection?.insertOne(documentJSON);
-
 
         // check if accepted by db
         if (insertResult.acknowledged) {
