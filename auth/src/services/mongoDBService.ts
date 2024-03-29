@@ -67,6 +67,10 @@ async function attemptToConnect() {
 export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
     let logItem = "";
 
+    if (!database.isConnected) {
+        return []
+    }
+
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {

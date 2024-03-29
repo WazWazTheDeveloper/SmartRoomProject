@@ -112,3 +112,29 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
         return isSuccessful;
     }
 }
+
+export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
+    let logItem = "";
+
+    if (!database.isConnected) {
+        return []
+    }
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found at mongoDBService.ts at getDocuments"
+        loggerDB.error(err);
+        throw new Error(err)
+    }
+
+    //query
+    const findResult = collection.find(fillter).project(project)
+    const findResultArr = await findResult.toArray() as DocumentType[];
+
+    // log
+    logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+    loggerDB.verbose(logItem)
+
+    return findResultArr
+}

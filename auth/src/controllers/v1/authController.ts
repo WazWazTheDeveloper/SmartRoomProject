@@ -64,7 +64,7 @@ export async function login(req: Request, res: Response) {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24,
         //TODO: change this to true
-        secure: false,
+        secure: true,
     })
     res.json({accessToken})
 }

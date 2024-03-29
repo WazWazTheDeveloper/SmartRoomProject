@@ -1,28 +1,59 @@
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../modules/user';
 import * as database from './mongoDBService'
+import bcrypt from 'bcrypt';
+import { TUser } from '../interfaces/user.interface';
+import { loggerDB } from './loggerService';
 
 type UserResult =
     | {
         isSuccessful: false;
+        reason: string;
     }
     | {
         isSuccessful: true;
         user: User;
     };
 
-export async function createNewUser(username:string,password:string):Promise<UserResult> {
-    let userResult : UserResult = {
-        isSuccessful : false
+export async function createNewUser(username: string, password: string): Promise<UserResult> {
+    let userResult: UserResult = {
+        isSuccessful: false,
+        reason: ''
     }
-    const _id = uuidv4();
-    const user = User.createNewUser(_id,username,password);
 
-    
-    
-    const isSuccessful = await database.createDocument('users',user);
-    if(!isSuccessful) {
-        return userResult    
+    // check if user exist
+    let userArr: User[] = []
+    try {
+        const fillter = { username: username };
+        userArr = await database.getDocuments<TUser>(
+            "users",
+            fillter
+        );
+    } catch (err) {
+        userResult = {
+            isSuccessful: false,
+            reason: 'internal server error'
+        }
+        return userResult
+    }
+
+    if(userArr.length >= 1) {
+        userResult = {
+            isSuccessful: false,
+            reason: 'account already exists'
+        }
+        return (userResult)
+    }
+
+    const saltRounds = 10;
+    let hashedPassword: string = await bcrypt.hash(password, saltRounds);
+
+    const _id = uuidv4();
+    const user = User.createNewUser(_id, username, hashedPassword);
+
+    const isSuccessful = await database.createDocument('users', user);
+    if (!isSuccessful) {
+        return userResult
     }
 
     userResult = {
@@ -30,6 +61,6 @@ export async function createNewUser(username:string,password:string):Promise<Use
         user: user
     }
 
-    return userResult    
+    return userResult
 
 }
