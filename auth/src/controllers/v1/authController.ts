@@ -4,6 +4,7 @@ import { getDocuments } from "../../services/mongoDBService";
 import { TUser } from "../../interfaces/user.interface";
 import bcrypt from 'bcrypt';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
+import { updateLastActive } from "../../services/userService";
 
 
 type JWTData = {
@@ -57,6 +58,12 @@ export async function login(req: Request, res: Response) {
     const response = await bcrypt.compare(password, user.password)
     if (!response) {
         res.status(400).json('bad username of password')
+        return
+    }
+
+    //update last active
+    if (await updateLastActive(user._id)) {
+        res.status(500).json('500 Internal Server Error')
         return
     }
 
@@ -148,6 +155,12 @@ export async function refreshToken(req: Request, res: Response) {
                 return
             }
 
+            //update last active
+            if (await updateLastActive(user._id)) {
+                res.status(500).json('500 Internal Server Error')
+                return
+            }
+
             const jwtData = {
                 userInfo: {
                     username: user.username,
@@ -161,4 +174,11 @@ export async function refreshToken(req: Request, res: Response) {
 
             res.json({ accessToken })
         })
+}
+
+export async function logout(req: Request, res: Response) {
+    const cookies = req.cookies
+    if (!cookies?.jwtRefreshTokenToken) return res.sendStatus(204) //No content
+    res.clearCookie('jwtRefreshTokenToken', { httpOnly: true, secure: true })
+    res.json({ message: 'Cookie cleared' })
 }

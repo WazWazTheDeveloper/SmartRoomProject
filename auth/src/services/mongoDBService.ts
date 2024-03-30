@@ -9,6 +9,8 @@ type TCollection = {
 
 type collectionNames = "users"
 
+export type JSONDBTypes = TUser
+
 type collectionTypes =
     mongoDB.Collection<TUser>
 
@@ -88,4 +90,44 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
     loggerDB.verbose(logItem)
 
     return findResultArr
+}
+
+export async function updateDocument(collectionStr: collectionNames, fillter: mongoDB.Filter<JSONDBTypes>, updateFilter: mongoDB.UpdateFilter<collectionTypes>) {
+    let logItem = "";
+
+    if (!database.isConnected) {
+        const err = "not conencted to db"
+        loggerDB.error(err);
+        throw new Error(err)
+    }
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found at mongoDBService.ts at updateDocument"
+        loggerDB.error(err);
+        throw new Error(err)
+    }
+
+    try {
+        // db update
+        const updateResult = await collection.updateOne(fillter, updateFilter)
+
+        //check if accepted by db and return
+        if (updateResult.acknowledged) {
+            logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
+            // logEvents(logItem, DB_LOG)
+            return true
+        }
+        else {
+            logItem = `Failed to update document with filter:${fillter} to ${collection.namespace}\t
+        ${JSON.stringify(updateFilter, null, "\t")}`
+            // logEvents(logItem, DB_LOG)
+            return false
+        }
+    } catch (e) {
+        logItem = `Failed to find document in database`
+        loggerDB.error(logItem)
+        return false;
+    }
 }
