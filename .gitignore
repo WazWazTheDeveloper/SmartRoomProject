@@ -43,3 +43,5 @@ backend/data/**/*.json
 *.log
 *.xlsx
 *\.vscode
+.crt
+.key
