@@ -62,7 +62,7 @@ export async function login(req: Request, res: Response) {
     }
 
     //update last active
-    if (await updateLastActive(user._id)) {
+    if (!(await updateLastActive(user._id))) {
         res.status(500).json('500 Internal Server Error')
         return
     }
@@ -156,7 +156,7 @@ export async function refreshToken(req: Request, res: Response) {
             }
 
             //update last active
-            if (await updateLastActive(user._id)) {
+            if (!(await updateLastActive(user._id))) {
                 res.status(500).json('500 Internal Server Error')
                 return
             }
