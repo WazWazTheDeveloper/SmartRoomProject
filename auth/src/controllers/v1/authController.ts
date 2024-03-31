@@ -6,7 +6,6 @@ import bcrypt from 'bcrypt';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { updateLastActive } from "../../services/userService";
 
-
 type JWTData = {
     userdata: {
         username: string
