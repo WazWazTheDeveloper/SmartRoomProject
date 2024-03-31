@@ -24,3 +24,13 @@ export const addRequestID = (req: Request, res: Response, next: NextFunction) =>
     });
 
 }
+
+export function getRequestUUID() {
+    const store = asyncLocalStorage.getStore();
+    if (store) {
+        const uuid = store.requestID
+        return uuid;
+    } else {
+        return "n/a"
+    }
+}

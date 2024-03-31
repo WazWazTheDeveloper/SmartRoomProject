@@ -3,7 +3,7 @@ const cookieParser = require('cookie-parser')
 import bodyParser = require('body-parser');
 import { createNewUser } from './src/services/userService';
 import { connectToDatabase } from './src/services/mongoDBService';
-import { addRequestID } from './src/middleware/addRequestID';
+import { addRequestID } from './src/middleware/requestID';
 import { httpRequestLogger } from './src/middleware/requestLogger';
 const app = express();
 

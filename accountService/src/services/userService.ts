@@ -3,7 +3,6 @@ import { User } from '../modules/user';
 import * as database from './mongoDBService'
 import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
-import { loggerDB } from './loggerService';
 
 type UserResult =
     | {
@@ -63,4 +62,19 @@ export async function createNewUser(username: string, password: string): Promise
 
     return userResult
 
+}
+
+// IMPLEMENT
+export async function updateUserPassword(username: string, newPassword: string) {
+    
+}
+
+// IMPLEMENT
+export async function updateUserPermissions(username: string) {
+    
+}
+
+// IMPLEMENT
+export async function updateUserPermissionGroups(username: string) {
+    
 }
