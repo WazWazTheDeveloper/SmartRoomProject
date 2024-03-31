@@ -2,6 +2,7 @@ import * as mongoDB from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
 import { TUser } from "../interfaces/user.interface";
 import { loggerDB } from "./loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 type TCollection = {
     users?: mongoDB.Collection<TUser>
@@ -77,7 +78,7 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found at mongoDBService.ts at getDocuments"
-        loggerDB.error(err);
+        loggerDB.error(err,{uuid : getRequestUUID()});
         throw new Error(err)
     }
 
@@ -87,7 +88,7 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
 
     // log
     logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
-    loggerDB.verbose(logItem)
+    loggerDB.verbose(logItem,{uuid : getRequestUUID()})
 
     return findResultArr
 }
@@ -97,7 +98,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
 
     if (!database.isConnected) {
         const err = "not conencted to db"
-        loggerDB.error(err);
+        loggerDB.error(err,{uuid : getRequestUUID()});
         throw new Error(err)
     }
 
@@ -105,7 +106,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found at mongoDBService.ts at updateDocument"
-        loggerDB.error(err);
+        loggerDB.error(err,{uuid : getRequestUUID()});
         throw new Error(err)
     }
 
@@ -127,7 +128,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
         }
     } catch (e) {
         logItem = `Failed to find document in database`
-        loggerDB.error(logItem)
+        loggerDB.error(logItem,{uuid : getRequestUUID()})
         return false;
     }
 }

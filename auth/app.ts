@@ -6,7 +6,7 @@ import { routerv1 } from './src/routes/v1/router';
 import { connectToDatabase } from './src/services/mongoDBService';
 import fs from 'fs';
 import { httpRequestLogger } from './src/middleware/requestLogger';
-import { addRequestID } from './src/middleware/addRequestID';
+import { addRequestID } from './src/middleware/requestID';
 
 const app = express();
 var key = fs.readFileSync('./certs/selfsigned.key');
