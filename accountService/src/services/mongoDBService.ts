@@ -98,7 +98,7 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
         if (insertResult.acknowledged) {
             logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
             isSuccessful = true
-            loggerDB.info(logItem,{uuid : getRequestUUID()})
+            loggerDB.verbose(logItem,{uuid : getRequestUUID()})
         }
         else {
             logItem = `Failed to insert document with the _id: ${insertResult.insertedId} to ${collection.namespace}\t
