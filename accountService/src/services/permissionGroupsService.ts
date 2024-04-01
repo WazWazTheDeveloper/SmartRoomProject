@@ -1,21 +1,37 @@
-import { PermissionGroup } from "../modules/permissionGroup";
+import { TPermissionGroup } from "../interfaces/permissionGroup.interface";
+import { v4 as uuidv4 } from 'uuid';
+import * as database from './mongoDBService'
 
-// IMPLEMENT
 type PermissionGroupResult =
     | {
         isSuccessful: false;
-        reason: string;
     }
     | {
         isSuccessful: true;
-        user: PermissionGroup;
+        permissionGroup: TPermissionGroup;
     };
-export async function createNewGroup(groupName:string) {
+export async function createNewGroup(groupName:string,groupDescription:string) {
     let userResult: PermissionGroupResult = {
         isSuccessful: false,
-        reason: ''
     }
+    const _id = uuidv4();
+    const permissionGroup: TPermissionGroup= {
+        _id:_id,
+        groupName:groupName,
+        groupDescription:groupDescription,
+        permissions:[]
+    }
+    const insertResult =  await database.createDocument("permissionGroups",permissionGroup);
+    if(insertResult) {
+        userResult = {
+            isSuccessful: true,
+            permissionGroup:permissionGroup
+        }
+    }
+
+    return userResult
 }
+
 // IMPLEMENT
 export async function updateGroupPermission() {
     
