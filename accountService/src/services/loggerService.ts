@@ -12,7 +12,7 @@ export const loggerDB = winston.createLogger({
     level: loggerDBLevel,
     format: winston.format.json(),
     defaultMeta: {
-        service: 'auth-service',
+        service: 'account-service',
         uuid: "none",
         dateTime: `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
     },
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV !== 'production') {
 export const loggerRequest = winston.createLogger({
     level: requestLoggerLevel,
     defaultMeta: {
-        service: 'auth-service',
+        service: 'account-service',
         uuid: "none",
         dateTime: `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
     },
