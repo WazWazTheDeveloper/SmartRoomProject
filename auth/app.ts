@@ -7,6 +7,7 @@ import { connectToDatabase } from './src/services/mongoDBService';
 import fs from 'fs';
 import { httpRequestLogger } from './src/middleware/requestLogger';
 import { addRequestID } from './src/middleware/requestID';
+import { loggerGeneral } from './src/services/loggerService';
 
 const app = express();
 var key = fs.readFileSync('./certs/selfsigned.key');
@@ -34,7 +35,7 @@ function startListeningToReqests(): void {
     let server = https.createServer(options, app);
     server.listen(process.env.SERVER_PORT, () => {
         // TODO: log this:
-        console.log(`listening on port ${process.env.SERVER_PORT}`)
+        loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
     })
 
 }

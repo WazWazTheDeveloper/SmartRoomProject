@@ -6,6 +6,7 @@ import { connectToDatabase } from './src/services/mongoDBService';
 import { addRequestID } from './src/middleware/requestID';
 import { httpRequestLogger } from './src/middleware/requestLogger';
 import { routerv1 } from './src/routes/v1/router';
+import { loggerGeneral } from './src/services/loggerService';
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -24,7 +25,7 @@ async function startServer(): Promise<void> {
 function startListeningToReqests(): void {
     let server = app.listen(process.env.SERVER_PORT, () => {
         // TODO: log this:
-        console.log(`listening on port ${process.env.SERVER_PORT}`)
+        loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
     })
     // setInterval(()=>{
     // console.log('test')
