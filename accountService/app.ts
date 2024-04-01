@@ -5,6 +5,7 @@ import { createNewUser } from './src/services/userService';
 import { connectToDatabase } from './src/services/mongoDBService';
 import { addRequestID } from './src/middleware/requestID';
 import { httpRequestLogger } from './src/middleware/requestLogger';
+import { routerv1 } from './src/routes/v1/router';
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -13,6 +14,7 @@ app.use(cookieParser())
 app.use(addRequestID)
 app.use(httpRequestLogger)
 
+app.use('/api/v1', routerv1);
 
 async function startServer(): Promise<void> {
     await connectToDatabase()
