@@ -56,3 +56,26 @@ export const loggerRequest = winston.createLogger({
         })
     ],
 });
+
+export const loggerGeneral = winston.createLogger({
+    level: requestLoggerLevel,
+    defaultMeta: {
+        service: 'account-service',
+        uuid: "none",
+        dateTime: `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
+    },
+    
+    transports: [
+        new winston.transports.File({ filename: `./logs/general_error${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'error' }),
+        new winston.transports.File({ filename: `./logs/general_info${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'info' }),
+        new winston.transports.File({ filename: `./logs/general_verbose${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'verbose' }),
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.simple(),
+                logFormat
+            ),
+            level: 'silly'
+        })
+    ],
+});
