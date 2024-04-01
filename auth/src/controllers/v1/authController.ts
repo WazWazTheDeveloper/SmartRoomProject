@@ -12,7 +12,6 @@ type JWTData = {
     }
 }
 export async function login(req: Request, res: Response) {
-    setTimeout(async()=>{
     const { username, password } = req.body;
     // check that all field exist
     // TODO: add type checking
@@ -102,7 +101,6 @@ export async function login(req: Request, res: Response) {
         secure: true,
     })
     res.json({ accessToken })
-},1000)
 }
 
 export async function refreshToken(req: Request, res: Response) {
