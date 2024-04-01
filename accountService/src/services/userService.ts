@@ -3,6 +3,8 @@ import { User } from '../modules/user';
 import * as database from './mongoDBService'
 import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
+import { loggerGeneral } from './loggerService';
+import { getRequestUUID } from '../middleware/requestID';
 
 type UserResult =
     | {
@@ -50,18 +52,23 @@ export async function createNewUser(username: string, password: string): Promise
     const _id = uuidv4();
     const user = User.createNewUser(_id, username, hashedPassword);
 
-    const isSuccessful = await database.createDocument('users', user);
-    if (!isSuccessful) {
+    try {
+        const isSuccessful = await database.createDocument('users', user);
+        if (isSuccessful) {
+            loggerGeneral.info(`creted new user:"${username}"`,{uuid:getRequestUUID()})
+            userResult = {
+                isSuccessful: true,
+                user: user
+            }
+            return userResult
+        }
+        loggerGeneral.error(`failed to create new user unknow error`,{uuid:getRequestUUID()})
+
+        return userResult
+    }catch(e) {
+        loggerGeneral.error(`failed to create new user: ${e}`,{uuid:getRequestUUID()})
         return userResult
     }
-
-    userResult = {
-        isSuccessful: true,
-        user: user
-    }
-
-    return userResult
-
 }
 
 // IMPLEMENT

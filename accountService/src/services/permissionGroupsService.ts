@@ -1,6 +1,8 @@
 import { TPermissionGroup } from "../interfaces/permissionGroup.interface";
 import { v4 as uuidv4 } from 'uuid';
 import * as database from './mongoDBService'
+import { loggerGeneral } from "./loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 type PermissionGroupResult =
     | {
@@ -21,12 +23,17 @@ export async function createNewGroup(groupName:string,groupDescription:string) {
         groupDescription:groupDescription,
         permissions:[]
     }
-    const insertResult =  await database.createDocument("permissionGroups",permissionGroup);
-    if(insertResult) {
-        userResult = {
-            isSuccessful: true,
-            permissionGroup:permissionGroup
+    try {
+        const insertResult =  await database.createDocument("permissionGroups",permissionGroup);
+        if(insertResult) {
+            userResult = {
+                isSuccessful: true,
+                permissionGroup:permissionGroup
+            }
         }
+        loggerGeneral.info(`creted new permission group:"${groupName}" with id:"${_id}"`,{uuid:getRequestUUID()})
+    }catch (e) {
+        loggerGeneral.info(`error in permission group creation: ${e}`,{uuid:getRequestUUID()})
     }
 
     return userResult

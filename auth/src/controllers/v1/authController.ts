@@ -5,6 +5,8 @@ import { TUser } from "../../interfaces/user.interface";
 import bcrypt from 'bcrypt';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 import { updateLastActive } from "../../services/userService";
+import { loggerGeneral } from "../../services/loggerService";
+import { getRequestUUID } from "../../middleware/requestID";
 
 type JWTData = {
     userdata: {
@@ -30,6 +32,7 @@ export async function login(req: Request, res: Response) {
         );
     } catch (err) {
         res.status(500).json('500 Internal Server Error')
+        loggerGeneral.error(`failed to authenticated user: ${username} dua to internal server error`, { uuid: getRequestUUID() })
         return
     }
 
@@ -42,6 +45,7 @@ export async function login(req: Request, res: Response) {
     // check that only one use exist with said user name
     if (userArr.length != 1) {
         res.status(500).json('500 Internal Server Error')
+        loggerGeneral.error(`failed to authenticated user: ${username} dua to to having more then one user with the same user name`, { uuid: getRequestUUID() })
         return
     }
 
@@ -63,6 +67,7 @@ export async function login(req: Request, res: Response) {
     //update last active
     if (!(await updateLastActive(user._id))) {
         res.status(500).json('500 Internal Server Error')
+        loggerGeneral.error(`failed to authenticated user: ${username} dua to internal server error`, { uuid: getRequestUUID() })
         return
     }
 
@@ -101,6 +106,7 @@ export async function login(req: Request, res: Response) {
         secure: true,
     })
     res.json({ accessToken })
+    loggerGeneral.info(`successfully authenticated user: ${username}`, { uuid: getRequestUUID() })
 }
 
 export async function refreshToken(req: Request, res: Response) {
@@ -131,6 +137,7 @@ export async function refreshToken(req: Request, res: Response) {
                 );
             } catch (err) {
                 res.status(500).json('500 Internal Server Error')
+                loggerGeneral.error(`failed to refresh token to user: ${paylaod.userdata.username} dua to internal server error`, { uuid: getRequestUUID() })
                 return
             }
 
@@ -143,6 +150,7 @@ export async function refreshToken(req: Request, res: Response) {
             // check that only one use exist with said user name
             if (userArr.length != 1) {
                 res.status(500).json('500 Internal Server Error')
+                loggerGeneral.error(`failed to refresh token to user: ${paylaod.userdata.username} dua to to having more then one user with the same user name`, { uuid: getRequestUUID() })
                 return
             }
 
@@ -157,6 +165,7 @@ export async function refreshToken(req: Request, res: Response) {
             //update last active
             if (!(await updateLastActive(user._id))) {
                 res.status(500).json('500 Internal Server Error')
+                loggerGeneral.error(`failed to refresh token to user: ${paylaod.userdata.username} dua to failing to update last active time of user`, { uuid: getRequestUUID() })
                 return
             }
 
@@ -172,6 +181,7 @@ export async function refreshToken(req: Request, res: Response) {
             )
 
             res.json({ accessToken })
+            loggerGeneral.info(`successfully refreshed token to user: ${paylaod.userdata.username}`, { uuid: getRequestUUID() })
         })
 }
 
