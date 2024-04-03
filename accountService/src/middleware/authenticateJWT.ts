@@ -4,6 +4,7 @@ import jwt, { VerifyErrors } from 'jsonwebtoken';
 type JWTData = {
     userdata: {
         username: string
+        userID : string
     }
 }
 
@@ -29,11 +30,9 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
                 res.status(403).json({ message: 'Forbidden' })
                 return
             }
-            // get userID
 
             req._userName = paylaod.userdata.username;
-            // add userID
-            // add user data
+            req._userID = paylaod.userdata.userID;
 
             next()
         }

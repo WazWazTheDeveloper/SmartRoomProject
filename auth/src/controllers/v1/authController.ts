@@ -11,6 +11,7 @@ import { getRequestUUID } from "../../middleware/requestID";
 type JWTData = {
     userdata: {
         username: string
+        userID : string
     }
 }
 export async function login(req: Request, res: Response) {
@@ -73,7 +74,8 @@ export async function login(req: Request, res: Response) {
 
     const payload: JWTData = {
         userdata: {
-            username: user.username
+            username: user.username,
+            userID : user._id
         }
     }
 
@@ -87,7 +89,8 @@ export async function login(req: Request, res: Response) {
 
     const refreshPayload: JWTData = {
         userdata: {
-            username: user.username
+            username: user.username,
+            userID : user._id
         }
     }
 
