@@ -34,7 +34,6 @@ async function startServer(): Promise<void> {
 function startListeningToReqests(): void {
     let server = https.createServer(options, app);
     server.listen(process.env.SERVER_PORT, () => {
-        // TODO: log this:
         loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
     })
 

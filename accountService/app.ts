@@ -24,7 +24,6 @@ async function startServer(): Promise<void> {
 
 function startListeningToReqests(): void {
     let server = app.listen(process.env.SERVER_PORT, () => {
-        // TODO: log this:
         loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
     })
     // setInterval(()=>{
