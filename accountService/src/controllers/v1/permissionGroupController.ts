@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import * as permissionGroupsService from '../../services/permissionGroupsService'
 export async function createNewGroup(req: Request, res: Response) {
+    // TODO: add permission check
     const {groupName,groupDescription} = req.body;
     if(typeof groupName != 'string' || typeof groupDescription != 'string') {
         res.status(400).json('Bad request')

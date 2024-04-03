@@ -2,10 +2,12 @@ import express, { Request, Response } from "express"
 import * as userService from '../../services/userService'
 // IMPLEMENT
 export async function getUserPermissions(req: Request, res: Response) {
+    // TODO: add permission check
 
 }
 
 export async function updateUserPermissions(req: Request, res: Response) {
+    // TODO: add permission check
     const { UUID } = req.params
     const { permissionOptions } = req.body
 
