@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
-import { TPermission } from '../interfaces/permission.interface';
+import { TPermission, TPermissionMaybe } from '../interfaces/permission.interface';
 import * as mongoDB from "mongodb";
 
 type UserResult =
@@ -97,6 +97,11 @@ export async function updateUserPassword(username: string, newPassword: string) 
         loggerGeneral.error(`failed to update password: ${e}`, { uuid: getRequestUUID() })
         return false;
     }
+}
+
+// IMPLEMENT
+export function checkUserPermission(userID: string, permission:TPermissionMaybe) {
+
 }
 
 type TPermissionsOptions = {
