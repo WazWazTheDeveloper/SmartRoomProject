@@ -6,6 +6,7 @@ import { TUser } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
 import { TPermission } from '../interfaces/permission.interface';
+import * as mongoDB from "mongodb";
 
 type UserResult =
     | {
@@ -39,7 +40,7 @@ export async function createNewUser(username: string, password: string): Promise
         return userResult
     }
 
-    if(userArr.length >= 1) {
+    if (userArr.length >= 1) {
         userResult = {
             isSuccessful: false,
             reason: 'account already exists'
@@ -56,18 +57,18 @@ export async function createNewUser(username: string, password: string): Promise
     try {
         const isSuccessful = await database.createDocument('users', user);
         if (isSuccessful) {
-            loggerGeneral.info(`creted new user:"${username}"`,{uuid:getRequestUUID()})
+            loggerGeneral.info(`creted new user:"${username}"`, { uuid: getRequestUUID() })
             userResult = {
                 isSuccessful: true,
                 user: user
             }
             return userResult
         }
-        loggerGeneral.error(`failed to create new user unknow error`,{uuid:getRequestUUID()})
+        loggerGeneral.error(`failed to create new user unknow error`, { uuid: getRequestUUID() })
 
         return userResult
-    }catch(e) {
-        loggerGeneral.error(`failed to create new user: ${e}`,{uuid:getRequestUUID()})
+    } catch (e) {
+        loggerGeneral.error(`failed to create new user: ${e}`, { uuid: getRequestUUID() })
         return userResult
     }
 }
@@ -83,42 +84,49 @@ export async function updateUserPassword(username: string, newPassword: string) 
         $set: { password: newHashedPassword }
     }
     try {
-        const result = await database.updateDocument("users",filter,updateFilter);
+        const result = await database.updateDocument("users", filter, updateFilter);
 
-        if(result) {
+        if (result) {
             return true;
         }
         else {
-            loggerGeneral.error(`failed to update password to user: ${username}`,{uuid:getRequestUUID()})
+            loggerGeneral.error(`failed to update password to user: ${username}`, { uuid: getRequestUUID() })
             return false;
         }
-    }catch (e) {
-        loggerGeneral.error(`failed to update password: ${e}`,{uuid:getRequestUUID()})
+    } catch (e) {
+        loggerGeneral.error(`failed to update password: ${e}`, { uuid: getRequestUUID() })
         return false;
     }
 }
 
-type TEditPermissions = {
-    action : "delete" | "modify" | "add"
-    permission : TPermission
+type TPermissionsOptions = {
+    action: "delete" | "modify" | "add"
+    permission: TPermission
 }[]
-export async function updateUserPermissions(username: string, permissionList:TEditPermissions) {
-    const filter = {
-        username: username,
+export async function updateUserPermissions(userID: string, permissionOptions: TPermissionsOptions) {
+    const updateList: mongoDB.AnyBulkWriteOperation<TUser>[] = [];
+
+    if (!isPermissionsOptions(permissionOptions)) {
+        throw new Error("invalid type of permissionOptions")
     }
-    const updateList: any[] = [];
-    for (let index = 0; index < permissionList.length; index++) {
-        const permission = permissionList[index];
-        switch(permission.action) {
+
+    for (let index = 0; index < permissionOptions.length; index++) {
+        const permissionOption = permissionOptions[index];
+        switch (permissionOption.action) {
             case 'add': {
                 updateList.push({
-                    $push : {
-                        permissions : {
-                            type : permission.permission.type,
-                            objectId : permission.permission.objectId,
-                            write : permission.permission.write,
-                            read : permission.permission.read,
-                            delete : permission.permission.delete
+                    updateOne: {
+                        filter: { _id: userID },
+                        update: {
+                            $push: {
+                                permissions: {
+                                    type: permissionOption.permission.type,
+                                    objectId: permissionOption.permission.objectId,
+                                    write: permissionOption.permission.write,
+                                    read: permissionOption.permission.read,
+                                    delete: permissionOption.permission.delete
+                                }
+                            }
                         }
                     }
                 })
@@ -126,10 +134,15 @@ export async function updateUserPermissions(username: string, permissionList:TEd
             }
             case 'delete': {
                 updateList.push({
-                    $pull : {
-                        permissions : {
-                            type : permission.permission.type,
-                            objectId : permission.permission.objectId,
+                    updateOne: {
+                        filter: { _id: userID },
+                        update: {
+                            $pull: {
+                                permissions: {
+                                    type: permissionOption.permission.type,
+                                    objectId: permissionOption.permission.objectId,
+                                }
+                            }
                         }
                     }
                 })
@@ -137,11 +150,17 @@ export async function updateUserPermissions(username: string, permissionList:TEd
             }
             case 'modify': {
                 updateList.push({
-                    $set : {
-                        permissions : {
-                            write : permission.permission.write,
-                            read : permission.permission.read,
-                            delete : permission.permission.delete
+                    updateOne: {
+                        filter: {
+                            _id: userID,
+                            "permissions.objectId": permissionOption.permission.objectId
+                        },
+                        update: {
+                            $set: {
+                                "permissions.$.write": permissionOption.permission.write,
+                                "permissions.$.read": permissionOption.permission.read,
+                                "permissions.$.delete": permissionOption.permission.delete
+                            }
                         }
                     }
                 })
@@ -149,9 +168,46 @@ export async function updateUserPermissions(username: string, permissionList:TEd
             }
         }
     }
+
+    try {
+        const result = await database.bulkWriteCollection('users', updateList)
+        if (result) {
+            return true
+
+        }
+        else {
+            loggerGeneral.error(`failed to update user permission to user: ${userID}`, { uuid: getRequestUUID() })
+            return false
+        }
+    } catch (e) {
+        loggerGeneral.error(`failed to update user permission: ${e}`, { uuid: getRequestUUID() })
+        return false
+    }
+}
+
+export function isPermissionsOptions(permissionOptions: TPermissionsOptions) {
+    if (!Array.isArray(permissionOptions)) {
+        return false
+    }
+    for (let index = 0; index < permissionOptions.length; index++) {
+        const permissionOption = permissionOptions[index];
+        if (
+            typeof (permissionOption.action) !== 'boolean' ||
+            typeof (permissionOption.permission) !== 'object' ||
+            typeof (permissionOption.permission.objectId) !== 'string' ||
+            typeof (permissionOption.permission.type) !== 'string' ||
+            typeof (permissionOption.permission.write) !== 'boolean' ||
+            typeof (permissionOption.permission.read) !== 'boolean' ||
+            typeof (permissionOption.permission.delete) !== 'boolean'
+        ) {
+            return false
+        }
+    }
+
+    return true
 }
 
 // IMPLEMENT
 export async function updateUserPermissionGroups(username: string) {
-    
+
 }
