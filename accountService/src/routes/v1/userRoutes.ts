@@ -1,10 +1,11 @@
 import express from "express"
 import * as userController from "../../controllers/v1/userController";
 import { userIDRouter } from "./userIDRoutes";
+import { authenticateJWT } from "../../middleware/authenticateJWT";
 
 export const userRouter: express.Router = express.Router();
 
 userRouter.route("/").post(userController.createNewUser);
-userRouter.route("/").delete(userController.deleteUser);
+userRouter.route("/").delete(authenticateJWT,userController.deleteUser);
 
-userRouter.use("/:UUID",userIDRouter)
+userRouter.use("/:UUID",authenticateJWT,userIDRouter)
