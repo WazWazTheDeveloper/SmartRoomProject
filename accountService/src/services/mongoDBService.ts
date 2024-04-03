@@ -98,19 +98,19 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
         if (insertResult.acknowledged) {
             logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
             isSuccessful = true
-            loggerDB.verbose(logItem,{uuid : getRequestUUID()})
+            loggerDB.verbose(logItem, { uuid: getRequestUUID() })
         }
         else {
             logItem = `Failed to insert document with the _id: ${insertResult.insertedId} to ${collection.namespace}\t
             ${JSON.stringify(documentJSON, null, "\t")}`
-            loggerDB.error(logItem,{uuid : getRequestUUID()})
+            loggerDB.error(logItem, { uuid: getRequestUUID() })
             isSuccessful = false
         }
 
         return isSuccessful
     } catch (e) {
         logItem = `Failed to insert document to database`
-        loggerDB.error(logItem,{uuid : getRequestUUID()})
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         return isSuccessful;
     }
 }
@@ -126,7 +126,7 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found at mongoDBService.ts at getDocuments"
-        loggerDB.error(err,{uuid : getRequestUUID()});
+        loggerDB.error(err, { uuid: getRequestUUID() });
         throw new Error(err)
     }
 
@@ -137,12 +137,12 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
 
         // log
         logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
-        loggerDB.verbose(logItem,{uuid : getRequestUUID()})
+        loggerDB.verbose(logItem, { uuid: getRequestUUID() })
 
         return findResultArr
     } catch (e) {
         logItem = `Failed to find document in database`
-        loggerDB.error(logItem,{uuid : getRequestUUID()})
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         return [];
     }
 }
@@ -152,7 +152,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
 
     if (!database.isConnected) {
         const err = "not conencted to db"
-        loggerDB.error(err,{uuid : getRequestUUID()});
+        loggerDB.error(err, { uuid: getRequestUUID() });
         throw new Error(err)
     }
 
@@ -160,7 +160,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found at mongoDBService.ts at updateDocument"
-        loggerDB.error(err,{uuid : getRequestUUID()});
+        loggerDB.error(err, { uuid: getRequestUUID() });
         throw new Error(err)
     }
 
@@ -182,7 +182,33 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
         }
     } catch (e) {
         logItem = `Failed to find document in database`
-        loggerDB.error(logItem,{uuid : getRequestUUID()})
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         return false;
+    }
+}
+
+type TOperation = mongoDB.AnyBulkWriteOperation<TUser>[] | mongoDB.AnyBulkWriteOperation<TPermissionGroup>[]
+export async function bulkWriteCollection(collectionStr: collectionNames, operations: TOperation, options?: mongoDB.BulkWriteOptions) {
+    let logItem = "";
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
+        loggerDB.error(err, { uuid: getRequestUUID() });
+        throw new Error(err)
+    }
+
+    try {
+        //@ts-ignore
+        const bulkWriteResult: mongoDB.BulkWriteResult = await collection.bulkWrite(operations, options)
+        logItem = `Inserted ${bulkWriteResult.insertedCount}, Modified ${bulkWriteResult.modifiedCount}, Deleted ${bulkWriteResult.deletedCount} documents at:${collection.namespace} with: \n
+            ${JSON.stringify(operations, null, "\t")}`
+        loggerDB.verbose(`failed bulkWrite to:${logItem}`, { uuid: getRequestUUID() })
+        return true
+    } catch (e) {
+        const err = `failed to bulkWrite :${e}`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
     }
 }
