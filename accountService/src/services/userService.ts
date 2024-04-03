@@ -71,9 +71,30 @@ export async function createNewUser(username: string, password: string): Promise
     }
 }
 
-// IMPLEMENT
 export async function updateUserPassword(username: string, newPassword: string) {
-    
+    const saltRounds = 10;
+    let newHashedPassword: string = await bcrypt.hash(newPassword, saltRounds);
+
+    const filter = {
+        username: username,
+    }
+    const updateFilter = {
+        $set: { password: newHashedPassword }
+    }
+    try {
+        const result = await database.updateDocument("users",filter,updateFilter);
+
+        if(result) {
+            return true;
+        }
+        else {
+            loggerGeneral.error(`failed to update password to user: ${username}`,{uuid:getRequestUUID()})
+            return false;
+        }
+    }catch (e) {
+        loggerGeneral.error(`failed to update password: ${e}`,{uuid:getRequestUUID()})
+        return false;
+    }
 }
 
 // IMPLEMENT
