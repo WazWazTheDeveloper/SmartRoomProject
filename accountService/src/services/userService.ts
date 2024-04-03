@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
+import { TPermission } from '../interfaces/permission.interface';
 
 type UserResult =
     | {
@@ -97,9 +98,57 @@ export async function updateUserPassword(username: string, newPassword: string) 
     }
 }
 
-// IMPLEMENT
-export async function updateUserPermissions(username: string) {
-    
+type TEditPermissions = {
+    action : "delete" | "modify" | "add"
+    permission : TPermission
+}[]
+export async function updateUserPermissions(username: string, permissionList:TEditPermissions) {
+    const filter = {
+        username: username,
+    }
+    const updateList: any[] = [];
+    for (let index = 0; index < permissionList.length; index++) {
+        const permission = permissionList[index];
+        switch(permission.action) {
+            case 'add': {
+                updateList.push({
+                    $push : {
+                        permissions : {
+                            type : permission.permission.type,
+                            objectId : permission.permission.objectId,
+                            write : permission.permission.write,
+                            read : permission.permission.read,
+                            delete : permission.permission.delete
+                        }
+                    }
+                })
+                break;
+            }
+            case 'delete': {
+                updateList.push({
+                    $pull : {
+                        permissions : {
+                            type : permission.permission.type,
+                            objectId : permission.permission.objectId,
+                        }
+                    }
+                })
+                break;
+            }
+            case 'modify': {
+                updateList.push({
+                    $set : {
+                        permissions : {
+                            write : permission.permission.write,
+                            read : permission.permission.read,
+                            delete : permission.permission.delete
+                        }
+                    }
+                })
+                break;
+            }
+        }
+    }
 }
 
 // IMPLEMENT
