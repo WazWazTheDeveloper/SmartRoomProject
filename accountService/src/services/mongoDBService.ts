@@ -212,3 +212,29 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
         throw new Error(err)
     }
 }
+
+export async function getDocumentsAggregate<DocumentType>(collectionStr: collectionNames, aggregation: any[]) {
+    let logItem = "";
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
+        loggerDB.error(err, { uuid: getRequestUUID() });
+        throw new Error(err)
+    }
+
+    //query
+    try {
+        const findResult = collection.aggregate(aggregation)
+        const findResultArr = await findResult.toArray() as DocumentType[];
+        logItem = `Search with aggregation:${JSON.stringify(aggregation, null, "\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+        loggerDB.verbose(logItem, { uuid: getRequestUUID() });
+
+        return findResultArr
+    } catch (e) {
+        const err = `failed to agregate :${e}`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+}
