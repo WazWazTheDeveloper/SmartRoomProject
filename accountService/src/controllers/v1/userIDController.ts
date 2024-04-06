@@ -7,7 +7,16 @@ export async function getUserPermissions(req: Request, res: Response) {
 }
 
 export async function updateUserPermissions(req: Request, res: Response) {
-    // TODO: add permission check
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "PermissionGroup",
+        objectId: "all",
+        permission: "write",
+    })
+
+    if(!isAuthorized) {
+        return res.status(401).json({ message: 'Unauthorized' })
+    }
+
     const { UUID } = req.params
     const { permissionOptions } = req.body
 
