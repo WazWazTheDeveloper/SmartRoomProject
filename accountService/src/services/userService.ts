@@ -100,8 +100,125 @@ export async function updateUserPassword(username: string, newPassword: string) 
 }
 
 // IMPLEMENT
-export function checkUserPermission(userID: string, permission:TPermissionMaybe) {
+type PermissionCheck = {
+    type: "topic" | "device" | "task" | "PermissionGroup" | "users"
+    objectId: string | "all"
+    permission: "read" | "write" | "delete"
+}
+export async function checkUserPermission(userID: string, permissionToCheck: PermissionCheck) {
+    const getPermissionFromUserAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $unwind: "$permissions",
+        },
+        {
+            $match: {
+                "permissions.objectId": permissionToCheck.objectId,
+                "permissions.type": permissionToCheck.type,
+            },
+        },
+        {
+            $project: {
+                permissions: 1,
+                isAdmin: 1
+            }
+        }
+    ]
+    const getPermissionFromUserGroupsAgregationPipeline = [
+        {
+            $match: {
+                _id: "4cea5241-8041-490c-9209-0e36561e8370",
+            },
+        },
+        {
+            $lookup: {
+                from: "permissiongroups",
+                localField: "permissionGroups",
+                foreignField: "_id",
+                as: "permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups.permissions",
+            },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                permissions: { $push: "test" }
+            }
+        }
+    ]
 
+
+    type TUserPermissionsSearchResult = { _id: string;isAdmin:boolean; permissions: TPermission }
+    const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+    let isFound = false
+
+    //check if admin and if so return true
+    if (userPermissions.length > 0 && userPermissions[0].isAdmin === true) return true;
+
+    for (let index = 0; index < userPermissions.length; index++) {
+            const element = userPermissions[index];
+        switch (permissionToCheck.permission) {
+            case ("write"): {
+                if (!element.permissions.write) return false;
+                if (element.permissions.write) {
+                    isFound = true
+                }
+            }
+            case ("delete"): {
+                if (!element.permissions.delete) return false;
+                if (element.permissions.delete) {
+                    isFound = true
+                }
+            }
+            case ("read"): {
+                if (!element.permissions.read) return false;
+                if (element.permissions.read) {
+                    isFound = true
+                }
+            }
+        }
+    }
+    if (isFound) return true;
+    const userGroupPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
+    for (let index = 0; index < userGroupPermissions.length; index++) {
+        const element = userGroupPermissions[index];
+        switch (permissionToCheck.permission) {
+            case ("write"): {
+                if (!element.permissions.write) return false;
+                if (element.permissions.write) {
+                    isFound = true
+                }
+            }
+            case ("delete"): {
+                if (!element.permissions.delete) return false;
+                if (element.permissions.delete) {
+                    isFound = true
+                }
+            }
+            case ("read"): {
+                if (!element.permissions.read) return false;
+                if (element.permissions.read) {
+                    isFound = true
+                }
+            }
+        }
+    }
+    if (isFound) return true;
+
+    return false;
 }
 
 type TPermissionsOptions = {
