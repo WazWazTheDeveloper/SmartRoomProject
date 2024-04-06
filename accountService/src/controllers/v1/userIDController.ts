@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express"
 import * as userService from '../../services/userService'
+import { problemDetails } from "../../modules/problemDetails"
+
 // IMPLEMENT
 export async function getUserPermissions(req: Request, res: Response) {
     // TODO: add permission check
@@ -14,27 +16,44 @@ export async function updateUserPermissions(req: Request, res: Response) {
     })
 
     if(!isAuthorized) {
-        return res.status(401).json({ message: 'Unauthorized' })
+        return res.status(401).json(problemDetails({
+            type : "about:blank",
+            title:"Unauthorized",
+            details: "User is not authorized to do this function",
+            instance: req.originalUrl,
+        }))
     }
 
     const { UUID } = req.params
     const { permissionOptions } = req.body
 
     if (typeof (UUID) != "string" || !Array.isArray(permissionOptions)) {
-        res.status(400).json('Bad request')
-        return
+        return res.status(400).json(problemDetails({
+            type : "about:blank",
+            title:"Bad Request",
+            details: "Invalid data provided. Please ensure that UUID is a string and permissionOptions is an array.",
+            instance: req.originalUrl,
+        }))
     }
 
     if (!userService.isPermissionsOptions(permissionOptions)) {
-        res.status(400).json('Bad request')
+        return res.status(400).json(problemDetails({
+            type : "about:blank",
+            title:"Bad Request",
+            details: "Invalid data provided. Please ensure that permissionOptions is an array of valid permissionOptions objects.",
+            instance: req.originalUrl,
+        }))
     }
 
     const result: boolean = await userService.updateUserPermissions(UUID, permissionOptions)
 
     if (result) {
-        res.status(200).json('ok')
-        return
+        return res.status(200).json('ok')
     }
-    res.status(500).json('internal server error')
-    return
+    return res.status(500).json(problemDetails({
+        type : "about:blank",
+        title:"Bad Request",
+        details: "An unexpected error occurred while processing your request. Please try again later.",
+        instance: req.originalUrl,
+    }))
 }

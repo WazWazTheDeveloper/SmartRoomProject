@@ -8,15 +8,13 @@ import { getRequestUUID } from '../middleware/requestID';
 import { TPermission, TPermissionMaybe } from '../interfaces/permission.interface';
 import * as mongoDB from "mongodb";
 
-type UserResult =
-    | {
-        isSuccessful: false;
-        reason: string;
-    }
-    | {
-        isSuccessful: true;
-        user: User;
-    };
+type UserResult = {
+    isSuccessful: false;
+    reason: string;
+} | {
+    isSuccessful: true;
+    user: User;
+};
 
 /**
  * creates new user
@@ -27,7 +25,7 @@ type UserResult =
 export async function createNewUser(username: string, password: string): Promise<UserResult> {
     let userResult: UserResult = {
         isSuccessful: false,
-        reason: ''
+        reason: 'unknown'
     }
 
     // check if user exist
@@ -123,7 +121,7 @@ type PermissionCheck = {
  * @returns true if user has permission else false
  */
 export async function checkUserPermission(userID: string, permissionToCheck: PermissionCheck) {
-    type TUserPermissionsSearchResult = { _id: string;isAdmin:boolean; permissions: TPermission }
+    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission }
 
     const getPermissionFromUserAgregationPipeline = [
         {
@@ -200,7 +198,7 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
     //check if admin and if so return true
 
     for (let index = 0; index < userPermissions.length; index++) {
-            const element = userPermissions[index];
+        const element = userPermissions[index];
         switch (permissionToCheck.permission) {
             case ("write"): {
                 if (!element.permissions.write) return false;
