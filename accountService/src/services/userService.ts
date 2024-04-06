@@ -123,6 +123,8 @@ type PermissionCheck = {
  * @returns true if user has permission else false
  */
 export async function checkUserPermission(userID: string, permissionToCheck: PermissionCheck) {
+    type TUserPermissionsSearchResult = { _id: string;isAdmin:boolean; permissions: TPermission }
+
     const getPermissionFromUserAgregationPipeline = [
         {
             $match: {
@@ -141,7 +143,6 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
         {
             $project: {
                 permissions: 1,
-                isAdmin: 1
             }
         }
     ]
@@ -176,14 +177,27 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
             }
         }
     ]
+    const getIsAdminAgregationPipeline = [
+        {
+            $match: {
+                _id: "4cea5241-8041-490c-9209-0e36561e8370",
+            },
+        },
+        {
+            $project: {
+                isAdmin: 1
+            }
+        }
+    ]
 
+    const userIsAdmin = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getIsAdminAgregationPipeline);
 
-    type TUserPermissionsSearchResult = { _id: string;isAdmin:boolean; permissions: TPermission }
+    if (userIsAdmin.length > 0 && userIsAdmin[0].isAdmin === true) return true;
+    console.log(userIsAdmin)
     const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
     let isFound = false
 
     //check if admin and if so return true
-    if (userPermissions.length > 0 && userPermissions[0].isAdmin === true) return true;
 
     for (let index = 0; index < userPermissions.length; index++) {
             const element = userPermissions[index];
