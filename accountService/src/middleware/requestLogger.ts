@@ -3,6 +3,9 @@ import { loggerRequest } from '../services/loggerService';
 import { getTime } from 'date-fns';
 import { getRequestUUID } from './requestID';
 
+/**
+ * A middle ware that logs each http request after complition
+ */
 export const httpRequestLogger = (req: Request, res: Response, next: NextFunction) => {
     var start = getTime(new Date());
 

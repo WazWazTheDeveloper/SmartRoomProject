@@ -29,6 +29,9 @@ const database = {
 
 export const collections: TCollection = {}
 
+/**
+ * setup connection to database and auto reconnect
+ */
 export async function connectToDatabase() {
     database.client.on("open", () => {
         database.isConnecting = false;
@@ -58,6 +61,9 @@ export async function connectToDatabase() {
     await attemptToConnect()
 }
 
+/**
+ * attempt to connect to database
+ */
 async function attemptToConnect() {
     if (database.isConnecting) return
 
@@ -74,6 +80,12 @@ async function attemptToConnect() {
     }
 }
 
+/**
+ * crate a new dockument in a specific collection in the database
+ * @param collectionStr name of collection in the database
+ * @param documentJSON object to push to the collection
+ * @returns boolean promiss if done successfully
+ */
 export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
     let isSuccessful = false;
     let logItem = "";
@@ -115,6 +127,13 @@ export async function createDocument(collectionStr: collectionNames, documentJSO
     }
 }
 
+/**
+ * get documents from collection with basic quarry
+ * @param collectionStr name of collection in the database
+ * @param fillter mongoDB.Filter<any> object to fillter collection
+ * @param project object that specify what fields to project from quarry
+ * @returns array with documents
+ */
 export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
     let logItem = "";
 
@@ -147,6 +166,13 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
     }
 }
 
+/**
+ * update one document in a collection
+ * @param collectionStr name of collection in the database
+ * @param fillter mongoDB.Filter<any> object to fillter collection
+ * @param updateFilter object that specify what fields to update
+ * @returns boolean promiss if done successfully
+ */
 export async function updateDocument(collectionStr: collectionNames, fillter: mongoDB.Filter<JSONDBTypes>, updateFilter: mongoDB.UpdateFilter<collectionTypes>) {
     let logItem = "";
 
@@ -188,6 +214,13 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
 }
 
 type TOperation = mongoDB.AnyBulkWriteOperation<TUser>[] | mongoDB.AnyBulkWriteOperation<TPermissionGroup>[]
+/**
+ * bulk write to collection
+ * @param collectionStr name of collection in the database
+ * @param operations An array of bulkwrite() operations
+ * @param options An object of BulkWriteOptions object
+ * @returns boolean promiss if done successfully
+ */
 export async function bulkWriteCollection(collectionStr: collectionNames, operations: TOperation, options?: mongoDB.BulkWriteOptions) {
     let logItem = "";
 
@@ -213,6 +246,12 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
     }
 }
 
+/**
+ * get documents from a collection using an aggregation pipeline
+ * @param collectionStr name of collection in the database
+ * @param aggregation An aggregation pipeline
+ * @returns An array containing documents from the database
+ */
 export async function getDocumentsAggregate<DocumentType>(collectionStr: collectionNames, aggregation: any[]) {
     let logItem = "";
 

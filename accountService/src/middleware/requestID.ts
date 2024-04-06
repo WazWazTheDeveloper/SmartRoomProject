@@ -7,6 +7,9 @@ type TStorage = {
     requestID : string
 }
 
+/**
+ * A middleware that adds a Request ID to each http request that can be accessed for everywhere
+ */
 export const addRequestID = (req: Request, res: Response, next: NextFunction) => {
     if (req.headers["X-Request-ID"]) {
         req._requestID = req.headers["X-Request-ID"] as string
@@ -25,6 +28,10 @@ export const addRequestID = (req: Request, res: Response, next: NextFunction) =>
 
 }
 
+/**
+ * Get Request-ID of the http request that initiated the function
+ * @returns Request-ID of request
+ */
 export function getRequestUUID() {
     const store = asyncLocalStorage.getStore();
     if (store) {

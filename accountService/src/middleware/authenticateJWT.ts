@@ -8,6 +8,9 @@ type JWTData = {
     }
 }
 
+/**
+ * A middle ware thats verifies the request based on the JWT token attached to incoming request
+ */
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization || req.headers.Authorization
 

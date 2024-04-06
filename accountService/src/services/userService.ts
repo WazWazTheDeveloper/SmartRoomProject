@@ -18,6 +18,12 @@ type UserResult =
         user: User;
     };
 
+/**
+ * creates new user
+ * @param username username of the user to be created
+ * @param password password of the user to be created
+ * @returns UserResult promiss
+ */
 export async function createNewUser(username: string, password: string): Promise<UserResult> {
     let userResult: UserResult = {
         isSuccessful: false,
@@ -73,12 +79,18 @@ export async function createNewUser(username: string, password: string): Promise
     }
 }
 
-export async function updateUserPassword(username: string, newPassword: string) {
+/**
+ * change password for user
+ * @param userID UUID of user
+ * @param newPassword new password for the user
+ * @returns true is changed seccsesfuly false if not
+ */
+export async function updateUserPassword(userID: string, newPassword: string) {
     const saltRounds = 10;
     let newHashedPassword: string = await bcrypt.hash(newPassword, saltRounds);
 
     const filter = {
-        username: username,
+        _id: userID,
     }
     const updateFilter = {
         $set: { password: newHashedPassword }
@@ -90,7 +102,7 @@ export async function updateUserPassword(username: string, newPassword: string) 
             return true;
         }
         else {
-            loggerGeneral.error(`failed to update password to user: ${username}`, { uuid: getRequestUUID() })
+            loggerGeneral.error(`failed to update password to user: ${userID}`, { uuid: getRequestUUID() })
             return false;
         }
     } catch (e) {
@@ -99,12 +111,17 @@ export async function updateUserPassword(username: string, newPassword: string) 
     }
 }
 
-// IMPLEMENT
 type PermissionCheck = {
     type: "topic" | "device" | "task" | "PermissionGroup" | "users"
     objectId: string | "all"
     permission: "read" | "write" | "delete"
 }
+/**
+ * check if user have a specific permission
+ * @param userID UUID of user to check
+ * @param permissionToCheck PermissionCheck Object with specification for permission to check
+ * @returns true if user has permission else false
+ */
 export async function checkUserPermission(userID: string, permissionToCheck: PermissionCheck) {
     const getPermissionFromUserAgregationPipeline = [
         {
@@ -224,8 +241,14 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
 type TPermissionsOptions = {
     action: "delete" | "modify" | "add"
     permission: TPermission
-}[]
-export async function updateUserPermissions(userID: string, permissionOptions: TPermissionsOptions) {
+}
+/**
+ * updates user permissions
+ * @param userID UUID of user to check
+ * @param permissionOptions TPermissionsOptions Object array that specify how to check user permissions
+ * @returns true is done seccsesfuly else false
+ */
+export async function updateUserPermissions(userID: string, permissionOptions: TPermissionsOptions[]) {
     const updateList: mongoDB.AnyBulkWriteOperation<TUser>[] = [];
 
     if (!isPermissionsOptions(permissionOptions)) {
@@ -307,7 +330,12 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
     }
 }
 
-export function isPermissionsOptions(permissionOptions: TPermissionsOptions) {
+/**
+ * check if permissionOptions[] is of TPermissionsOptions Type
+ * @param permissionOptions 
+ * @returns true is of type permissionOptions[] else false
+ */
+export function isPermissionsOptions(permissionOptions: TPermissionsOptions[]) {
     if (!Array.isArray(permissionOptions)) {
         return false
     }
