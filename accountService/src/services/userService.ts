@@ -78,6 +78,32 @@ export async function createNewUser(username: string, password: string): Promise
 }
 
 /**
+ * delete user
+ * @param userID UUID of user to be deleted
+ * @returns true is delete seccsesfuly false if not
+ */
+export async function deleteUser(userID: string){
+    const filter = {
+        _id: userID,
+    }
+
+    try {
+        const result = await database.deleteDocument("users", filter);
+
+        if (result) {
+            return true;
+        }
+        else {
+            loggerGeneral.error(`failed to delete user: ${userID}`, { uuid: getRequestUUID() })
+            return false;
+        }
+    } catch (e) {
+        loggerGeneral.error(`failed to delete user: ${e}`, { uuid: getRequestUUID() })
+        return false;
+    }
+}
+
+/**
  * change password for user
  * @param userID UUID of user
  * @param newPassword new password for the user
@@ -250,6 +276,11 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
     return false;
 }
 
+/**
+ * check if user have admin permission
+ * @param userID UUID of user to check
+ * @returns true if user has permission else false
+ */
 export async function checkUserIsAdmin(userID: string) {
     type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean;}
     const getIsAdminAgregationPipeline = [
