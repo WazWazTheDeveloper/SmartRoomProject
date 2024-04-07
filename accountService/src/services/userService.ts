@@ -396,15 +396,15 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
  * @param userID UUID of user
  * @returns TResult with result from quarry
  */
-export async function getUserPermissions(userID: string) {
-    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission }
-    type TResult = {
-        isSuccessful: false,
-        reason: string
-    } | {
-        isSuccessful: true,
-        permissions: TUserPermissionsSearchResult[]
-    }
+type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission[] }
+type TResult = {
+    isSuccessful: false,
+    reason: string
+} | {
+    isSuccessful: true,
+    permissions: TUserPermissionsSearchResult[]
+}
+export async function getUserPermissions(userID: string): Promise<TResult> {
     let result : TResult
 
 
@@ -415,11 +415,9 @@ export async function getUserPermissions(userID: string) {
             },
         },
         {
-            $unwind: "$permissions",
-        },
-        {
             $project: {
                 permissions: 1,
+                isAdmin : 1
             }
         }
     ]
@@ -436,6 +434,7 @@ export async function getUserPermissions(userID: string) {
             isSuccessful : false,
             reason: String(e)
         }
+        return result;
     }
 }
 
