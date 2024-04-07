@@ -83,7 +83,7 @@ export async function createNewUser(username: string, password: string): Promise
  * @param userID UUID of user to be deleted
  * @returns true is delete seccsesfuly false if not
  */
-export async function deleteUser(userID: string){
+export async function deleteUser(userID: string) {
     const filter = {
         _id: userID,
     }
@@ -283,7 +283,7 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
  * @returns true if user has permission else false
  */
 export async function checkUserIsAdmin(userID: string) {
-    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean;}
+    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; }
     const getIsAdminAgregationPipeline = [
         {
             $match: {
@@ -388,6 +388,54 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
     } catch (e) {
         loggerGeneral.error(`failed to update user permission: ${e}`, { uuid: getRequestUUID() })
         return false
+    }
+}
+
+/**
+ * get all permissions of user
+ * @param userID UUID of user
+ * @returns TResult with result from quarry
+ */
+export async function getUserPermissions(userID: string) {
+    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission }
+    type TResult = {
+        isSuccessful: false,
+        reason: string
+    } | {
+        isSuccessful: true,
+        permissions: TUserPermissionsSearchResult[]
+    }
+    let result : TResult
+
+
+    const getPermissionFromUserAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $unwind: "$permissions",
+        },
+        {
+            $project: {
+                permissions: 1,
+            }
+        }
+    ]
+
+    try {
+        const permissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+        result = {
+            isSuccessful: true,
+            permissions: permissions
+        }
+        return result;
+    } catch (e) {
+        result = {
+            isSuccessful : false,
+            reason: String(e)
+        }
     }
 }
 
