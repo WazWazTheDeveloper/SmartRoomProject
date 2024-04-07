@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
-import { TPermission, TPermissionMaybe } from '../interfaces/permission.interface';
+import { TPermission } from '../interfaces/permission.interface';
 import * as mongoDB from "mongodb";
 
 type UserResult = {
