@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import * as database from './mongoDBService'
 import { loggerGeneral } from "./loggerService";
 import { getRequestUUID } from "../middleware/requestID";
+import * as mongoDB from "mongodb";
+import { isPermissionsOptions } from "../modules/permissionOptions";
+import { TPermissionsOptions } from "../interfaces/permission.interface";
 
 type PermissionGroupResult =
     | {
@@ -45,7 +48,90 @@ export async function createNewGroup(groupName: string, groupDescription: string
     return userResult
 }
 
-// IMPLEMENT
-export async function updateGroupPermission() {
+/**
+ * updates group permissions
+ * @param userID ID of group to update
+ * @param permissionOptions TPermissionsOptions Object array that specify how to check user permissions
+ * @returns true is done seccsesfuly else false
+ */
+export async function updateGroupPermission(groupID: string, permissionOptions: TPermissionsOptions[]) {
+    const updateList: mongoDB.AnyBulkWriteOperation<TPermissionGroup>[] = [];
 
+    if (!isPermissionsOptions(permissionOptions)) {
+        throw new Error("invalid type of permissionOptions")
+    }
+
+    for (let index = 0; index < permissionOptions.length; index++) {
+        const permissionOption = permissionOptions[index];
+        switch (permissionOption.action) {
+            case 'add': {
+                updateList.push({
+                    updateOne: {
+                        filter: { _id: groupID },
+                        update: {
+                            $push: {
+                                permissions: {
+                                    type: permissionOption.permission.type,
+                                    objectId: permissionOption.permission.objectId,
+                                    write: permissionOption.permission.write,
+                                    read: permissionOption.permission.read,
+                                    delete: permissionOption.permission.delete
+                                }
+                            }
+                        }
+                    }
+                })
+                break;
+            }
+            case 'delete': {
+                updateList.push({
+                    updateOne: {
+                        filter: { _id: groupID },
+                        update: {
+                            $pull: {
+                                permissions: {
+                                    type: permissionOption.permission.type,
+                                    objectId: permissionOption.permission.objectId,
+                                }
+                            }
+                        }
+                    }
+                })
+                break;
+            }
+            case 'modify': {
+                updateList.push({
+                    updateOne: {
+                        filter: {
+                            _id: groupID,
+                            "permissions.objectId": permissionOption.permission.objectId
+                        },
+                        update: {
+                            $set: {
+                                "permissions.$.write": permissionOption.permission.write,
+                                "permissions.$.read": permissionOption.permission.read,
+                                "permissions.$.delete": permissionOption.permission.delete
+                            }
+                        }
+                    }
+                })
+                break;
+            }
+        }
+    }
+
+    try {
+        const result = await database.bulkWriteCollection('permissionGroups', updateList)
+        if (result) {
+            return true
+
+        }
+        else {
+            loggerGeneral.error(`failed to update user permission to group: ${groupID}`, { uuid: getRequestUUID() })
+            return false
+        }
+    } catch (e) {
+        loggerGeneral.error(`failed to update groupPermission: ${e}`, { uuid: getRequestUUID() })
+        return false
+    }
 }
