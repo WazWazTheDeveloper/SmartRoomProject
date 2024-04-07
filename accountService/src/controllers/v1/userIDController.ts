@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express"
 import * as userService from '../../services/userService'
 import { problemDetails } from "../../modules/problemDetails"
+import * as  permissionsOptions from "../../modules/permissionOptions"
 
 // IMPLEMENT
 export async function getUserPermissions(req: Request, res: Response) {
@@ -36,7 +37,7 @@ export async function updateUserPermissions(req: Request, res: Response) {
         }))
     }
 
-    if (!userService.isPermissionsOptions(permissionOptions)) {
+    if (!permissionsOptions.isPermissionsOptions(permissionOptions)) {
         return res.status(400).json(problemDetails({
             type : "about:blank",
             title:"Bad Request",
