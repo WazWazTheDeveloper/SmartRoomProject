@@ -147,7 +147,7 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
     const getPermissionFromUserGroupsAgregationPipeline = [
         {
             $match: {
-                _id: "4cea5241-8041-490c-9209-0e36561e8370",
+                _id: userID,
             },
         },
         {
@@ -171,14 +171,14 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
         {
             $group: {
                 _id: "$_id",
-                permissions: { $push: "test" }
+                permissions: { $push: "$permissionFromGroups.permissions" }
             }
         }
     ]
     const getIsAdminAgregationPipeline = [
         {
             $match: {
-                _id: "4cea5241-8041-490c-9209-0e36561e8370",
+                _id: userID,
             },
         },
         {
@@ -246,6 +246,27 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
         }
     }
     if (isFound) return true;
+
+    return false;
+}
+
+export async function checkUserIsAdmin(userID: string) {
+    type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean;}
+    const getIsAdminAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $project: {
+                isAdmin: 1
+            }
+        }
+    ]
+    const userIsAdmin = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getIsAdminAgregationPipeline);
+
+    if (userIsAdmin.length > 0 && userIsAdmin[0].isAdmin === true) return true;
 
     return false;
 }
