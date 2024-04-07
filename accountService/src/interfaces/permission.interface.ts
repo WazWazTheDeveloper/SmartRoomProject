@@ -5,3 +5,8 @@ export type TPermission = {
     write: boolean
     delete: boolean
 }
+
+export type TPermissionsOptions = {
+    action: "delete" | "modify" | "add"
+    permission: TPermission
+}

@@ -5,8 +5,9 @@ import bcrypt from 'bcrypt';
 import { TUser } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
-import { TPermission } from '../interfaces/permission.interface';
+import { TPermission, TPermissionsOptions } from '../interfaces/permission.interface';
 import * as mongoDB from "mongodb";
+import { isPermissionsOptions } from '../modules/permissionOptions';
 
 type UserResult = {
     isSuccessful: false;
@@ -302,10 +303,6 @@ export async function checkUserIsAdmin(userID: string) {
     return false;
 }
 
-type TPermissionsOptions = {
-    action: "delete" | "modify" | "add"
-    permission: TPermission
-}
 /**
  * updates user permissions
  * @param userID UUID of user to check
@@ -392,33 +389,6 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
         loggerGeneral.error(`failed to update user permission: ${e}`, { uuid: getRequestUUID() })
         return false
     }
-}
-
-/**
- * check if permissionOptions[] is of TPermissionsOptions Type
- * @param permissionOptions 
- * @returns true is of type permissionOptions[] else false
- */
-export function isPermissionsOptions(permissionOptions: TPermissionsOptions[]) {
-    if (!Array.isArray(permissionOptions)) {
-        return false
-    }
-    for (let index = 0; index < permissionOptions.length; index++) {
-        const permissionOption = permissionOptions[index];
-        if (
-            typeof (permissionOption.action) !== 'boolean' ||
-            typeof (permissionOption.permission) !== 'object' ||
-            typeof (permissionOption.permission.objectId) !== 'string' ||
-            typeof (permissionOption.permission.type) !== 'string' ||
-            typeof (permissionOption.permission.write) !== 'boolean' ||
-            typeof (permissionOption.permission.read) !== 'boolean' ||
-            typeof (permissionOption.permission.delete) !== 'boolean'
-        ) {
-            return false
-        }
-    }
-
-    return true
 }
 
 // IMPLEMENT
