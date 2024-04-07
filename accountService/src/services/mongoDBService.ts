@@ -277,3 +277,36 @@ export async function getDocumentsAggregate<DocumentType>(collectionStr: collect
         throw new Error(err)
     }
 }
+
+/**
+ * update one document in a collection
+ * @param collectionStr name of collection in the database
+ * @param fillter mongoDB.Filter<any> object to fillter collection
+ * @returns boolean promiss if done successfully
+ */
+export async function deleteDocument(collectionStr: collectionNames, filter: mongoDB.Filter<any>) {
+    let logItem = "";
+
+    // check if db collection exist
+    let collection: collectionTypes | undefined = collections[collectionStr]
+    if (!collection) {
+        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+
+    // create and insert mqtt topic
+    const deleteResult = await collection?.deleteOne(filter);
+
+    // check if accepted by db
+    if (deleteResult.acknowledged) {
+        logItem = `Deleted ${deleteResult.deletedCount} documents from: ${collection.namespace} with filter: \n${JSON.stringify(filter, null, "\t")}`
+        loggerDB.verbose(logItem, { uuid: getRequestUUID() })
+        return true
+    }
+    else {
+        logItem = `Failed to delete documents from: ${collection.namespace} with filter: \n${JSON.stringify(filter, null, "\t")}`
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
+        return false
+    }
+}
