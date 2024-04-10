@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import { problemDetails } from "../problemDetails"
-export function response505(req: Request, res: Response) {
+export function response500(req: Request, res: Response) {
     return res.status(500).json(problemDetails({
         type: "about:blank",
         title: "Internal server error",

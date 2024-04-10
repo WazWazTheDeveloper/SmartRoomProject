@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import * as userService from '../../services/userService'
 import { problemDetails } from "../../modules/problemDetails"
 import * as  permissionsOptions from "../../modules/permissionOptions"
-import { response505 } from "../../modules/errors/500"
+import { response500 } from "../../modules/errors/500"
 
 export async function getUserPermissions(req: Request, res: Response) {
     const { UUID } = req.params
@@ -43,11 +43,11 @@ export async function getUserPermissions(req: Request, res: Response) {
                     instance: req.originalUrl,
                 }))
             }
-            return response505(req, res);
+            return response500(req, res);
         }
         return res.status(200).json(result.permissions)
     } catch (e) {
-        return response505(req, res);
+        return response500(req, res);
     }
 }
 
@@ -95,9 +95,9 @@ export async function updateUserPermissions(req: Request, res: Response) {
             return res.status(200).json('ok')
         }
 
-        return response505(req, res);
+        return response500(req, res);
     } catch (e) {
-        return response505(req, res);
+        return response500(req, res);
     }
 }
 
@@ -135,8 +135,8 @@ export async function updateUserPermissionGroups(req: Request, res: Response) {
         if (result) {
             return res.status(200).json('ok')
         }
-        return response505(req, res);
+        return response500(req, res);
     } catch (e) {
-        return response505(req, res);
+        return response500(req, res);
     }
 }
