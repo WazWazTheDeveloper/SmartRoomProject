@@ -12,7 +12,7 @@ export function isPermissionsOptions(permissionOptions: TPermissionsOptions[]) {
     for (let index = 0; index < permissionOptions.length; index++) {
         const permissionOption = permissionOptions[index];
         if (
-            typeof (permissionOption.action) !== 'boolean' ||
+            typeof (permissionOption.action) !== 'string' ||
             typeof (permissionOption.permission) !== 'object' ||
             typeof (permissionOption.permission.objectId) !== 'string' ||
             typeof (permissionOption.permission.type) !== 'string' ||
