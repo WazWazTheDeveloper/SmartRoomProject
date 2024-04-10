@@ -399,13 +399,20 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
 type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission[] }
 type TResult = {
     isSuccessful: false,
-    reason: string
+    errorCode : number
+    error: string
 } | {
     isSuccessful: true,
-    permissions: TUserPermissionsSearchResult[]
+    permissions: TUserPermissionsSearchResult
 }
+/**
+ * get permission of specified user
+ * @param userID UUID of user
+ * @returns TResult
+ * 0: db error, 1: no user found
+ */
 export async function getUserPermissions(userID: string): Promise<TResult> {
-    let result : TResult
+    let result: TResult
 
 
     const getPermissionFromUserAgregationPipeline = [
@@ -417,22 +424,69 @@ export async function getUserPermissions(userID: string): Promise<TResult> {
         {
             $project: {
                 permissions: 1,
-                isAdmin : 1
+                isAdmin: 1
+            }
+        }
+    ]
+
+    const getPermissionFromUserGroupsAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $lookup: {
+                from: "permissiongroups",
+                localField: "permissionGroups",
+                foreignField: "_id",
+                as: "permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups.permissions",
+            },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                permissions: { $push: "$permissionFromGroups.permissions" }
             }
         }
     ]
 
     try {
-        const permissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+        const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+        const permissionsFromGroups = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
+        if (userPermissions.length === 0) {
+            result = {
+                isSuccessful: false,
+                errorCode: 1,
+                error: "no such user"
+            }
+            return result
+        }
+
+        if (permissionsFromGroups.length != 0) {
+            userPermissions[0].permissions = userPermissions[0].permissions.concat(permissionsFromGroups[0].permissions)
+        }
+
         result = {
             isSuccessful: true,
-            permissions: permissions
+            permissions: userPermissions[0]
         }
         return result;
     } catch (e) {
         result = {
-            isSuccessful : false,
-            reason: String(e)
+            isSuccessful: false,
+            errorCode: 0,
+            error: String(e)
         }
         return result;
     }
