@@ -550,3 +550,20 @@ export async function updateUserPermissionGroups(userID: string, options: TPermi
         return false
     }
 }
+
+export function isPermissionGroupOptions(permissionOptions: TPermissionGroupOptions[]) {
+    if (!Array.isArray(permissionOptions)) {
+        return false
+    }
+    for (let index = 0; index < permissionOptions.length; index++) {
+        const permissionOption = permissionOptions[index];
+        if (
+            typeof (permissionOption.action) !== 'string' ||
+            typeof (permissionOption.groupID) !== 'string'
+        ) {
+            return false
+        }
+    }
+
+    return true
+}

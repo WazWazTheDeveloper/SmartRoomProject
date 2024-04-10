@@ -2,6 +2,7 @@ import express, { Request, Response } from "express"
 import * as userService from '../../services/userService'
 import { problemDetails } from "../../modules/problemDetails"
 import * as  permissionsOptions from "../../modules/permissionOptions"
+import { response505 } from "../../modules/errors/500"
 
 export async function getUserPermissions(req: Request, res: Response) {
     const { UUID } = req.params
@@ -89,17 +90,17 @@ export async function updateUserPermissions(req: Request, res: Response) {
         }))
     }
 
-    const result: boolean = await userService.updateUserPermissions(UUID, permissionOptions)
+    try {
+        const result: boolean = await userService.updateUserPermissions(UUID, permissionOptions)
 
-    if (result) {
-        return res.status(200).json('ok')
+        if (result) {
+            return res.status(200).json('ok')
+        }
+
+        return response505(req,res);
+    }catch (e) {
+        return response505(req,res);
     }
-    return res.status(500).json(problemDetails({
-        type: "about:blank",
-        title: "Bad Request",
-        details: "An unexpected error occurred while processing your request. Please try again later.",
-        instance: req.originalUrl,
-    }))
 }
 
 export async function updateUserPermissionGroups(req: Request, res: Response) {
@@ -119,4 +120,25 @@ export async function updateUserPermissionGroups(req: Request, res: Response) {
     }
 
     const { UUID } = req.params
+    const { permissionOptions } = req.body
+
+    if (!userService.isPermissionGroupOptions(permissionOptions)) {
+        return res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that permissionOptions is an array of valid permissionOptions objects.",
+            instance: req.originalUrl,
+        }))
+    }
+
+    try {
+        const result: boolean = await userService.updateUserPermissionGroups(UUID, permissionOptions)
+
+        if (result) {
+            return res.status(200).json('ok')
+        }
+        return response505(req,res);
+    }catch (e) {
+        return response505(req,res);
+    }
 }
