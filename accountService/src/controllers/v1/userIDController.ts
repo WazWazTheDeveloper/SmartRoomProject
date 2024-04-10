@@ -3,7 +3,6 @@ import * as userService from '../../services/userService'
 import { problemDetails } from "../../modules/problemDetails"
 import * as  permissionsOptions from "../../modules/permissionOptions"
 
-// IMPLEMENT
 export async function getUserPermissions(req: Request, res: Response) {
     const { UUID } = req.params
 
@@ -35,6 +34,14 @@ export async function getUserPermissions(req: Request, res: Response) {
 
 
     if (!result.isSuccessful) {
+        if (result.errorCode == 1) {
+            return res.status(400).json(problemDetails({
+                type: "about:blank",
+                title: "Bad Request",
+                details: `The UUID (${UUID}) provided does not correspond to any existing user.`,
+                instance: req.originalUrl,
+            }))
+        }
         return res.status(500).json(problemDetails({
             type: "about:blank",
             title: "Internal server error",
@@ -42,16 +49,7 @@ export async function getUserPermissions(req: Request, res: Response) {
             instance: req.originalUrl,
         }))
     }
-    if(result.permissions.length === 0) {
-        return res.status(500).json(problemDetails({
-            type: "about:blank",
-            title: "Bad Request",
-            details: `The UUID (${UUID}) provided does not correspond to any existing user.`,
-            instance: req.originalUrl,
-        }))
-    }
-    
-    return res.status(200).json(result.permissions[0])
+    return res.status(200).json(result.permissions)
 }
 
 export async function updateUserPermissions(req: Request, res: Response) {
@@ -70,7 +68,8 @@ export async function updateUserPermissions(req: Request, res: Response) {
         }))
     }
 
-    const { UUID, permissionOptions } = req.params
+    const { UUID} = req.params
+    const { permissionOptions } = req.body
 
     if (typeof (UUID) != "string" || !Array.isArray(permissionOptions)) {
         return res.status(400).json(problemDetails({
