@@ -54,7 +54,7 @@ export async function getUserPermissions(req: Request, res: Response) {
 
 export async function updateUserPermissions(req: Request, res: Response) {
     const isAuthorized = await userService.checkUserPermission(req._userID, {
-        type: "PermissionGroup",
+        type: "users",
         objectId: "all",
         permission: "write",
     })
@@ -68,7 +68,7 @@ export async function updateUserPermissions(req: Request, res: Response) {
         }))
     }
 
-    const { UUID} = req.params
+    const { UUID } = req.params
     const { permissionOptions } = req.body
 
     if (typeof (UUID) != "string" || !Array.isArray(permissionOptions)) {
@@ -100,4 +100,23 @@ export async function updateUserPermissions(req: Request, res: Response) {
         details: "An unexpected error occurred while processing your request. Please try again later.",
         instance: req.originalUrl,
     }))
+}
+
+export async function updateUserPermissionGroups(req: Request, res: Response) {
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: "all",
+        permission: "write",
+    })
+
+    if (!isAuthorized) {
+        return res.status(401).json(problemDetails({
+            type: "about:blank",
+            title: "Unauthorized",
+            details: "User is not authorized to do this function",
+            instance: req.originalUrl,
+        }))
+    }
+
+    const { UUID } = req.params
 }
