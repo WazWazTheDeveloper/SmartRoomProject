@@ -215,66 +215,71 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
         }
     ]
 
-    const userIsAdmin = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getIsAdminAgregationPipeline);
+    try {
+        const userIsAdmin = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getIsAdminAgregationPipeline);
 
-    if (userIsAdmin.length > 0 && userIsAdmin[0].isAdmin === true) return true;
-    console.log(userIsAdmin)
-    const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
-    let isFound = false
+        if (userIsAdmin.length > 0 && userIsAdmin[0].isAdmin === true) return true;
+        console.log(userIsAdmin)
+        const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+        let isFound = false
 
-    //check if admin and if so return true
+        //check if admin and if so return true
 
-    for (let index = 0; index < userPermissions.length; index++) {
-        const element = userPermissions[index];
-        switch (permissionToCheck.permission) {
-            case ("write"): {
-                if (!element.permissions.write) return false;
-                if (element.permissions.write) {
-                    isFound = true
+        for (let index = 0; index < userPermissions.length; index++) {
+            const element = userPermissions[index];
+            switch (permissionToCheck.permission) {
+                case ("write"): {
+                    if (!element.permissions.write) return false;
+                    if (element.permissions.write) {
+                        isFound = true
+                    }
                 }
-            }
-            case ("delete"): {
-                if (!element.permissions.delete) return false;
-                if (element.permissions.delete) {
-                    isFound = true
+                case ("delete"): {
+                    if (!element.permissions.delete) return false;
+                    if (element.permissions.delete) {
+                        isFound = true
+                    }
                 }
-            }
-            case ("read"): {
-                if (!element.permissions.read) return false;
-                if (element.permissions.read) {
-                    isFound = true
+                case ("read"): {
+                    if (!element.permissions.read) return false;
+                    if (element.permissions.read) {
+                        isFound = true
+                    }
                 }
             }
         }
-    }
-    if (isFound) return true;
-    const userGroupPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
-    for (let index = 0; index < userGroupPermissions.length; index++) {
-        const element = userGroupPermissions[index];
-        switch (permissionToCheck.permission) {
-            case ("write"): {
-                if (!element.permissions.write) return false;
-                if (element.permissions.write) {
-                    isFound = true
+        if (isFound) return true;
+        const userGroupPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
+        for (let index = 0; index < userGroupPermissions.length; index++) {
+            const element = userGroupPermissions[index];
+            switch (permissionToCheck.permission) {
+                case ("write"): {
+                    if (!element.permissions.write) return false;
+                    if (element.permissions.write) {
+                        isFound = true
+                    }
                 }
-            }
-            case ("delete"): {
-                if (!element.permissions.delete) return false;
-                if (element.permissions.delete) {
-                    isFound = true
+                case ("delete"): {
+                    if (!element.permissions.delete) return false;
+                    if (element.permissions.delete) {
+                        isFound = true
+                    }
                 }
-            }
-            case ("read"): {
-                if (!element.permissions.read) return false;
-                if (element.permissions.read) {
-                    isFound = true
+                case ("read"): {
+                    if (!element.permissions.read) return false;
+                    if (element.permissions.read) {
+                        isFound = true
+                    }
                 }
             }
         }
-    }
-    if (isFound) return true;
+        if (isFound) return true;
 
-    return false;
+        return false;
+
+    } catch (e) {
+        throw new Error(String(e))
+    }
 }
 
 /**
