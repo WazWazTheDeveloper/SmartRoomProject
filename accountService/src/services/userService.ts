@@ -399,7 +399,7 @@ export async function updateUserPermissions(userID: string, permissionOptions: T
 type TUserPermissionsSearchResult = { _id: string; isAdmin: boolean; permissions: TPermission[] }
 type TResult = {
     isSuccessful: false,
-    errorCode : number
+    errorCode: number
     error: string
 } | {
     isSuccessful: true,
@@ -492,7 +492,61 @@ export async function getUserPermissions(userID: string): Promise<TResult> {
     }
 }
 
-// IMPLEMENT
-export async function updateUserPermissionGroups(username: string) {
+type TPermissionGroupOptions = {
+    action: "delete" | "add"
+    groupID: string
+}
+export async function updateUserPermissionGroups(userID: string, options: TPermissionGroupOptions[]) {
+    const updateList: mongoDB.AnyBulkWriteOperation<TUser>[] = [];
 
+    // TODO: chcek if valid groupID
+
+    for (let index = 0; index < options.length; index++) {
+        const element = options[index];
+        switch (element.action) {
+            case ("add"): {
+                updateList.push({
+                    updateOne: {
+                        filter: {
+                            _id: userID,
+                        },
+                        update: {
+                            $push: {
+                                permissionGroups: element.groupID
+                            }
+                        }
+                    }
+                })
+            }
+            case ("delete"): {
+                updateList.push({
+                    updateOne: {
+                        filter: {
+                            _id: userID,
+                        },
+                        update: {
+                            $pull: {
+                                permissionGroups: element.groupID
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    try {
+        const result = await database.bulkWriteCollection('users', updateList)
+        if (result) {
+            return true
+
+        }
+        else {
+            loggerGeneral.error(`failed to update user permission groups to user: ${userID}`, { uuid: getRequestUUID() })
+            return false
+        }
+    } catch (e) {
+        loggerGeneral.error(`failed to update user permission groups: ${e}`, { uuid: getRequestUUID() })
+        return false
+    }
 }
