@@ -1,4 +1,4 @@
-import express = require('express');
+import express, { Request, Response, NextFunction } from "express"
 import https from "https";
 const cookieParser = require('cookie-parser')
 import bodyParser = require('body-parser');
@@ -8,6 +8,7 @@ import fs from 'fs';
 import { httpRequestLogger } from './src/middleware/requestLogger';
 import { addRequestID } from './src/middleware/requestID';
 import { loggerGeneral } from './src/services/loggerService';
+import { response500 } from "./src/modules/errors/500";
 
 const app = express();
 var key = fs.readFileSync('./certs/selfsigned.key');
@@ -25,7 +26,12 @@ app.use(httpRequestLogger)
 
 app.use('/api/v1', routerv1);
 
-
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    response500(req, res);
+})
+app.use((req: Request, res: Response, next: NextFunction) => {
+    response500(req, res);
+})
 async function startServer(): Promise<void> {
     await connectToDatabase()
     startListeningToReqests()
