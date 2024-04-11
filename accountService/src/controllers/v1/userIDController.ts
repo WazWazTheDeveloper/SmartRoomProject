@@ -26,7 +26,7 @@ export const getUserPermissions = asyncHandler(async (req: Request, res: Respons
     })
 
     if (!isAuthorized) {
-        response401(req,res);
+        response401(req, res);
         return
     }
     const result = await userService.getUserPermissions(UUID)
@@ -56,7 +56,7 @@ export const updateUserPermissions = asyncHandler(async (req: Request, res: Resp
     })
 
     if (!isAuthorized) {
-        response401(req,res);
+        response401(req, res);
         return
     }
 
@@ -100,8 +100,8 @@ export const updateUserPermissionGroups = asyncHandler(async (req: Request, res:
     })
 
     if (!isAuthorized) {
-        response401(req,res);
-        return 
+        response401(req, res);
+        return
     }
 
     const { UUID } = req.params
@@ -114,7 +114,7 @@ export const updateUserPermissionGroups = asyncHandler(async (req: Request, res:
             details: "Invalid data provided. Please ensure that permissionOptions is an array of valid permissionOptions objects.",
             instance: req.originalUrl,
         }))
-        return 
+        return
     }
 
     const result: boolean = await userService.updateUserPermissionGroups(UUID, permissionOptions)
@@ -124,4 +124,49 @@ export const updateUserPermissionGroups = asyncHandler(async (req: Request, res:
     }
 
     next()
+})
+
+export const checkUserPermission = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: "all",
+        permission: "read",
+    })
+
+    if (!isAuthorized) {
+        response401(req, res);
+        return
+    }
+
+    const { UUID } = req.params
+    const { type, objectid, permission } = req.query
+
+    if (typeof (type) != "string" ||typeof (UUID) != "string" || typeof (objectid) != "string" || typeof (permission) != "string") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that 'type', 'objectid', and 'permission' are strings.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    // TODO: remove ts-ignore
+    const result = await userService.checkUserPermission(UUID , {
+        // @ts-ignore
+        type:type,
+        objectId:objectid,
+        // @ts-ignore
+        permission:permission
+    })
+
+    if(result){
+        res.status(200).json({
+            hasPermission : true
+        })
+    }else {
+        res.status(200).json({
+            hasPermission : false
+        })
+    }
 })
