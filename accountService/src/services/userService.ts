@@ -522,6 +522,7 @@ export async function updateUserPermissionGroups(userID: string, options: TPermi
                         }
                     }
                 })
+                break;
             }
             case ("delete"): {
                 updateList.push({
@@ -536,6 +537,7 @@ export async function updateUserPermissionGroups(userID: string, options: TPermi
                         }
                     }
                 })
+                break;
             }
         }
     }
