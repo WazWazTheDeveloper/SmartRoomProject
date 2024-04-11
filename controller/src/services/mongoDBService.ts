@@ -5,6 +5,7 @@ import { TDeviceJSON_DB } from '../interfaces/device.interface';
 import { TMqttTopicObjectJSON_DB } from '../interfaces/mqttTopicObject.interface';
 import { DB_LOG, logEvents } from '../middleware/logger';
 import { TTaskJSON_DB } from '../interfaces/task.interface';
+import { loggerDB } from './loggerService';
 type TCollection = {
     devices?: mongoDB.Collection<TDeviceJSON_DB>
     mqttTopics?: mongoDB.Collection<TMqttTopicObjectJSON_DB>
@@ -25,28 +26,65 @@ export const COLLECTION_TASKS = 'tasks'
 
 export const collections: TCollection = {}
 
-export async function connectToDatabase() {
-    dotenv.config();
-    const client: mongoDB.MongoClient = new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
+const database = {
+    client: new mongoDB.MongoClient(`mongodb://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_IP}/?replicaSet=rs0` as string, {
         pkFactory: { createPk: () => uuidv4() }
-    });
+    }),
+    isConnected: false,
+    isConnecting: false
+}
 
-    await client.connect();
+/**
+ * setup connection to database and auto reconnect
+ */
+export async function connectToDatabase() {
+    database.client.on("open", () => {
+        database.isConnecting = false;
+        database.isConnected = true
+        loggerDB.info("Successfully connected to users database")
+        // init collections and db
+        const db: mongoDB.Db = database.client.db(process.env.DATABASE_NAME as string);
+        const devices: mongoDB.Collection<TDeviceJSON_DB> = db.collection<TDeviceJSON_DB>(process.env.DATABASE_COLLECTION_DEVICE as string);
+        const mqttTopics: mongoDB.Collection<TMqttTopicObjectJSON_DB> = db.collection<TMqttTopicObjectJSON_DB>(process.env.DATABASE_COLLECTION_MQTT_TOPICS as string);
+        const tasks: mongoDB.Collection<TTaskJSON_DB> = db.collection<TTaskJSON_DB>(process.env.DATABASE_COLLECTION_TASKS as string);
 
-    // init collections and db
-    const db: mongoDB.Db = client.db(process.env.DATABASE_NAME as string);
-    const devices: mongoDB.Collection<TDeviceJSON_DB> = db.collection<TDeviceJSON_DB>(process.env.DATABASE_COLLECTION_DEVICE as string);
-    const mqttTopics: mongoDB.Collection<TMqttTopicObjectJSON_DB> = db.collection<TMqttTopicObjectJSON_DB>(process.env.DATABASE_COLLECTION_MQTT_TOPICS as string);
-    const tasks: mongoDB.Collection<TTaskJSON_DB> = db.collection<TTaskJSON_DB>(process.env.DATABASE_COLLECTION_TASKS as string);
+        collections.devices = devices;
+        collections.mqttTopics = mqttTopics;
+        collections.tasks = tasks;
 
-    collections.devices = devices;
-    collections.mqttTopics = mqttTopics;
-    collections.tasks = tasks;
+        mqttTopics.createIndex({ path: 1 }, { unique: true });
+    })
 
-    // index path
-    mqttTopics.createIndex({path:1},{unique:true});
-    
-    logEvents(`Successfully connected to database`, DB_LOG)
+    database.client.on("serverHeartbeatFailed", () => {
+        if (database.isConnecting) return
+
+        database.isConnected = false
+        loggerDB.error("connection to database closed attempting to reconnect in 5 secends")
+        setTimeout(async () => {
+            attemptToConnect()
+        }, 5000)
+    })
+
+    await attemptToConnect()
+}
+
+/**
+ * attempt to connect to database
+ */
+async function attemptToConnect() {
+    if (database.isConnecting) return
+
+    try {
+        database.isConnecting = true;
+        loggerDB.info("attempting to connect to database")
+        await database.client.connect();
+    } catch (e) {
+        database.isConnecting = false;
+        loggerDB.error(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
+        setTimeout(async () => {
+            attemptToConnect()
+        }, 5000)
+    }
 }
 
 export async function updateDocument(collectionStr: collectionNames, fillter: mongoDB.Filter<JSONDBTypes>, updateFilter: mongoDB.UpdateFilter<collectionTypes>) {
@@ -201,7 +239,7 @@ export async function getDocumentsAggregate<DocumentType>(collectionStr: collect
     const findResultArr = await findResult.toArray() as DocumentType[];
 
     // log
-    logItem = `Search with aggregation:${JSON.stringify(aggregation,null,"\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+    logItem = `Search with aggregation:${JSON.stringify(aggregation, null, "\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
     logEvents(logItem, DB_LOG)
 
 
