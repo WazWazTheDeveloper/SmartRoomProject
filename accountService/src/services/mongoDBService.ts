@@ -224,6 +224,13 @@ type TOperation = mongoDB.AnyBulkWriteOperation<TUser>[] | mongoDB.AnyBulkWriteO
 export async function bulkWriteCollection(collectionStr: collectionNames, operations: TOperation, options?: mongoDB.BulkWriteOptions) {
     let logItem = "";
 
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
@@ -254,6 +261,13 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
  */
 export async function getDocumentsAggregate<DocumentType>(collectionStr: collectionNames, aggregation: any[]) {
     let logItem = "";
+
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
 
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]

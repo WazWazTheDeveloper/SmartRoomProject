@@ -6,6 +6,7 @@ import { TMqttTopicObjectJSON_DB } from '../interfaces/mqttTopicObject.interface
 import { DB_LOG, logEvents } from '../middleware/logger';
 import { TTaskJSON_DB } from '../interfaces/task.interface';
 import { loggerDB } from './loggerService';
+import { getRequestUUID } from '../middleware/requestID';
 type TCollection = {
     devices?: mongoDB.Collection<TDeviceJSON_DB>
     mqttTopics?: mongoDB.Collection<TMqttTopicObjectJSON_DB>
@@ -87,8 +88,22 @@ async function attemptToConnect() {
     }
 }
 
+/**
+ * update one document in a collection
+ * @param collectionStr name of collection in the database
+ * @param fillter mongoDB.Filter<any> object to fillter collection
+ * @param updateFilter object that specify what fields to update
+ * @returns boolean promiss if done successfully
+ */
 export async function updateDocument(collectionStr: collectionNames, fillter: mongoDB.Filter<JSONDBTypes>, updateFilter: mongoDB.UpdateFilter<collectionTypes>) {
     let logItem = "";
+
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
 
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
@@ -98,21 +113,26 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
         throw new Error(err)
     }
 
-    // db update
-    const updateResult = await collection.updateOne(fillter, updateFilter)
-    // console.log(updateResult)
+    try {
+        // db update
+        const updateResult = await collection.updateOne(fillter, updateFilter)
 
-    //check if accepted by db and return
-    if (updateResult.acknowledged) {
-        logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
-        logEvents(logItem, DB_LOG)
-        return true
-    }
-    else {
-        logItem = `Failed to update document with filter:${fillter} to ${collection.namespace}\t
+        //check if accepted by db and return
+        if (updateResult.acknowledged) {
+            logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
+            // logEvents(logItem, DB_LOG)
+            return true
+        }
+        else {
+            logItem = `Failed to update document with filter:${fillter} to ${collection.namespace}\t
         ${JSON.stringify(updateFilter, null, "\t")}`
-        logEvents(logItem, DB_LOG)
-        return false
+            // logEvents(logItem, DB_LOG)
+            return false
+        }
+    } catch (e) {
+        logItem = `Failed to find document in database`
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
+        return false;
     }
 }
 
@@ -144,8 +164,22 @@ export async function updateDocuments(collectionStr: collectionNames, fillter: m
     }
 }
 
+/**
+ * bulk write to collection
+ * @param collectionStr name of collection in the database
+ * @param operations An array of bulkwrite() operations
+ * @param options An object of BulkWriteOptions object
+ * @returns boolean promiss if done successfully
+ */
 export async function bulkWriteCollection(collectionStr: collectionNames, operations: mongoDB.AnyBulkWriteOperation<JSONDBTypes>[], options?: mongoDB.BulkWriteOptions) {
     let logItem = "";
+
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
 
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
@@ -160,49 +194,82 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
         const bulkWriteResult: mongoDB.BulkWriteResult = await collection.bulkWrite(operations, options)
         logItem = `Inserted ${bulkWriteResult.insertedCount}, Modified ${bulkWriteResult.modifiedCount}, Deleted ${bulkWriteResult.deletedCount} documents at:${collection.namespace} with: \n
             ${JSON.stringify(operations, null, "\t")}`
-        logEvents(logItem, DB_LOG)
+        loggerDB.verbose(`failed bulkWrite to:${logItem}`, { uuid: getRequestUUID() })
         return true
     } catch (e) {
-        logEvents(e, DB_LOG)
-        return true
+        const err = `failed to bulkWrite :${e}`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
     }
 }
 
+/**
+ * crate a new dockument in a specific collection in the database
+ * @param collectionStr name of collection in the database
+ * @param documentJSON object to push to the collection
+ * @returns boolean promiss if done successfully
+ */
 export async function createDocument(collectionStr: collectionNames, documentJSON: any) {
     let isSuccessful = false;
-    const _id = uuidv4()
     let logItem = "";
+
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+
 
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
-        const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        const err = "no collection found \tat mongoDBService.ts \tat createDocument"
+        loggerDB.error(err)
         throw new Error(err)
     }
 
-    // create and insert mqtt topic
-    const insertResult = await collection?.insertOne(documentJSON);
+    try {
+        const insertResult = await collection?.insertOne(documentJSON);
 
-    // check if accepted by db
-    if (insertResult.acknowledged) {
-        logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
-        isSuccessful = true
+        // check if accepted by db
+        if (insertResult.acknowledged) {
+            logItem = `Inserted new document with _id: ${insertResult.insertedId} to ${collection.namespace}: \n${JSON.stringify(documentJSON, null, "\t")}`
+            isSuccessful = true
+            loggerDB.verbose(logItem, { uuid: getRequestUUID() })
+        }
+        else {
+            logItem = `Failed to insert document with the _id: ${insertResult.insertedId} to ${collection.namespace}\t
+            ${JSON.stringify(documentJSON, null, "\t")}`
+            loggerDB.error(logItem, { uuid: getRequestUUID() })
+            isSuccessful = false
+        }
+
+        return isSuccessful
+    } catch (e) {
+        logItem = `Failed to insert document to database`
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
+        return isSuccessful;
     }
-    else {
-        logItem = `Failed to insert document with the _id: ${insertResult.insertedId} to ${collection.namespace}\t
-        ${JSON.stringify(documentJSON, null, "\t")}`
-        isSuccessful = false
-
-    }
-
-    logEvents(logItem, DB_LOG)
-    return isSuccessful
 }
 
+/**
+ * get documents from collection with basic quarry
+ * @param collectionStr name of collection in the database
+ * @param fillter mongoDB.Filter<any> object to fillter collection
+ * @param project object that specify what fields to project from quarry
+ * @returns array with documents
+ */
 export async function getDocuments<DocumentType>(collectionStr: collectionNames, fillter: mongoDB.Filter<any>, project: any = {}) {
     let logItem = "";
 
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
@@ -211,21 +278,39 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
         throw new Error(err)
     }
 
-    //query
-    const findResult = collection.find(fillter).project(project)
-    const findResultArr = await findResult.toArray() as DocumentType[];
+    try {
+        //query
+        const findResult = collection.find(fillter).project(project)
+        const findResultArr = await findResult.toArray() as DocumentType[];
 
-    // log
-    logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
-    logEvents(logItem, DB_LOG)
+        // log
+        logItem = `Search with fillter:${JSON.stringify(fillter)} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+        loggerDB.verbose(logItem, { uuid: getRequestUUID() })
 
-
-    return findResultArr
+        return findResultArr
+    } catch (e) {
+        logItem = `Failed to find document in database`
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
+        return [];
+    }
 }
 
+/**
+ * get documents from a collection using an aggregation pipeline
+ * @param collectionStr name of collection in the database
+ * @param aggregation An aggregation pipeline
+ * @returns An array containing documents from the database
+ */
 export async function getDocumentsAggregate<DocumentType>(collectionStr: collectionNames, aggregation: any[]) {
     let logItem = "";
 
+    //check if database is connected
+    if (!database.isConnected) {
+        const err = `not connected to database`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+
     // check if db collection exist
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
@@ -235,15 +320,18 @@ export async function getDocumentsAggregate<DocumentType>(collectionStr: collect
     }
 
     //query
-    const findResult = collection.aggregate(aggregation)
-    const findResultArr = await findResult.toArray() as DocumentType[];
+    try {
+        const findResult = collection.aggregate(aggregation)
+        const findResultArr = await findResult.toArray() as DocumentType[];
+        logItem = `Search with aggregation:${JSON.stringify(aggregation, null, "\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
+        loggerDB.verbose(logItem, { uuid: getRequestUUID() });
 
-    // log
-    logItem = `Search with aggregation:${JSON.stringify(aggregation, null, "\t")} returned ${findResultArr.length} documents from: ${collection.namespace}`;
-    logEvents(logItem, DB_LOG)
-
-
-    return findResultArr
+        return findResultArr
+    } catch (e) {
+        const err = `failed to agregate :${e}`
+        loggerDB.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
 }
 
 export async function getCollection(collectionStr: collectionNames) {
