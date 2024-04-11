@@ -13,12 +13,16 @@ import { initializeMqttClient } from './src/services/mqttClientService';
 import { initDeviceSubscriptions } from './src/handlers/mqttDeviceSubscriptionsHandler';
 import { initializeMqttTopicHandler } from './src/services/mqttTopicService';
 import { mqttTopicDBHandler } from './src/handlers/mqttTopicDBHandler';
+import { addRequestID } from './src/middleware/requestID';
+import { httpRequestLogger } from './src/middleware/requestLogger';
+import { loggerGeneral } from './src/services/loggerService';
 
 const app = express();
-app.use(logger)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
+app.use(addRequestID)
+app.use(httpRequestLogger)
 
 app.use('/api/v1', routerv1);
 
@@ -35,8 +39,7 @@ async function startServer(): Promise<void> {
 
 function startListeningToReqests(): void {
     let server = app.listen(process.env.SERVER_PORT, () => {
-        // TODO: log this:
-        console.log(`listening on port ${process.env.SERVER_PORT}`)
+        loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
     })
 
 }
