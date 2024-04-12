@@ -1,9 +1,9 @@
 import { TAllMqttMessageType, TGetDeviceRequest, TInitDeviceRequest, } from "../interfaces/mqttMassge.interface";
-import { MQTT_LOG, logEvents } from "../middleware/logger";
 import { initDevice } from "../mqttMessages/incoming/mqttInitDeviceRequest";
 import { getDevice } from "../mqttMessages/incoming/mqttGetDeviceRequest";
 import { checkConnection } from "../mqttMessages/incoming/mqttCheckConnectionResponse";
 import { updateServerRequest } from "../mqttMessages/incoming/mqttUpdateServerRequest";
+import { loggerMQTT } from "../services/loggerService";
 
 /**
  * @description supposed to be called by the mqtt client when a message is recived and routes the message to the correct funciton
@@ -40,7 +40,7 @@ export function mqttMessageHandler(
 
         //@ts-ignore
         let logItem = `unknown operation: ${message.operation}`;
-        logEvents(logItem, MQTT_LOG);
+        loggerMQTT.warn(logItem, { uuid: "mqttRequest" })
     } catch (e) {
         if (topic == process.env.MQTT_TOPIC_CHECK_CONNECTION_RESPONSE && typeof message == "string") {
             checkConnection(topic, message);
@@ -54,7 +54,7 @@ export function mqttMessageHandler(
 
         //@ts-ignore
         let logItem = `unknown message: ${message}`;
-        logEvents(logItem, MQTT_LOG);
+        loggerMQTT.warn(logItem, { uuid: "mqttRequest" })
     }
 }
 

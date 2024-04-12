@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
-import { DB_LOG, logEvents } from "../middleware/logger";
 import MqttTopicObject from "../models/mqttTopicObject";
 import {COLLECTION_MQTT_TOPICS,bulkWriteCollection,collections,createDocument,getCollection,getDocuments,getDocumentsAggregate,updateDocument,} from "./mongoDBService";
 import {TMqttTopicObjectJSON_DB,TMqttTopicProperty,} from "../interfaces/mqttTopicObject.interface";
-import { UpdateFilter } from "mongodb";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
 import * as mongoDB from "mongodb";
 import SwitchData from "../models/dataTypes/switchData";
 import NumberData from "../models/dataTypes/numberData";
 import MultiStateButton from "../models/dataTypes/multiStateButtonData";
+import { loggerGeneral } from "./loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 type MqttTopicResult =
     | {
@@ -68,7 +68,7 @@ export async function getMqttTopic(_id: string): Promise<MqttTopicResult> {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} in: mqttCollection`;
-        logEvents(err, DB_LOG);
+        loggerGeneral.error(err , getRequestUUID())
         throw new Error(err);
     } else if (findResultArr.length == 0) {
         functionResult = { isSuccessful: false };

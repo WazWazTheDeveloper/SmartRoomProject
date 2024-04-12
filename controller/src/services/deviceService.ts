@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { DeviceDataTypesConfigs } from "../interfaces/deviceData.interface";
-import { ERROR_LOG, logEvents } from "../middleware/logger";
 import Device from "../models/device";
 import { COLLECTION_DEVICES, JSONDBTypes, bulkWriteCollection, createDocument, deleteDocuments, getCollection, getDocuments, getDocumentsAggregate, } from "./mongoDBService";
 import { createNewMqttTopic } from "./mqttTopicService";
@@ -10,6 +9,8 @@ import { deleteAllProperyChecksOfDevice } from "./taskService";
 import SwitchData from "../models/dataTypes/switchData";
 import NumberData from "../models/dataTypes/numberData";
 import MultiStateButton from "../models/dataTypes/multiStateButtonData";
+import { loggerGeneral } from "./loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 type DeviceResult =
     | {
@@ -28,7 +29,7 @@ export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.Cha
         )) as mongoDB.Collection<TDeviceJSON_DB>;
     } catch (e) {
         let logItem = `Failed to initialize device handler: ${e}`;
-        logEvents(logItem, ERROR_LOG);
+        loggerGeneral.error(logItem, { uuid: "server-startup" })
         return false;
     }
 
@@ -38,7 +39,7 @@ export async function initializeDeviceHandler(handler: (changeEvent: mongoDB.Cha
     return true;
 }
 
-export async function createDevice(deviceName: string,deviceTargetID: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
+export async function createDevice(deviceName: string, deviceTargetID: string, dataTypeArray: DeviceDataTypesConfigs[]): Promise<DeviceResult> {
     let functionResult: DeviceResult = { isSuccessful: false };
     let logItem = "";
     const _id = uuidv4();
@@ -52,7 +53,7 @@ export async function createDevice(deviceName: string,deviceTargetID: string, da
     // check if created isSuccessful
     if (!deviceTopicResult.isSuccessful) {
         logItem = `Failed to create device due to failing to create a topic`;
-        logEvents(logItem, ERROR_LOG);
+        loggerGeneral.error(logItem, { uuid: deviceTargetID })
         return functionResult;
     }
 
@@ -68,7 +69,7 @@ export async function createDevice(deviceName: string,deviceTargetID: string, da
         // check if created isSuccessful
         if (!configTopicResult.isSuccessful) {
             logItem = `Failed to create device due to failing to create a topic to data`;
-            logEvents(logItem, ERROR_LOG);
+            loggerGeneral.error(logItem, { uuid: deviceTargetID })
             return functionResult;
         }
 
@@ -116,7 +117,7 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} at: deviceCollection`;
-        logEvents(err, ERROR_LOG);
+        loggerGeneral.error(err,{uuid : getRequestUUID()})
         throw new Error(err);
     } else if (findResultArr.length == 0) {
         functionResult = { isSuccessful: false };

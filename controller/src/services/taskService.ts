@@ -2,10 +2,11 @@ import { TPropertyCheck, TTask, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTa
 import { Task } from "../models/task"
 import { v4 as uuidv4 } from 'uuid';
 import { COLLECTION_TASKS, createDocument, deleteDocuments, getDocuments, updateDocument, updateDocuments } from "./mongoDBService";
-import { ERROR_LOG, logEvents } from "../middleware/logger";
 import { UpdateFilter } from "mongodb";
 import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
 import { taskTimeCheckHandler } from "../handlers/taskHandler";
+import { loggerGeneral } from "./loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 type TaskResult = {
     isSuccessful: false
@@ -82,7 +83,7 @@ export async function getTask(_id: string) {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} at: taskCollection`
-        logEvents(err, ERROR_LOG)
+        loggerGeneral.error(err,{uuid : getRequestUUID()})
         throw new Error(err)
     }
     else if (findResultArr.length == 0) {

@@ -6,8 +6,9 @@ const logFormat = winston.format.printf(({ level, message, service, uuid ,dateTi
 });
 
 const loggerDBLevel = "silly"
+const loggerMQTTLevel = "silly"
 const requestLoggerLevel = "silly"
-const serviceName = "account-service"
+const serviceName = "controller-service"
 
 export const loggerDB = winston.createLogger({
     level: loggerDBLevel,
@@ -24,8 +25,32 @@ export const loggerDB = winston.createLogger({
     ],
 });
 
+export const loggerMQTT = winston.createLogger({
+    level: loggerMQTTLevel,
+    format: winston.format.json(),
+    defaultMeta: {
+        service: serviceName,
+        uuid: "none",
+        dateTime: `${date.format(new Date(), 'HH:mm:ss dd/LL/yyyy')}`
+    },
+    transports: [
+        new winston.transports.File({ filename: `./logs/db_error${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'error' }),
+        new winston.transports.File({ filename: `./logs/db_info${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'info' }),
+        new winston.transports.File({ filename: `./logs/db_verbose${date.format(new Date(), '_dd_LL_yyyy')}.log`, level: 'verbose' }),
+    ],
+});
+
 if (process.env.NODE_ENV !== 'production') {
     loggerDB.add(new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple(),
+            logFormat
+        ),
+        level: 'silly'
+    }));
+
+    loggerMQTT.add(new winston.transports.Console({
         format: winston.format.combine(
             winston.format.colorize(),
             winston.format.simple(),

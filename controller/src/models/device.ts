@@ -10,9 +10,11 @@ import {
     TNumberData,
     TSwitchData,
 } from "../interfaces/deviceData.interface";
-import { ERROR_LOG, logEvents } from "../middleware/logger";
+// import { ERROR_LOG, logEvents } from "../middleware/logger";
 import NumberData from "./dataTypes/numberData";
 import MultiStateButton from "./dataTypes/multiStateButtonData";
+import { loggerGeneral } from "../services/loggerService";
+import { getRequestUUID } from "../middleware/requestID";
 
 export default class Device implements TDevice {
     //is accepted states
@@ -170,8 +172,8 @@ export default class Device implements TDevice {
             case MultiStateButton.TYPE_ID:
                 return MultiStateButton.createNewData(dataConfig);
             default:
-                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getNewData`;
-                logEvents(err, ERROR_LOG);
+                const err = `unknown typeID:"${dataConfig.typeID}" at device.ts at getNewData`;
+                loggerGeneral.error(err,{uuid : getRequestUUID()})
                 throw new Error(err);
         }
     }
@@ -193,8 +195,8 @@ export default class Device implements TDevice {
                     dataConfig as MultiStateButton
                 );
             default:
-                const err = `unknown typeID:"${dataConfig.typeID}" at mqttTopicService.ts at getDataFromTDeviceJSON_DB`;
-                logEvents(err, ERROR_LOG);
+                const err = `unknown typeID:"${dataConfig.typeID}" at device.ts at getDataFromTDeviceJSON_DB`;
+                loggerGeneral.error(err,{uuid : getRequestUUID()})
                 throw new Error(err);
         }
     }

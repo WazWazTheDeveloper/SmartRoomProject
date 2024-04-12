@@ -1,5 +1,6 @@
 import * as cron from 'node-cron';
-import { ERROR_LOG, logEvents } from '../middleware/logger';
+import { loggerGeneral } from './loggerService';
+import { getRequestUUID } from '../middleware/requestID';
 
 type TScheduledTask = {
     id: string
@@ -12,7 +13,7 @@ export function addScheduledTask(cronExpression: string, id: string, func: () =>
     // check if valid cron expression
     if (!isCronValid(cronExpression)){
         const error = `${cronExpression} is no a valid cron-expression at:addScheduledTask(cronExpression: string, id: string, func: () => void) in:taskSchedulerService.ts`
-        logEvents(error,ERROR_LOG)
+        loggerGeneral.error(error,getRequestUUID())
         throw new Error
     }
 

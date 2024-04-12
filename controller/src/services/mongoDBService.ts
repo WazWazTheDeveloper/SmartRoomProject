@@ -1,9 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as mongoDB from "mongodb";
-import * as dotenv from "dotenv";
 import { TDeviceJSON_DB } from '../interfaces/device.interface';
 import { TMqttTopicObjectJSON_DB } from '../interfaces/mqttTopicObject.interface';
-import { DB_LOG, logEvents } from '../middleware/logger';
 import { TTaskJSON_DB } from '../interfaces/task.interface';
 import { loggerDB } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
@@ -42,7 +40,7 @@ export async function connectToDatabase() {
     database.client.on("open", () => {
         database.isConnecting = false;
         database.isConnected = true
-        loggerDB.info("Successfully connected to users database")
+        loggerDB.info("Successfully connected to users database", { uuid: "db connection" })
         // init collections and db
         const db: mongoDB.Db = database.client.db(process.env.DATABASE_NAME as string);
         const devices: mongoDB.Collection<TDeviceJSON_DB> = db.collection<TDeviceJSON_DB>(process.env.DATABASE_COLLECTION_DEVICE as string);
@@ -60,7 +58,7 @@ export async function connectToDatabase() {
         if (database.isConnecting) return
 
         database.isConnected = false
-        loggerDB.error("connection to database closed attempting to reconnect in 5 secends")
+        loggerDB.error("connection to database closed attempting to reconnect in 5 secends", { uuid: "db connection" })
         setTimeout(async () => {
             attemptToConnect()
         }, 5000)
@@ -77,11 +75,11 @@ async function attemptToConnect() {
 
     try {
         database.isConnecting = true;
-        loggerDB.info("attempting to connect to database")
+        loggerDB.info("attempting to connect to database", { uuid: "db connection" })
         await database.client.connect();
     } catch (e) {
         database.isConnecting = false;
-        loggerDB.error(`error connecting to database: ${e}, attempting to reconnect in 5 secends`)
+        loggerDB.error(`error connecting to database: ${e}, attempting to reconnect in 5 secends`, { uuid: "db connection" })
         setTimeout(async () => {
             attemptToConnect()
         }, 5000)
@@ -109,7 +107,7 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(err, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -120,12 +118,14 @@ export async function updateDocument(collectionStr: collectionNames, fillter: mo
         //check if accepted by db and return
         if (updateResult.acknowledged) {
             logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
+            loggerDB.info(logItem, { uuid: getRequestUUID() })
             // logEvents(logItem, DB_LOG)
             return true
         }
         else {
             logItem = `Failed to update document with filter:${fillter} to ${collection.namespace}\t
         ${JSON.stringify(updateFilter, null, "\t")}`
+            loggerDB.error(logItem, { uuid: getRequestUUID() })
             // logEvents(logItem, DB_LOG)
             return false
         }
@@ -143,7 +143,7 @@ export async function updateDocuments(collectionStr: collectionNames, fillter: m
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(err, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -153,13 +153,13 @@ export async function updateDocuments(collectionStr: collectionNames, fillter: m
     //check if accepted by db and return
     if (updateResult.acknowledged) {
         logItem = `Modified ${updateResult.modifiedCount} documents at:${collection.namespace} with: \n${JSON.stringify(updateFilter, null, "\t")}`
-        logEvents(logItem, DB_LOG)
+        loggerDB.info(logItem, { uuid: getRequestUUID() })
         return true
     }
     else {
         logItem = `Failed to update document with filter:${fillter} to ${collection.namespace}\t
         ${JSON.stringify(updateFilter, null, "\t")}`
-        logEvents(logItem, DB_LOG)
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         return false
     }
 }
@@ -185,7 +185,7 @@ export async function bulkWriteCollection(collectionStr: collectionNames, operat
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -274,7 +274,7 @@ export async function getDocuments<DocumentType>(collectionStr: collectionNames,
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -315,7 +315,7 @@ export async function getDocumentsAggregate<DocumentType>(collectionStr: collect
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -339,7 +339,7 @@ export async function getCollection(collectionStr: collectionNames) {
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(err, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -353,7 +353,7 @@ export async function deleteDocuments(collectionStr: collectionNames, filter: mo
     let collection: collectionTypes | undefined = collections[collectionStr]
     if (!collection) {
         const err = "no collection found \tat mongoDBService.ts \tat updateDocument"
-        logEvents(err, DB_LOG)
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
         throw new Error(err)
     }
 
@@ -363,11 +363,10 @@ export async function deleteDocuments(collectionStr: collectionNames, filter: mo
     // check if accepted by db
     if (deleteResult.acknowledged) {
         logItem = `Deleted ${deleteResult.deletedCount} documents from: ${collection.namespace} with filter: \n${JSON.stringify(filter, null, "\t")}`
+        loggerDB.info(logItem, { uuid: getRequestUUID() })
     }
     else {
         logItem = `Failed to delete documents from: ${collection.namespace} with filter: \n${JSON.stringify(filter, null, "\t")}`
-
+        loggerDB.error(logItem, { uuid: getRequestUUID() })
     }
-
-    logEvents(logItem, DB_LOG)
 }
