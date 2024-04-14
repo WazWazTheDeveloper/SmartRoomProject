@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express"
 import jwt, { VerifyErrors } from 'jsonwebtoken';
-import { problemDetails } from "../modules/problemDetails";
+import { problemDetails } from "../models/problemDetails";
 
 type JWTData = {
     userdata: {
@@ -52,7 +52,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
             req._userName = paylaod.userdata.username;
             req._userID = paylaod.userdata.userID;
-
+            
             next()
         }
     )
