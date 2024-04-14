@@ -1,7 +1,6 @@
 import express = require('express');
 const cookieParser = require('cookie-parser')
 import bodyParser = require('body-parser');
-import { logger } from './src/middleware/logger';
 import { deviceDBHandler } from "./src/handlers/deviceDBHandler";
 import { taskCheckHandler } from "./src/handlers/taskHandler";
 import { connectToDatabase } from "./src/services/mongoDBService";
