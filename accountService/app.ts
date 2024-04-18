@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express"
-const cookieParser = require('cookie-parser')
+import cookieParser from 'cookie-parser';
 import bodyParser = require('body-parser');
 import { createNewUser } from './src/services/userService';
 import { connectToDatabase } from './src/services/mongoDBService';
