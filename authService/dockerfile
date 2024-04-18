@@ -1,5 +1,5 @@
 FROM node
-WORKDIR /auth
-COPY package*.json /auth
+WORKDIR /authService
+COPY package*.json /authService
 RUN npm install
 CMD [ "npm" ,"start" ]

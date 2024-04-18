@@ -14,14 +14,14 @@ services:
       - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
       - MONGODB_USERNAME=admin
       - MONGODB_PASSWORD=admin
-      - ACCOUNT_SERVICE=account_service:5002
+      - ACCOUNT_SERVICE=account-service:5002
     networks:
       - mongoCluster
       - mqttCluster
       - reverseProxy
 
   auth-service:
-    container_name: 'authService'
+    container_name: 'auth-service'
     build: /authService
     tty: true
     ports:
@@ -38,7 +38,7 @@ services:
       - reverseProxy
 
   account-service:
-    container_name: 'account_service'
+    container_name: 'account-service'
     build: /accountService
     tty: true
     ports:
