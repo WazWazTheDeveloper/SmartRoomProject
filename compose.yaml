@@ -20,15 +20,15 @@ services:
       - mqttCluster
       - reverseProxy
 
-  auth:
-    container_name: 'auth'
-    build: /auth
+  auth-service:
+    container_name: 'authService'
+    build: /authService
     tty: true
     ports:
       - 5001:5001
     volumes:
-      - ./auth:/auth
-      - /auth/node_modules/
+      - ./authService:/authService
+      - /authService/node_modules/
     environment:
       - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
       - MONGODB_USERNAME=admin
@@ -37,7 +37,7 @@ services:
       - mongoCluster
       - reverseProxy
 
-  account_service:
+  account-service:
     container_name: 'account_service'
     build: /accountService
     tty: true
@@ -215,8 +215,8 @@ services:
       - 80:80
       - 443:443
     depends_on: 
-      - auth
-      - account_service
+      - auth-service
+      - account-service
     networks:
       - reverseProxy
 
