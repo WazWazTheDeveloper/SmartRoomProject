@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /deviceControllerService
+COPY package*.json /deviceControllerService
+RUN npm install
+CMD [ "npm" ,"start" ]
