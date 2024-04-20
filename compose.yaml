@@ -20,6 +20,25 @@ services:
       - mqttCluster
       - reverseProxy
 
+  device-controller-service:
+    container_name: 'device-controller-service'
+    build: /deviceControllerService
+    tty: true
+    ports:
+      - 5005:5000
+    volumes:
+      - ./deviceControllerService:/deviceControllerService
+      - /deviceControllerService/node_modules/
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+    networks:
+      - mongoCluster
+      - mqttCluster
+
   auth-service:
     container_name: 'auth-service'
     build: /authService
