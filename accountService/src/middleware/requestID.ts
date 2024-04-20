@@ -11,16 +11,16 @@ type TStorage = {
  * A middleware that adds a Request ID to each http request that can be accessed for everywhere
  */
 export const addRequestID = (req: Request, res: Response, next: NextFunction) => {
-    if (req.headers["X-Request-ID"]) {
-        req._requestID = req.headers["X-Request-ID"] as string
+    if (req.headers["x-request-id"]) {
+        req._requestID = req.headers["x-request-id"] as string
     } else {
         req._requestID = uuidv4()
     }
 
-    res.set("X-Request-ID", req._requestID)
+    res.set("x-request-id", req._requestID)
 
     const store : TStorage = {
-        requestID : uuidv4()
+        requestID : req._requestID
     }
     asyncLocalStorage.run(store, () => {
         next();
