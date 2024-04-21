@@ -1,17 +1,36 @@
 import { TPropertyCheck, TTask, TTaskJSON_DB, TTaskProperty, TTimeCheck, TTodoTask } from "../interfaces/task.interface";
 import { Task } from "../models/task"
 import { v4 as uuidv4 } from 'uuid';
-import { COLLECTION_TASKS, createDocument, deleteDocuments, getDocuments, updateDocument, updateDocuments } from "./mongoDBService";
+import { COLLECTION_TASKS, createDocument, deleteDocuments, getCollection, getDocuments, updateDocument, updateDocuments } from "./mongoDBService";
 import { UpdateFilter } from "mongodb";
 import { addScheduledTask, stopScheduledTask } from "./taskSchedulerService";
 import { taskTimeCheckHandler } from "../handlers/taskHandler";
 import { loggerGeneral } from "./loggerService";
+import * as mongoDB from "mongodb";
 
 type TaskResult = {
     isSuccessful: false
 } | {
     isSuccessful: true
     task: Task
+}
+
+export async function initializeTaskHandler(handler: (changeEvent: mongoDB.ChangeStreamDocument) => void) {
+    let collection: mongoDB.Collection<TTaskJSON_DB>;
+    try {
+        collection = (await getCollection(
+            "tasks"
+        )) as mongoDB.Collection<TTaskJSON_DB>;
+    } catch (e) {
+        let logItem = `Failed to initialize device handler: ${e}`;
+        loggerGeneral.error(logItem, { uuid: "server-startup" })
+        return false;
+    }
+
+    const changeStream = collection.watch();
+    changeStream.on("change", handler);
+    
+    return true;
 }
 
 export async function initializeTasksFromDB(handler: Function) {
