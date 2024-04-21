@@ -39,6 +39,25 @@ services:
       - mongoCluster
       - mqttCluster
 
+  task-controller-service:
+    container_name: 'task-controller-service'
+    build: /taskControllerService
+    tty: true
+    ports:
+      - 5006:5000
+    volumes:
+      - ./taskControllerService:/taskControllerService
+      - /taskControllerService/node_modules/
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+    networks:
+      - mongoCluster
+      - mqttCluster
+
   auth-service:
     container_name: 'auth-service'
     build: /authService
