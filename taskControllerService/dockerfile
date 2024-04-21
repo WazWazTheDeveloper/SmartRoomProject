@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /taskControllerService
+COPY package*.json /taskControllerService
+RUN npm install
+CMD [ "npm" ,"start" ]
