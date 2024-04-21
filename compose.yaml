@@ -1,13 +1,34 @@
 services:
-  controller:
-    container_name: 'controller'
-    build: /controller
+  # controller:
+  #   container_name: 'controller'
+  #   build: /controller
+  #   tty: true
+  #   ports:
+  #     - 5000:5000
+  #   volumes:
+  #     - ./controller:/controller
+  #     - /controller/node_modules/
+  #   environment:
+  #     - MQTT_HOST=emqx
+  #     - MQTT_PORT=1883
+  #     - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+  #     - MONGODB_USERNAME=admin
+  #     - MONGODB_PASSWORD=admin
+  #     - ACCOUNT_SERVICE=account-service:5002
+  #   networks:
+  #     - mongoCluster
+  #     - mqttCluster
+  #     - reverseProxy
+
+  controller-api-service:
+    container_name: 'controller-api-service'
+    build: /controllerApiService
     tty: true
     ports:
-      - 5000:5000
+      - 5007:5000
     volumes:
-      - ./controller:/controller
-      - /controller/node_modules/
+      - ./controllerApiService:/controllerApiService
+      - /controllerApiService/node_modules/
     environment:
       - MQTT_HOST=emqx
       - MQTT_PORT=1883
