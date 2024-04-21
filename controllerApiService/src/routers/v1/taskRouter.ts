@@ -4,10 +4,10 @@ export const taskRouter:express.Router = express.Router()
 
 taskRouter.post('/',taskController.createTask)
 
-export const taskIDRouter:express.Router = express.Router()
+export const taskIDRouter:express.Router = express.Router({ mergeParams : true })
 
 taskRouter.use("/:UUID",taskIDRouter)
 
-taskRouter.get('/',taskController.getTask)
-taskRouter.post('/',taskController.updateTask)
-taskRouter.delete('/',taskController.deleteTask)
+taskIDRouter.get('/',taskController.getTask)
+taskIDRouter.put('/',taskController.updateTask)
+taskIDRouter.delete('/',taskController.deleteTask)

@@ -6,7 +6,7 @@ deviceRouter.put("/",deviceController.updateDevices)
 deviceRouter.post("/",deviceController.getDeviceWithArray)
 deviceRouter.get("/",deviceController.getAlldevices)
 
-export const deviceIDRouter:express.Router = express.Router()
+export const deviceIDRouter:express.Router = express.Router({ mergeParams : true })
 
 deviceRouter.use("/:UUID",deviceIDRouter)
 

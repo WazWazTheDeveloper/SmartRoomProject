@@ -7,12 +7,14 @@ import { response500 } from "./src/models/errors/500";
 import { routerv1 } from "./src/routers/v1/router";
 import { loggerGeneral } from "./src/services/loggerService";
 import { connectToDatabase } from "./src/services/mongoDBService";
+import { authenticateJWT } from "./src/middleware/authenticateJWT";
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
+app.use(authenticateJWT)
 app.use(addRequestID)
 app.use(httpRequestLogger)
 
@@ -20,6 +22,7 @@ app.use('/api/v1', routerv1);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     response500(req, res);
+    console.log(err)
 })
 app.use((req: Request, res: Response, next: NextFunction) => {
     response500(req, res);
