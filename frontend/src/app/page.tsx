@@ -1,6 +1,44 @@
+"use client"
+
 import Image from "next/image";
+import axios from "axios";
+import { QueryClient, useQuery } from "react-query";
+
+axios.defaults.withCredentials = true
 
 export default function Home() {
+
+  const result = useQuery({
+    queryKey: ['auth'],
+    queryFn: () =>
+      axios
+        .post('/api/v1/auth/login', {
+          withCredentials: true,
+          headers: {'Content-Type': 'application/json' },
+          "username": "admin",
+          "password": "admin"
+        })
+        .then((res) => {
+          console.log(res.data)
+        }),
+  })
+
+  // fetch("https://127.0.0.1/api/v1/auth/login", {
+  //   method: "POST",
+  //   body: JSON.stringify({
+  //     "username": "admin",
+  //     "password": "admin"
+  //   }),
+  //   headers: {
+  //     'Accept': 'application/json',
+  //     'Content-Type': 'application/json'
+  //   },
+  //   credentials:"same-origin"
+  // }).then((e) => {
+  //   return e.json()
+  // })
+  // .then((e)=>console.log(e))
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
