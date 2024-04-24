@@ -9,6 +9,7 @@ import { httpRequestLogger } from './src/middleware/requestLogger';
 import { addRequestID } from './src/middleware/requestID';
 import { loggerGeneral } from './src/services/loggerService';
 import { response500 } from "./src/modules/errors/500";
+import cors from "cors";
 
 const app = express();
 var key = fs.readFileSync('./certs/selfsigned.key');
@@ -18,6 +19,20 @@ var options = {
     cert: cert
 };
 
+app.use(cors({
+    origin: 'http://127.0.0.1:3000',
+    credentials : true
+}))
+app.use((req: Request, res: Response, next: NextFunction) => {
+    //@ts-ignore
+    res.header('Access-Control-Allow-Origin', "http://127.0.0.1:3000");
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie");
+    res.header('Access-Control-Allow-Credentials', "true");
+    
+
+    next()
+})
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
@@ -27,9 +42,11 @@ app.use(httpRequestLogger)
 app.use('/api/v1', routerv1);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.log(err)
     response500(req, res);
 })
 app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log("yeet")
     response500(req, res);
 })
 async function startServer(): Promise<void> {
@@ -40,7 +57,7 @@ async function startServer(): Promise<void> {
 function startListeningToReqests(): void {
     let server = https.createServer(options, app);
     server.listen(process.env.SERVER_PORT, () => {
-        loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`,{uuid : "server-startup"})
+        loggerGeneral.info(`listening on port ${process.env.SERVER_PORT}`, { uuid: "server-startup" })
     })
 
 }
