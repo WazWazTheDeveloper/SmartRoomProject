@@ -19,20 +19,6 @@ var options = {
     cert: cert
 };
 
-app.use(cors({
-    origin: 'http://127.0.0.1:3000',
-    credentials : true
-}))
-app.use((req: Request, res: Response, next: NextFunction) => {
-    //@ts-ignore
-    res.header('Access-Control-Allow-Origin', "http://127.0.0.1:3000");
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie");
-    res.header('Access-Control-Allow-Credentials', "true");
-    
-
-    next()
-})
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())

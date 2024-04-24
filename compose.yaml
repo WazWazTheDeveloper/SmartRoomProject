@@ -41,6 +41,16 @@ services:
       - mqttCluster
       - reverseProxy
 
+  frontend:
+    container_name: 'frontend'
+    build: /frontend
+    tty: true
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules/
+    networks:
+      - reverseProxy
+
   device-controller-service:
     container_name: 'device-controller-service'
     build: /deviceControllerService
@@ -245,6 +255,7 @@ services:
     depends_on: 
       - auth-service
       - account-service
+      - frontend
     networks:
       - reverseProxy
 
