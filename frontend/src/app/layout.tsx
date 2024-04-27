@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Providers } from "./providers";
+import Sidebar from "@/components/sidebar";
+import { useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,9 +21,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Providers>
-        <body className={inter.className}>{children}</body>
-      </Providers>
+      <body className={inter.className}>
+        <Providers>
+          <Sidebar />
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }
