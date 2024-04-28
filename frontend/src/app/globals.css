@@ -2,13 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+/* * {
   all:unset;
 }
 
-title, script {
+title, script, style {
   display: none;
 }
+
+path {
+  width: auto;
+  height: auto;
+} */
 
 body {
   /* color: rgb(var(--foreground-rgb));

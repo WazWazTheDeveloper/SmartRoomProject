@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className + " text-neutral-1000 dark:text-darkNeutral-1000"}>
         <Providers>
           <Sidebar />
           {children}
