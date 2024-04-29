@@ -16,9 +16,9 @@ type TLogin = {
 }
 
 export type ContextType = {
-    login: UseMutationResult<refreshType, unknown, TLogin, unknown>;
-    refreshToken: UseMutationResult<refreshType, any, void, unknown>;
-    logout: UseMutationResult<refreshType, unknown, void, unknown>
+    login: (username : string , password:string) => void;
+    refreshToken: () => void;
+    logout: () => void;
     authToken: string;
     isAuthed: boolean;
     isLoading: boolean;
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: Props) {
     const [errors, serErrors] = useState<string[]>([])
     const currentPage = usePathname();
 
-    const login = useMutation({
+    const loginMutation = useMutation({
         mutationFn: async (user: TLogin) => {
             const res = await axios.post('/api/v1/auth/login', {
                 withCredentials: true,
@@ -47,11 +47,12 @@ export function AuthProvider({ children }: Props) {
             setIsLoading(false);
             return res.data as refreshType
         },
-        onError: async () => {
+        onError: async (e) => {
+            console.log(e)
         }
     })
 
-    const refreshToken = useMutation({
+    const refreshTokenMutation = useMutation({
         mutationFn: async () => {
             const res = await axios.get('/api/v1/auth/refresh', {
                 withCredentials: true,
@@ -67,13 +68,14 @@ export function AuthProvider({ children }: Props) {
                 setAuthToken("")
                 setIsAuthed(false)
                 setIsLoading(false);
+                // logout.mutate()
             }
         }
     })
 
-    const logout = useMutation({
+    const logoutMutation = useMutation({
         mutationFn: async () => {
-            const res = await axios.get('/api/v1/auth/logout', {
+            const res = await axios.delete('/api/v1/auth/logout', {
                 withCredentials: true,
             })
             setAuthToken("")
@@ -85,15 +87,35 @@ export function AuthProvider({ children }: Props) {
 
 
     useEffect(() => {
-        refreshToken.mutate()
+        // login.mutate({
+        //     password: "admin",
+        //     username: "admin"
+        // })
+        logoutMutation.mutate()
     }, [])
 
     useEffect(() => {
         if (isLoading) return
         if (isAuthed) return
-        if(currentPage == "/login") return
+        if (currentPage == "/login") return
+    
         redirect("/login")
     }, [isAuthed, isLoading])
+
+    const logout = () => {
+        logoutMutation.mutate();
+    }
+
+    const login = (username : string , password:string) => {
+        loginMutation.mutate({
+            username : username,
+            password : password
+        });
+    }
+
+    const refreshToken = () => {
+        refreshTokenMutation.mutate();
+    }
 
     const auth = {
         login,
