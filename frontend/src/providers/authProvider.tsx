@@ -87,11 +87,7 @@ export function AuthProvider({ children }: Props) {
 
 
     useEffect(() => {
-        // login.mutate({
-        //     password: "admin",
-        //     username: "admin"
-        // })
-        logoutMutation.mutate()
+        refreshTokenMutation.mutate()
     }, [])
 
     useEffect(() => {

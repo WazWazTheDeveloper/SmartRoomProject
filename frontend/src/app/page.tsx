@@ -1,11 +1,6 @@
 "use client"
 
-import Image from "next/image";
 import axios from "axios";
-import { QueryClient, useMutation, useQuery } from "react-query";
-import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
-import useSidebarState from "@/hooks/useSidebarState";
 
 axios.defaults.withCredentials = true
 
@@ -14,10 +9,8 @@ type refreshType = {
 }
 
 export default function Home() {
-    const [isSidebarOpen, setIsSidebarOpen] = useSidebarState()
-    function test() {
+  function test() {
     document.documentElement.classList.toggle("dark");
-    // setIsSidebarOpen(!isSidebarOpen);
     console.log("asd")
   }
   return (
