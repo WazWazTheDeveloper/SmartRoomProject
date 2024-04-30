@@ -71,7 +71,7 @@ export const deleteDevice = asyncHandler(async (req: Request, res: Response, nex
 })
 
 export const getDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-
+    //get all permissions of user
 })
 
 export const updateDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
