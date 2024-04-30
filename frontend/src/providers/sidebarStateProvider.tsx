@@ -12,7 +12,7 @@ export type ContextType = [
 export const SidebarStateContext = createContext<ContextType | null>(null);
 
 export function SidebarStateProvider({ children }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 return(
     <SidebarStateContext.Provider value={[isSidebarOpen, setIsSidebarOpen]}>
         { children }
