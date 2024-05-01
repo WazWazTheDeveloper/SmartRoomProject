@@ -42,7 +42,11 @@ export const getDeviceWithArray = asyncHandler(async (req: Request, res: Respons
 })
 
 export const getAlldevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    // get user permissions
 
+    // if admin return all
+
+    // if not get all device form permissions
 })
 
 export const deleteDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -71,7 +75,6 @@ export const deleteDevice = asyncHandler(async (req: Request, res: Response, nex
 })
 
 export const getDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    //get all permissions of user
 })
 
 export const updateDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
