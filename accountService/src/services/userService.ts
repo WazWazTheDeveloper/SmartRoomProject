@@ -497,7 +497,7 @@ export async function getUserPermissions(userID: string): Promise<TResult> {
     }
 }
 
-export async function getUserPermissionsOfType(userID: string,permissionType:string): Promise<TResult> {
+export async function getUserPermissionsOfType(userID: string, permissionType: string): Promise<TResult> {
     let result: TResult
 
 
@@ -508,19 +508,20 @@ export async function getUserPermissionsOfType(userID: string,permissionType:str
             },
         },
         {
-            $unwind : {
-                path : "$permissions"
+            $unwind: {
+                path: "$permissions"
             }
         },
         {
-            $match : {
-                "permissions.type" : permissionType
+            $match: {
+                "permissions.type": permissionType
             }
         },
         {
             $group: {
                 _id: "$_id",
-                permissions: { $push: "$permissions" }
+                permissions: { $push: "$permissions" },
+                isAdmin: { $first: "$isAdmin" }
             }
         }
     ]
@@ -550,14 +551,14 @@ export async function getUserPermissionsOfType(userID: string,permissionType:str
             },
         },
         {
-            $match : {
-                "permissionFromGroups.permissions.type" : permissionType
+            $match: {
+                "permissionFromGroups.permissions.type": permissionType
             }
         },
         {
             $group: {
                 _id: "$_id",
-                permissions: { $push: "$permissionFromGroups.permissions" }
+                permissions: { $push: "$permissionFromGroups.permissions" },
             }
         }
     ]
@@ -565,6 +566,7 @@ export async function getUserPermissionsOfType(userID: string,permissionType:str
     try {
         const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
         const permissionsFromGroups = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
+        // BUG: when user doesn't have any permissions(of type) will return user not found
         if (userPermissions.length === 0) {
             result = {
                 isSuccessful: false,

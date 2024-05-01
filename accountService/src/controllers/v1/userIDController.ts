@@ -54,7 +54,13 @@ export const getUserPermissions = asyncHandler(async (req: Request, res: Respons
         response401(req, res);
         return
     }
-    const result = await userService.getUserPermissions(UUID)
+
+    let result
+    if(permission_type) {
+        result = await userService.getUserPermissionsOfType(UUID,permission_type as string)
+    }else {
+        result = await userService.getUserPermissions(UUID)
+    }
 
 
     if (!result.isSuccessful) {
