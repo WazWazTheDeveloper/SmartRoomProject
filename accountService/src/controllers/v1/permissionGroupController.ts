@@ -10,7 +10,7 @@ import { response401 } from "../../modules/errors/401";
 export const createNewGroup = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     //check permissions
     const isAuthorized = await checkUserPermission(req._userID, {
-        type: "PermissionGroup",
+        type: "permissionGroup",
         objectId: "all",
         permission: "write",
     })
@@ -42,7 +42,7 @@ export const createNewGroup = asyncHandler(async (req: Request, res: Response, n
 
 export const updateGroupPermissions = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const isAuthorized = await userService.checkUserPermission(req._userID, {
-        type: "PermissionGroup",
+        type: "permissionGroup",
         objectId: "all",
         permission: "write",
     })

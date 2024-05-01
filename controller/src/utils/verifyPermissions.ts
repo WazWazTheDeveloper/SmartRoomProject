@@ -7,7 +7,7 @@ const axios = require('axios').default;
 type TResponseData = {
     hasPermission: boolean
 }
-type TType = "topic" | "device" | "task" | "PermissionGroup" | "users"
+type TType = "topic" | "device" | "task" | "permissionGroup" | "users"
 type TPermissionType = "read" | "write" | "delete"
 export async function verifyPermissions(authKey: string, userID: string, type: TType, objectid: string, permission: TPermissionType,) : Promise<boolean> {
     return axios.get(`http://${process.env.ACCOUNT_SERVICE as string}/api/v1/user/${userID}/check-permission?type=${type}&objectid=${objectid}&permission=${permission}`,
