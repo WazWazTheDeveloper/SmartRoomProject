@@ -8,6 +8,31 @@ import { response401 } from "../../modules/errors/401"
 
 export const getUserPermissions = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { UUID } = req.params
+    const { permission_type } = req.query
+
+    if (!((permission_type == "topic" ||
+        permission_type == "device" ||
+        permission_type == "task" ||
+        permission_type == "permissionGroup" ||
+        permission_type == "users")) && typeof (permission_type) == "string") {
+
+    }
+
+    if (typeof (permission_type) == "string") {
+        if (!(permission_type == "topic" ||
+            permission_type == "device" ||
+            permission_type == "task" ||
+            permission_type == "permissionGroup" ||
+            permission_type == "users")) {
+            res.status(400).json(problemDetails({
+                type: "about:blank",
+                title: "Bad Request",
+                details: "Invalid permission_type provided.",
+                instance: req.originalUrl,
+            }))
+            return
+        }
+    }
 
     if (typeof (UUID) != "string") {
         res.status(400).json(problemDetails({
@@ -141,7 +166,7 @@ export const checkUserPermission = asyncHandler(async (req: Request, res: Respon
     const { UUID } = req.params
     const { type, objectid, permission } = req.query
 
-    if (typeof (type) != "string" ||typeof (UUID) != "string" || typeof (objectid) != "string" || typeof (permission) != "string") {
+    if (typeof (type) != "string" || typeof (UUID) != "string" || typeof (objectid) != "string" || typeof (permission) != "string") {
         res.status(400).json(problemDetails({
             type: "about:blank",
             title: "Bad Request",
@@ -152,21 +177,21 @@ export const checkUserPermission = asyncHandler(async (req: Request, res: Respon
     }
 
     // TODO: remove ts-ignore
-    const result = await userService.checkUserPermission(UUID , {
+    const result = await userService.checkUserPermission(UUID, {
         // @ts-ignore
-        type:type,
-        objectId:objectid,
+        type: type,
+        objectId: objectid,
         // @ts-ignore
-        permission:permission
+        permission: permission
     })
 
-    if(result){
+    if (result) {
         res.status(200).json({
-            hasPermission : true
+            hasPermission: true
         })
-    }else {
+    } else {
         res.status(200).json({
-            hasPermission : false
+            hasPermission: false
         })
     }
 })

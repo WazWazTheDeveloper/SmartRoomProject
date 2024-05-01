@@ -137,7 +137,7 @@ export async function updateUserPassword(userID: string, newPassword: string) {
 }
 
 type PermissionCheck = {
-    type: "topic" | "device" | "task" | "PermissionGroup" | "users"
+    type: "topic" | "device" | "task" | "permissionGroup" | "users"
     objectId: string | "all"
     permission: "read" | "write" | "delete"
 }
@@ -457,6 +457,102 @@ export async function getUserPermissions(userID: string): Promise<TResult> {
             $unwind: {
                 path: "$permissionFromGroups.permissions",
             },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                permissions: { $push: "$permissionFromGroups.permissions" }
+            }
+        }
+    ]
+
+    try {
+        const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
+        const permissionsFromGroups = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserGroupsAgregationPipeline);
+        if (userPermissions.length === 0) {
+            result = {
+                isSuccessful: false,
+                errorCode: 1,
+                error: "no such user"
+            }
+            return result
+        }
+
+        if (permissionsFromGroups.length != 0) {
+            userPermissions[0].permissions = userPermissions[0].permissions.concat(permissionsFromGroups[0].permissions)
+        }
+
+        result = {
+            isSuccessful: true,
+            permissions: userPermissions[0]
+        }
+        return result;
+    } catch (e) {
+        result = {
+            isSuccessful: false,
+            errorCode: 0,
+            error: String(e)
+        }
+        return result;
+    }
+}
+
+export async function getUserPermissionsOfType(userID: string,permissionType:string): Promise<TResult> {
+    let result: TResult
+
+
+    const getPermissionFromUserAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $unwind : {
+                path : "$permissions"
+            }
+        },
+        {
+            $match : {
+                "permissions.type" : permissionType
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                permissions: { $push: "$permissions" }
+            }
+        }
+    ]
+
+    const getPermissionFromUserGroupsAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $lookup: {
+                from: "permissiongroups",
+                localField: "permissionGroups",
+                foreignField: "_id",
+                as: "permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups",
+            },
+        },
+        {
+            $unwind: {
+                path: "$permissionFromGroups.permissions",
+            },
+        },
+        {
+            $match : {
+                "permissionFromGroups.permissions.type" : permissionType
+            }
         },
         {
             $group: {
