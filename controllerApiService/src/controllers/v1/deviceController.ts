@@ -4,6 +4,8 @@ import { problemDetails } from "../../models/problemDetails";
 import { response401 } from "../../models/errors/401";
 import { verifyPermissions } from "../../utils/verifyPermissions";
 import * as deviceService from "../../services/deviceService"
+import axios from "axios";
+import { getRequestUUID } from "../../middleware/requestID";
 
 
 export const updateDevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -42,6 +44,33 @@ export const getDeviceWithArray = asyncHandler(async (req: Request, res: Respons
 })
 
 export const getAlldevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    type TResponseData = {
+        _id: String
+        isAdmin: boolean
+        permissions: {
+            type: "topic" | "device" | "task" | "permissionGroup" | "users"
+            objectId: string | "all"
+            read: boolean
+            write: boolean
+            delete: boolean
+        }[]
+    }
+    const result = await axios.get(`http://${process.env.ACCOUNT_SERVICE as string}/api/v1/user/${req._userID}/permission`, {
+        headers: {
+            "X-Request-ID": getRequestUUID(),
+            Authorization: req.headers.authorization
+        }
+    })
+    const resultData : TResponseData = result.data
+
+    const devicesID = []
+
+    for (let i = 0; i < resultData.permissions.length; i++) {
+        const permission = resultData.permissions[i];
+        if(permission.type == "device" && permission.read == true) {
+            devicesID.push(permission.objectId)
+        }
+    }
     // get user permissions
 
     // if admin return all
@@ -107,12 +136,12 @@ export const updateDevice = asyncHandler(async (req: Request, res: Response, nex
         return
     }
 
-    let _updateList : any[] = []
+    let _updateList: any[] = []
     for (let index = 0; index < updateList.length; index++) {
         const element = updateList[index];
         _updateList.push({
             id: UUID,
-            propertyToChange : element
+            propertyToChange: element
         })
     }
 

@@ -16,7 +16,7 @@ app.use(cookieParser())
 app.use(addRequestID)
 app.use(httpRequestLogger)
 
-app.use('/api/v1/account', routerv1);
+app.use('/api/v1', routerv1);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     response500(req, res);
