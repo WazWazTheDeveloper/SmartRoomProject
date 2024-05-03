@@ -226,8 +226,9 @@ export const refreshToken = asyncHandler(async(req: Request, res: Response, next
             }
 
             const jwtData = {
-                userInfo: {
+                userdata: {
                     username: user.username,
+                    userID: user._id
                 }
             }
             const accessToken = jwt.sign(
