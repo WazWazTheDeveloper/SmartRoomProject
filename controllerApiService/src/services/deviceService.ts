@@ -117,7 +117,7 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} at: deviceCollection`;
-        loggerGeneral.error(err,{uuid : getRequestUUID()})
+        loggerGeneral.error(err, { uuid: getRequestUUID() })
         throw new Error(err);
     } else if (findResultArr.length == 0) {
         functionResult = { isSuccessful: false };
@@ -126,6 +126,62 @@ export async function getDevice(_id: string): Promise<DeviceResult> {
             findResultArr[0]
         );
         functionResult = { isSuccessful: true, device: queryDevice };
+    }
+
+    return functionResult;
+}
+
+export type DevicesResult =
+    | {
+        isSuccessful: false;
+    }
+    | {
+        isSuccessful: true;
+        device: Device[];
+    };
+export async function getDeviceArray(idArray: string[]): Promise<DevicesResult> {
+    let functionResult: DevicesResult = { isSuccessful: false };
+    //query
+    try {
+        const fillter = { _id: { $in: idArray } };
+        const findResultArr = await getDocuments<TDeviceJSON_DB>(
+            COLLECTION_DEVICES,
+            fillter
+        );
+
+        const queryDevice = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const device = findResultArr[i];
+            queryDevice.push(Device.createDeviceFromTDeviceJSON_DB(device))
+        }
+        functionResult = { isSuccessful: true, device: queryDevice };
+    }
+    catch {
+
+    }
+
+    return functionResult;
+}
+
+export async function getAllDevices(): Promise<DevicesResult> {
+    let functionResult: DevicesResult = { isSuccessful: false };
+    //query
+    try {
+        const fillter = {};
+        const findResultArr = await getDocuments<TDeviceJSON_DB>(
+            COLLECTION_DEVICES,
+            fillter
+        );
+
+        const queryDevice = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const device = findResultArr[i];
+            queryDevice.push(Device.createDeviceFromTDeviceJSON_DB(device))
+        }
+        functionResult = { isSuccessful: true, device: queryDevice };
+    }
+    catch {
+
     }
 
     return functionResult;

@@ -6,6 +6,7 @@ import { verifyPermissions } from "../../utils/verifyPermissions";
 import * as deviceService from "../../services/deviceService"
 import axios from "axios";
 import { getRequestUUID } from "../../middleware/requestID";
+import { response500 } from "../../models/errors/500";
 
 
 export const updateDevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -61,21 +62,34 @@ export const getAlldevices = asyncHandler(async (req: Request, res: Response, ne
             Authorization: req.headers.authorization
         }
     })
-    const resultData : TResponseData = result.data
+    const resultData: TResponseData = result.data
 
     const devicesID = []
+    let canSeeAll = false;
 
     for (let i = 0; i < resultData.permissions.length; i++) {
         const permission = resultData.permissions[i];
-        if(permission.type == "device" && permission.read == true) {
+        if (permission.type == "device" && permission.read == true) {
+            if (permission.objectId = "all") {
+                canSeeAll = true;
+            }
             devicesID.push(permission.objectId)
         }
     }
-    // get user permissions
 
-    // if admin return all
+    let devices: deviceService.DevicesResult;
+    if (resultData.isAdmin || canSeeAll) {
+        devices = await deviceService.getAllDevices();
+    }
+    else {
+        devices = await deviceService.getDeviceArray(devicesID);
+    }
 
-    // if not get all device form permissions
+    if(devices.isSuccessful) {
+        res.status(200).json(devices.device)
+    }else{
+        response500(req,res)
+    }
 })
 
 export const deleteDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
