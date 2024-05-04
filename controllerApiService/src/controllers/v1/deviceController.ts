@@ -85,10 +85,10 @@ export const getAlldevices = asyncHandler(async (req: Request, res: Response, ne
         devices = await deviceService.getDeviceArray(devicesID);
     }
 
-    if(devices.isSuccessful) {
+    if (devices.isSuccessful) {
         res.status(200).json(devices.device)
-    }else{
-        response500(req,res)
+    } else {
+        response500(req, res)
     }
 })
 
@@ -118,6 +118,28 @@ export const deleteDevice = asyncHandler(async (req: Request, res: Response, nex
 })
 
 export const getDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { UUID } = req.params
+    if (!UUID) {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Bad request. Please provide a device ID.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    // @ts-ignore we check for req.headers.authorization in middleware
+    let permissionResult = await verifyPermissions(req.headers.authorization, req._userID, "device", UUID, "read")
+    if (!permissionResult) {
+        response401(req, res)
+        return
+    }
+
+    const result = await deviceService.getDevice(UUID)
+    if (result.isSuccessful) {
+        res.status(200).json(result.device);
+    }
 })
 
 export const updateDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
