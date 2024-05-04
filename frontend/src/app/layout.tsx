@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { Providers } from "./providers";
 import Sidebar from "@/components/sidebar";
-import { useState } from "react";
+import Topbar from "@/components/topbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className + " text-neutral-1000 dark:text-darkNeutral-1000 bg-neutral-100 dark:bg-darkNeutral-100"}>
+      <body className={inter.className + " relative text-neutral-1000 dark:text-darkNeutral-1000 bg-neutral-100 dark:bg-darkNeutral-100"}>
         <Providers>
+          <Topbar />
           <Sidebar />
           {children}
         </Providers>

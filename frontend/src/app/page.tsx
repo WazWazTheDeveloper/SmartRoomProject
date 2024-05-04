@@ -11,7 +11,6 @@ type refreshType = {
 export default function Home() {
   function test() {
     document.documentElement.classList.toggle("dark");
-    console.log("asd")
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24" onClick={test}>

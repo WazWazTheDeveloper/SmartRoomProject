@@ -1,47 +1,70 @@
 "use client"
 
+import Loading from '@/components/loading';
 import useAuth from '@/hooks/useAuth';
-import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
+import { redirect, useRouter } from 'next/navigation';
+import { ReactNode } from 'react';
 import { useQuery } from 'react-query';
-
+import { BounceLoader } from 'react-spinners'
 export default function Page() {
     const auth = useAuth();
     const deviceQuery = useQuery({
-        queryKey : ["devices"],
-        queryFn : async () => {
-            const res = await axios.get("/api/v1/device/",{
-                headers : {
-                    Authorization : `Bearer ${auth.authToken}`
+        queryKey: ["devices"],
+        queryFn: async () => {
+            const res = await axios.get("/api/v1/device/", {
+                headers: {
+                    Authorization: `Bearer ${auth.authToken}`
                 }
             })
 
+            if (res.status == 401) {
+                auth.refreshToken()
+            }
+
             return res.data
-        }
+        },
+        enabled: auth.isAuthed
     });
 
-    
+    const ele: ReactNode[] = []
+    if (deviceQuery.isFetched && !deviceQuery.isError) {
+        console.log(deviceQuery.data)
+        for (let i = 0; i < deviceQuery.data.length; i++) {
+            const element = deviceQuery.data[i];
+            ele.push((
+                <ListItem deviceName={`${element.deviceName}`} isOnline={element.isConnected} deviceID={element._id} />
+            ))
+        }
+    }
     return (
         <>
-            <div className="text-3xl bg-neutral-200 dark:bg-neutral-200 border-b border-solid border-neutral-500 p-2">
+            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2">
                 Devices
             </div>
-            <ListItem deviceName={"text"} isOnline={true}/>
-            <ListItem deviceName={"test2"} isOnline={true}/>
-            <ListItem deviceName={"test3"} isOnline={false}/>
+            {
+                deviceQuery.isLoading ?
+                    <Loading /> : <></>
+            }
+            {ele}
         </>
     )
 }
 
 type TProps = {
-    deviceName : string
-    isOnline : boolean
+    deviceName: string
+    isOnline: boolean
+    deviceID: string
 }
 
-function ListItem({deviceName,isOnline} : TProps) {
+function ListItem({ deviceName, isOnline, deviceID }: TProps) {
     const onlineCSS = isOnline ? "bg-green-500" : "bg-red-500"
+    const router = useRouter()
+    function redirectToDevice() {
+        router.push(`/device/${deviceID}`)
+    }
     return (
-        <div className="relative flex mt-1 bg-neutral-300 dark:bg-neutral-300">
+        <div className="relative flex mt-1 bg-neutral-300 dark:bg-darkNeutral-300" onClick={redirectToDevice}>
             <div className={`w-full box-border h-12 pl-2 flex items-center`}>
                 <div className={"w-6 h-6 rounded-full " + onlineCSS} />
                 <h2 className="text-xl inline-block pl-1">

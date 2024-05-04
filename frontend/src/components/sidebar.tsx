@@ -22,7 +22,7 @@ export default function Sidebar() {
                     <ArrowRightIcon className="fill-neutral-1000 dark:fill-darkNeutral-1000 w-full h-full border-solid border-2 border-neutral-300 dark:border-darkNeutral-300" />
                 }
             </div> */}
-            <div className={"fixed box-border flex flex-col overflow-hidden duration-100 bg-neutral-100 dark:bg-darkNeutral-100 h-svh " + isOpen}>
+            <div className={"fixed top-0 box-border flex flex-col overflow-hidden duration-100 bg-neutral-100 dark:bg-darkNeutral-100 h-svh z-50 " + isOpen}>
                 <div className="relative grow-1 w-full after:content-[''] after:w-1/2 after:h-[1px] after:bg-neutral-500 dark:after:bg-darkNeutral-500 after:absolute after:bottom-['-2px'] after:left-1/4">
                     <h1 className="text-center text-xl">
                         Menu
@@ -35,7 +35,7 @@ export default function Sidebar() {
                                 Home
                             </p>
                         </SideBarItemHref>
-                        <SideBarItemHref href="/">
+                        <SideBarItemHref href="/device">
                             <p className="inline-block text-lg">
                                 Devices
                             </p>
@@ -69,16 +69,26 @@ export default function Sidebar() {
 }
 
 function SideBarItemHref({ children, href }: { children: React.ReactNode; href: string }) {
+    const [isSidebarOpen, setIsSidebarOpen] = useSidebarState()
+    function onClickFunction() {
+        setIsSidebarOpen(false)
+    }
+
     return (
-        <Link href={href} className="w-full hover:bg-neutral-300 dark:hover:bg-darkNeutral-300 flex justify-center">
+        <Link href={href} className="w-full hover:bg-neutral-300 dark:hover:bg-darkNeutral-300 flex justify-center" onClick={onClickFunction}>
             {children}
         </Link>
     )
 }
 
 function SideBarItemClick({ children, onClick }: { children: React.ReactNode; onClick: Function }) {
+    const [isSidebarOpen, setIsSidebarOpen] = useSidebarState()
+    function onClickFunction() {
+        setIsSidebarOpen(false)
+        onClick()
+    }
     return (
-        <div className="w-full hover:bg-neutral-300 dark:hover:bg-darkNeutral-300 flex justify-center" onClick={() => { onClick() }}>
+        <div className="w-full hover:bg-neutral-300 dark:hover:bg-darkNeutral-300 flex justify-center" onClick={onClickFunction}>
             {children}
         </div>
     )
