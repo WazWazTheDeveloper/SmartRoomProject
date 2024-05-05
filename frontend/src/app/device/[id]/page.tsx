@@ -8,7 +8,6 @@ import useAuth from "@/hooks/useAuth";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { BounceLoader } from "react-spinners";
 
 type TResponseType = {
     _id: string;
