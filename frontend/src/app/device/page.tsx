@@ -33,7 +33,7 @@ export default function Page() {
         for (let i = 0; i < deviceQuery.data.length; i++) {
             const element = deviceQuery.data[i];
             ele.push((
-                <ListItem deviceName={`${element.deviceName}`} isOnline={element.isConnected} deviceID={element._id} />
+                <ListItem deviceName={`${element.deviceName}`} isOnline={element.isConnected} deviceID={element._id} key={i}/>
             ))
         }
     }
