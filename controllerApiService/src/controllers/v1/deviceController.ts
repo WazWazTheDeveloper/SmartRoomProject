@@ -176,7 +176,7 @@ export const updateDevice = asyncHandler(async (req: Request, res: Response, nex
     for (let index = 0; index < updateList.length; index++) {
         const element = updateList[index];
         _updateList.push({
-            id: UUID,
+            _id: UUID,
             propertyToChange: element
         })
     }
@@ -184,7 +184,8 @@ export const updateDevice = asyncHandler(async (req: Request, res: Response, nex
     const result = await deviceService.updateDeviceProperties(_updateList)
     if (result.isSuccessful) {
         res.status(200).send("ok");
+    } else {
+        console.log(result)
+        response500(req, res);
     }
-
-    next()
 })

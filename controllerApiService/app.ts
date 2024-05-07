@@ -14,18 +14,15 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser())
-app.use(authenticateJWT)
 app.use(addRequestID)
 app.use(httpRequestLogger)
+app.use(authenticateJWT)
 
 app.use('/api/v1', routerv1);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     response500(req, res);
     console.log(err)
-})
-app.use((req: Request, res: Response, next: NextFunction) => {
-    response500(req, res);
 })
 
 async function startServer(): Promise<void> {
