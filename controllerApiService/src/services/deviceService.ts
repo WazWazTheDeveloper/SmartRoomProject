@@ -216,26 +216,15 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
         const changeItem = changeList[index];
 
         //checks
-        if (typeof changeItem == "undefined")
-            return returnError(`changeList[${index}].changeItem is undefined`);
-        if (typeof changeItem._id == "undefined")
-            return returnError(`changeList[${index}]._id is undefined`);
-        if (typeof changeItem.propertyToChange == "undefined")
-            return returnError(
-                `changeList[${index}].propertyToChange is undefined`
-            );
-        if (typeof changeItem.propertyToChange.propertyName != "string")
-            return returnError(
-                `changeList[${index}].propertyName is not a string`
-            );
+        if (typeof changeItem == "undefined") return returnError(`changeList[${index}].changeItem is undefined`);
+        if (typeof changeItem._id == "undefined") return returnError(`changeList[${index}]._id is undefined`);
+        if (typeof changeItem.propertyToChange == "undefined") return returnError(`changeList[${index}].propertyToChange is undefined`);
+        if (typeof changeItem.propertyToChange.propertyName != "string") return returnError(`changeList[${index}].propertyName is not a string`);
 
         const propertyName = changeItem.propertyToChange.propertyName;
         if (propertyName == "deviceName") {
             //type checking
-            if (typeof changeItem.propertyToChange.newValue != "string")
-                return returnError(
-                    `changeList[${index}].propertyToChange.newValue is not a string`
-                );
+            if (typeof changeItem.propertyToChange.newValue != "string") return returnError(`changeList[${index}].propertyToChange.newValue is not a string`);
 
             const filter = { _id: changeItem._id };
             const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> = {
@@ -353,35 +342,23 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
         } else if (propertyName == "data") {
             //type checking
             if (typeof changeItem.propertyToChange.dataID != "number")
-                return returnError(
-                    `changeList[${index}].propertyToChange.dataID is not a number`
-                );
+                return returnError(`changeList[${index}].propertyToChange.dataID is not a number`);
             if (typeof changeItem.propertyToChange.typeID != "number")
-                return returnError(
-                    `changeList[${index}].propertyToChange.typeID is not a number`
-                );
+                return returnError(`changeList[${index}].propertyToChange.typeID is not a number`);
             if (typeof changeItem.propertyToChange.dataPropertyName == "undefined")
-                return returnError(
-                    `changeList[${index}].propertyToChange.dataPropertyName is undefined`
-                );
+                return returnError(`changeList[${index}].propertyToChange.dataPropertyName is undefined`);
             if (typeof changeItem.propertyToChange.dataPropertyName != "string")
-                return returnError(
-                    `changeList[${index}].propertyToChange.dataPropertyName is not a string`
-                );
+                return returnError(`changeList[${index}].propertyToChange.dataPropertyName is not a string`);
 
-            const dataPropertyName =
-                changeItem.propertyToChange.dataPropertyName;
+            const dataPropertyName = changeItem.propertyToChange.dataPropertyName;
             const typeID = changeItem.propertyToChange.typeID;
-
             if (
                 dataPropertyName == "mqttTopicID" ||
                 dataPropertyName == "iconName" ||
                 dataPropertyName == "dataTitle"
             ) {
                 if (typeof changeItem.propertyToChange.newValue != "string")
-                    return returnError(
-                        `changeList[${index}].propertyToChange.newValue is not a string`
-                    );
+                    return returnError(`changeList[${index}].propertyToChange.newValue is not a string`);
 
                 const filter = {
                     _id: changeItem._id,
@@ -557,9 +534,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                 if (dataPropertyName == "currentState") {
                     //type checking
                     if (typeof changeItem.propertyToChange.newValue != "number")
-                        return returnError(
-                            `changeList[${index}].propertyToChange.newValue is not a number`
-                        );
+                        return returnError(`changeList[${index}].propertyToChange.newValue is not a number`);
 
                     const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
                     {
@@ -575,43 +550,19 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                         },
                     };
                     operations.push(operation);
-                } else if (
-                    changeItem.propertyToChange.dataPropertyName == "stateList"
-                ) {
+                } else if (changeItem.propertyToChange.dataPropertyName == "stateList") {
                     if (changeItem.propertyToChange.operation == "add") {
                         //type checking
                         if (typeof changeItem.propertyToChange.newState == "undefined")
-                            return returnError(
-                                `changeList[${index}].propertyToChange.newState is undefined`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.newState.icon !=
-                            "string"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.newState.icon is not a string`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.newState
-                                .isIcon != "boolean"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.newState.isIcon is not a boolean`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.newState
-                                .stateTitle != "string"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.newState.stateTitle is not a string`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.newState
-                                .stateValue != "number"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.newState.stateValue is not a number`
-                            );
+                            return returnError(`changeList[${index}].propertyToChange.newState is undefined`);
+                        if (typeof changeItem.propertyToChange.newState.icon != "string")
+                            return returnError(`changeList[${index}].propertyToChange.newState.icon is not a string`);
+                        if (typeof changeItem.propertyToChange.newState.isIcon != "boolean")
+                            return returnError(`changeList[${index}].propertyToChange.newState.isIcon is not a boolean`);
+                        if (typeof changeItem.propertyToChange.newState.stateTitle != "string")
+                            return returnError(`changeList[${index}].propertyToChange.newState.stateTitle is not a string`);
+                        if (typeof changeItem.propertyToChange.newState.stateValue != "number")
+                            return returnError(`changeList[${index}].propertyToChange.newState.stateValue is not a number`);
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
                         {
@@ -631,13 +582,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                         changeItem.propertyToChange.operation == "delete"
                     ) {
                         //type checking
-                        if (
-                            typeof changeItem.propertyToChange.stateValue !=
-                            "number"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.stateValue is not a number`
-                            );
+                        if (typeof changeItem.propertyToChange.stateValue != "number") return returnError(`changeList[${index}].propertyToChange.stateValue is not a number`);
 
                         const operation: mongoDB.AnyBulkWriteOperation<JSONDBTypes> =
                         {
@@ -660,37 +605,15 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
                     ) {
                         //type checking
                         if (typeof changeItem.propertyToChange.state == "undefined")
-                            return returnError(
-                                `changeList[${index}].propertyToChange.state is undefined`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.state
-                                .stateValue != "number"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.state.stateValue is not a number`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.state.isIcon !=
-                            "boolean"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.state.isIcon is not a boolean`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.state
-                                .stateTitle != "string"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.state.stateTitle is not a string`
-                            );
-                        if (
-                            typeof changeItem.propertyToChange.state.icon !=
-                            "string"
-                        )
-                            return returnError(
-                                `changeList[${index}].propertyToChange.state.icon is not a string`
-                            );
+                            return returnError(`changeList[${index}].propertyToChange.state is undefined`);
+                        if (typeof changeItem.propertyToChange.state.stateValue != "number")
+                            return returnError(`changeList[${index}].propertyToChange.state.stateValue is not a number`);
+                        if (typeof changeItem.propertyToChange.state.isIcon !="boolean")
+                            return returnError(`changeList[${index}].propertyToChange.state.isIcon is not a boolean`);
+                        if (typeof changeItem.propertyToChange.state.stateTitle != "string")
+                            return returnError(`changeList[${index}].propertyToChange.state.stateTitle is not a string`);
+                        if (typeof changeItem.propertyToChange.state.icon !="string")
+                            return returnError(`changeList[${index}].propertyToChange.state.icon is not a string`);
 
                         const set: any = {};
                         if (
@@ -746,6 +669,7 @@ export async function updateDeviceProperties(changeList: TUpdateDeviceProperties
         }
     }
 
+    console.log(changeList)
     await bulkWriteCollection(COLLECTION_DEVICES, operations);
     returnObj.isSuccessful = true;
     return returnObj;
