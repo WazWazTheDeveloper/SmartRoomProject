@@ -37,7 +37,7 @@ export type TSwitchData = {
     isOn: boolean
     onName: string
     offName: string
-    typeID:0
+    typeID: 0
 } & TDeviceData
 
 export type TNumberData = {
@@ -46,13 +46,13 @@ export type TNumberData = {
     maxValue: number
     jumpValue: number
     symbol: string
-    typeID:1
+    typeID: 1
 } & TDeviceData
 
 export type TMultiStateButton = {
     currentState: number
     stateList: TStateItem[]
-    typeID:2
+    typeID: 2
 } & TDeviceData
 
 export type TStateItem = {
@@ -129,15 +129,40 @@ export default function Page({ params }: { params: { id: string } }) {
                             let component = <></>;
                             switch (data.typeID) {
                                 case (SWITCH_TYPE): {
-                                    component = <SwitchData state={data.isOn} key={index} stateChangeFunction={()=>{}} title="test "/>
+                                    component = <SwitchData
+                                        state={data.isOn}
+                                        key={index}
+                                        stateChangeFunction={() => { }}
+                                        deviceID={params.id}
+                                        title={data.dataTitle}
+                                        dataID={data.dataID}
+                                        iconName={data.iconName} />
                                     break;
                                 }
                                 case (NUMBER_TYPE): {
-                                    component = <NumberData />
+                                    component = <NumberData
+                                        currentValue={data.currentValue}
+                                        key={index}
+                                        title={data.dataTitle}
+                                        deviceID={params.id}
+                                        dataID={data.dataID}
+                                        minValue={data.minValue}
+                                        maxValue={data.maxValue}
+                                        jumpValue={data.jumpValue}
+                                        symbol={data.symbol}
+                                        iconName={data.iconName} />
                                     break;
                                 }
                                 case (MULTI_STATE_BUTTON_TYPE): {
-                                    component = <MultiStateButtonData />
+                                    component = <MultiStateButtonData
+                                        key={index}
+                                        currentState={data.currentState}
+                                        deviceID={params.id}
+                                        dataID={data.dataID}
+                                        title={data.dataTitle}
+                                        iconName={data.iconName} 
+                                        stateList={data.stateList}
+                                        />
                                     break;
                                 }
                                 default: {
