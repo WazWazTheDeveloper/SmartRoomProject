@@ -23,7 +23,7 @@ export default function MultiStateButtonData(props: Props) {
     const [state, setState] = useState(props.currentState);
     return (
         <div className='flex justify-start items-center pl-2 pr-2 w-full flex-wrap'>
-            <h2 className='text-xl w-full'>{"props.title"}</h2>
+            {/* <h2 className='text-xl w-full'>{"props.title"}</h2> */}
             {props.title ? <h2 className='text-xl w-full'>{props.title}</h2> : <></>}
             <div className="w-full flex flex-wrap gap-2 justify-evenly">
                 {
@@ -33,7 +33,7 @@ export default function MultiStateButtonData(props: Props) {
 
                         return (
                             <div key={index} 
-                            className={"border-box w-24 h-14 p-2 flex justify-center items-center border border-solid border-neutral-1000 dark:border-darkNeutral-1000 rounded-lg "+ (item.stateValue==state ? "bg-black" : "") }
+                            className={"border-box w-24 h-14 p-2 flex justify-center items-center border border-solid border-neutral-1000 dark:border-darkNeutral-1000 rounded-lg "+ (item.stateValue==state ? "bg-neutral-500 dark:bg-darkNeutral-500" : "bg-neutral-200 dark:bg-darkNeutral-200") }
                             onClick={()=>{setState(item.stateValue)}}
                             >
                                 {item.isIcon ?

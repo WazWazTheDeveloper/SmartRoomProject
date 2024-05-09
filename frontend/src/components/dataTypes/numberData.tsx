@@ -59,7 +59,7 @@ export default function NumberData(props: Props) {
 
 
 
-    if (props.title == "") {
+    if (props.title != "") {
         return (
             <div className="w-full pl-2 pr-2 flex justify-start items-center flex-wrap">
                 {props.title ? <h2 className='text-xl'>{props.title}</h2> : <></>}
