@@ -61,8 +61,8 @@ export default function NumberData(props: Props) {
 
     if (props.title != "") {
         return (
-            <div className="w-full pl-2 pr-2 flex justify-start items-center flex-wrap">
-                {props.title ? <h2 className='text-xl'>{props.title}</h2> : <></>}
+            <div className="w-[98%] pl-2 pr-2 flex justify-start items-center flex-wrap box-border sm:w-full sm:max-w-[52rem] sm:justify-start">
+                {props.title ? <h2 className='text-xl sm:pl-2'>{props.title}</h2> : <></>}
                 <div className='w-full flex justify-center items-center pl-2 pr-2'>
                     <Slider
                         min={props.minValue}
@@ -82,8 +82,8 @@ export default function NumberData(props: Props) {
         // @ts-ignore
         const Icon = Icons[props.iconName]
         return (
-            <div className="w-full pl-2 pr-2 flex justify-start items-center">
-                {props.iconName ? <Icon className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300' sx={{ fontSize: "2rem" }} /> : <></>}
+            <div className="w-[98%] pl-2 pr-2 flex justify-start items-center box-border sm:w-full sm:max-w-[52rem]">
+                {props.iconName ? <Icon className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 sm:pl-2' sx={{ fontSize: "2rem" }} /> : <></>}
                 <div className='w-full flex justify-center items-center pl-2 pr-2'>
                     <Slider
                         min={props.minValue}

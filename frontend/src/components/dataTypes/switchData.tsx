@@ -56,8 +56,8 @@ export default function SwitchData(props: Props) {
 
     if (props.title != "") {
         return (
-            <div className='flex justify-start items-center pl-2 pr-2 w-full flex-wrap'>
-                {props.title ? <h2 className='text-xl'>{props.title}</h2> : <></>}
+            <div className='flex justify-start items-center pl-2 pr-2 w-full flex-wrap sm:w-full sm:max-w-[52rem] sm:justify-start'>
+                {props.title ? <h2 className='text-xl sm:pl-2'>{props.title}</h2> : <></>}
                 <Switch
                     checked={isOn}
                     onChange={handleChange}
@@ -70,7 +70,7 @@ export default function SwitchData(props: Props) {
         // @ts-ignore
         const Icon = Icons[props.iconName]
         return (
-            < div className='flex justify-start items-center pl-2 pr-2 w-full' >
+            < div className='flex justify-start items-center pl-2 pr-2 w-full sm:w-full sm:max-w-[52rem] sm:justify-center' >
                 {props.iconName ? <Icon className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300' sx={{ fontSize: "2rem" }} /> : <></>}
                 <Switch
                     checked={isOn}

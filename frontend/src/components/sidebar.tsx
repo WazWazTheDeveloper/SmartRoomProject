@@ -12,7 +12,7 @@ export default function Sidebar() {
     const [isSidebarOpen, setIsSidebarOpen] = useSidebarState()
     const auth = useAuth();
 
-    const isOpen = isSidebarOpen ? "w-32 border-solid border-2 border-neutral-300 dark:border-darkNeutral-300" : "w-0"
+    const isOpen = isSidebarOpen ? "w-32 border-solid border-2 " : "w-0"
     const isOpenButton = isSidebarOpen ? "left-[127px]" : "left-0"
     return (
         <>
@@ -22,7 +22,8 @@ export default function Sidebar() {
                     <ArrowRightIcon className="fill-neutral-1000 dark:fill-darkNeutral-1000 w-full h-full border-solid border-2 border-neutral-300 dark:border-darkNeutral-300" />
                 }
             </div> */}
-            <div className={"fixed top-0 box-border flex flex-col overflow-hidden duration-100 bg-neutral-100 dark:bg-darkNeutral-100 h-svh z-50 " + isOpen}>
+            <div className={`fixed top-0 box-border flex flex-col overflow-hidden duration-100 border-neutral-500 dark:border-darkNeutral-500 bg-neutral-100 dark:bg-darkNeutral-100 h-svh z-50
+            sm:relative sm:w-40 sm:border-r sm:h-[calc(100svh-3rem)] ` + isOpen}>
                 <div className="relative grow-1 w-full after:content-[''] after:w-1/2 after:h-[1px] after:bg-neutral-500 dark:after:bg-darkNeutral-500 after:absolute after:bottom-['-2px'] after:left-1/4">
                     <h1 className="text-center text-xl">
                         Menu
@@ -75,7 +76,7 @@ function SideBarItemHref({ children, href }: { children: React.ReactNode; href: 
     }
 
     return (
-        <Link href={href} className="w-full hover:bg-neutral-300 dark:hover:bg-darkNeutral-300 flex justify-center" onClick={onClickFunction}>
+        <Link href={href} className="w-full sm:hover:bg-neutral-300 sm:dark:hover:bg-darkNeutral-300 flex justify-center" onClick={onClickFunction}>
             {children}
         </Link>
     )

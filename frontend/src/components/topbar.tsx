@@ -18,11 +18,11 @@ export default function Topbar() {
     }
     
     return (
-        <div className="text-3xl bg-neutral-200 dark:bg-darkNeutral-200 p-2 flex justify-between items-center">
-            <h1 className="text 3xl" onClick={onClick}>
+        <div className="text-3xl bg-neutral-200 dark:bg-darkNeutral-200 p-2 flex justify-between items-center border-box h-12">
+            <h1 className="text 3xl cursor-pointer" onClick={onClick}>
                 SmartRoomProject
             </h1>
-            <MenuIcon className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300' sx={{ fontSize: 35 }}  onClick={toggleSidebar}/>
+            <MenuIcon className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 sm:hidden' sx={{ fontSize: 35 }}  onClick={toggleSidebar}/>
         </div>
     )
 }

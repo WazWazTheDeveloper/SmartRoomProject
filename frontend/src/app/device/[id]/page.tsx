@@ -108,11 +108,11 @@ export default function Page({ params }: { params: { id: string } }) {
 
     return (
         <>
-            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2">
+            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2 box-border sm:w-full sm:text-center">
                 {deviceName}
             </div>
             <div className="flex w-full flex-wrap">
-                <div className="w-full">
+                <div className="w-full flex justify-center">
                     {
                         isOnline ?
                             <p className="pl-2 pt-1 pb-1 text-green-500 font-semibold">
@@ -160,9 +160,9 @@ export default function Page({ params }: { params: { id: string } }) {
                                         deviceID={params.id}
                                         dataID={data.dataID}
                                         title={data.dataTitle}
-                                        iconName={data.iconName} 
+                                        iconName={data.iconName}
                                         stateList={data.stateList}
-                                        />
+                                    />
                                     break;
                                 }
                                 default: {
@@ -170,7 +170,7 @@ export default function Page({ params }: { params: { id: string } }) {
                                 }
                             }
                             return (
-                                <div className="w-full" key={index}>
+                                <div className="w-full sm:justify-center sm:flex" key={index}>
                                     {component}
                                 </div>
                             )

@@ -55,9 +55,9 @@ export default function MultiStateButtonData(props: Props) {
     }
 
     return (
-        <div className='flex justify-start items-center pl-2 pr-2 w-full flex-wrap'>
+        <div className='flex justify-start items-center pl-2 pr-2 w-full flex-wrap sm:w-full sm:max-w-[52rem] sm:justify-start'>
             {/* <h2 className='text-xl w-full'>{"props.title"}</h2> */}
-            {props.title ? <h2 className='text-xl w-full'>{props.title}</h2> : <></>}
+            {props.title ? <h2 className='text-xl w-full sm:pl-2'>{props.title}</h2> : <></>}
             <div className="w-full flex flex-wrap gap-2 justify-evenly">
                 {
                     props.stateList.map((item: TStateItem, index: number) => {

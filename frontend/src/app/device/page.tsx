@@ -64,7 +64,7 @@ function ListItem({ deviceName, isOnline, deviceID }: TProps) {
         router.push(`/device/${deviceID}`)
     }
     return (
-        <div className="relative flex mt-1 bg-neutral-300 dark:bg-darkNeutral-300" onClick={redirectToDevice}>
+        <div className="relative flex mt-1 bg-neutral-300 dark:bg-darkNeutral-300 cursor-pointer" onClick={redirectToDevice}>
             <div className={`w-full box-border h-12 pl-2 flex items-center`}>
                 <div className={"w-6 h-6 rounded-full " + onlineCSS} />
                 <h2 className="text-xl inline-block pl-1">

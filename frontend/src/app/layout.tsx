@@ -23,8 +23,12 @@ export default function RootLayout({
       <body className={inter.className + " relative text-neutral-1000 dark:text-darkNeutral-1000 bg-neutral-100 dark:bg-darkNeutral-100"}>
         <Providers>
           <Topbar />
-          <Sidebar />
-          {children}
+          <div className="sm:flex">
+            <Sidebar />
+            <div className="w-full">
+              {children}
+            </div>
+          </div>
         </Providers>
       </body>
     </html>
