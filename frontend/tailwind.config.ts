@@ -13,6 +13,7 @@ const config: Config = {
         '1/4': '25%',
         '1/2': '50%',
         '3/4': '75%',
+        '9/10': '90%',
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
