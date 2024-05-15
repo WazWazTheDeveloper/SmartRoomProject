@@ -1,12 +1,24 @@
 'use client'
-import { FormEvent } from "react";
+import useAuth from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect } from "react";
 
 export default function Page() {
+    const router = useRouter()
+    const auth = useAuth()
     function onSumbitHandler(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        console.log(formData.get("username"))
+        const username = formData.get("username") as string
+        const password = formData.get("password") as string
+        auth.login(username,password)
     }
+
+    useEffect(()=>{
+        if(auth.isAuthed){
+            router.push('/')
+        }
+    },[auth.isAuthed])
 
     return (
         <section className="relative w-full flex justify-center items-center wrap overflow-hidden h-[calc(100svh-3rem)]">
