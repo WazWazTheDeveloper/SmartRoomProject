@@ -81,7 +81,28 @@ export const getAllTasks = asyncHandler(async (req: Request, res: Response, next
 })
 
 export const getTask = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { UUID } = req.params
+    if (!UUID) {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Bad request. Please provide a task ID.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
 
+    // @ts-ignore we check for req.headers.authorization in middleware
+    let permissionResult = await verifyPermissions(req.headers.authorization, req._userID, "task", UUID, "read")
+    if (!permissionResult) {
+        response401(req, res)
+        return
+    }
+
+    const result = await TaskService.getTask(UUID)
+    if (result.isSuccessful) {
+        res.status(200).json(result.task);
+    }
 })
 
 export const updateTask = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
