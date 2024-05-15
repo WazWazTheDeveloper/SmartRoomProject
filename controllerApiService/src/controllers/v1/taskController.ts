@@ -3,9 +3,10 @@ import asyncHandler from "express-async-handler"
 import { problemDetails } from "../../models/problemDetails";
 import { response401 } from "../../models/errors/401";
 import { verifyPermissions } from "../../utils/verifyPermissions";
-import * as taskService from "../../services/taskService";
+import * as TaskService from "../../services/taskService";
 import axios from "axios";
 import { getRequestUUID } from "../../middleware/requestID";
+import { response500 } from "../../models/errors/500";
 
 
 export const createTask = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -22,9 +23,9 @@ export const createTask = asyncHandler(async (req: Request, res: Response, next:
         taskName = "new task"
     }
 
-    const taskResult = await taskService.createTask(taskName);
+    const taskResult = await TaskService.createTask(taskName);
     if (taskResult.isSuccessful) {
-        res.status(200).json("ok");
+        res.status(200).json(taskResult.task._id);
     }
 
     next();
@@ -50,7 +51,7 @@ export const getAllTasks = asyncHandler(async (req: Request, res: Response, next
     })
     const resultData: TResponseData = result.data
 
-    const devicesID = []
+    const taskID = []
     let canSeeAll = false;
 
     for (let i = 0; i < resultData.permissions.length; i++) {
@@ -59,8 +60,22 @@ export const getAllTasks = asyncHandler(async (req: Request, res: Response, next
             if (permission.objectId = "all") {
                 canSeeAll = true;
             }
-            devicesID.push(permission.objectId)
+            taskID.push(permission.objectId)
         }
+    }
+
+    let taskResult: TaskService.TasksResult;
+    if (resultData.isAdmin || canSeeAll) {
+        taskResult = await TaskService.getAllTasks();
+    }
+    else {
+        taskResult = await TaskService.getTaskArray(taskID);
+    }
+
+    if (taskResult.isSuccessful) {
+        res.status(200).json(taskResult.tasks)
+    } else {
+        response500(req, res)
     }
 
 })
@@ -89,7 +104,7 @@ export const updateTask = asyncHandler(async (req: Request, res: Response, next:
         return
     }
 
-    await taskService.updateTaskProperty(UUID, propertyList);
+    await TaskService.updateTaskProperty(UUID, propertyList);
     res.status(200).json("ok")
 })
 
@@ -115,6 +130,6 @@ export const deleteTask = asyncHandler(async (req: Request, res: Response, next:
         return
     }
 
-    await taskService.deleteTask(UUID);
+    await TaskService.deleteTask(UUID);
     res.status(200).json("ok")
 })

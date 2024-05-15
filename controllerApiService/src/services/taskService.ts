@@ -83,7 +83,7 @@ export async function getTask(_id: string) {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} at: taskCollection`
-        loggerGeneral.error(err,{uuid : getRequestUUID()})
+        loggerGeneral.error(err, { uuid: getRequestUUID() })
         throw new Error(err)
     }
     else if (findResultArr.length == 0) {
@@ -95,6 +95,63 @@ export async function getTask(_id: string) {
     }
 
     return functionResult
+}
+
+export type TasksResult =
+    | {
+        isSuccessful: false;
+    }
+    | {
+        isSuccessful: true;
+        tasks: Task[];
+    };
+
+export async function getTaskArray(idArray: string[]): Promise<TasksResult> {
+    let functionResult: TasksResult = { isSuccessful: false };
+    //query
+    try {
+        const fillter = { _id: { $in: idArray } };
+        const findResultArr = await getDocuments<TTaskJSON_DB>(
+            "tasks",
+            fillter
+        );
+
+        const queryDevice = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const task = findResultArr[i];
+            queryDevice.push(Task.createTaskFromTTaskJSON_DB(task))
+        }
+        functionResult = { isSuccessful: true, tasks: queryDevice };
+    }
+    catch {
+
+    }
+
+    return functionResult;
+}
+
+export async function getAllTasks(): Promise<TasksResult> {
+    let functionResult: TasksResult = { isSuccessful: false };
+    //query
+    try {
+        const fillter = {};
+        const findResultArr = await getDocuments<TTaskJSON_DB>(
+            "tasks",
+            fillter
+        );
+
+        const queryTasks = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const task = findResultArr[i];
+            queryTasks.push(Task.createTaskFromTTaskJSON_DB(task))
+        }
+        functionResult = { isSuccessful: true, tasks: queryTasks };
+    }
+    catch {
+
+    }
+
+    return functionResult;
 }
 
 export async function updateTaskProperty(_id: string, propertyList: TTaskProperty[]) {
@@ -249,8 +306,8 @@ async function updateTimeCheck(taskID: string, propertyItem: TTaskProperty) {
 
     //TODO: remove from here
     // if (propertyItem.checkPropertyName == "timingDatas" && taskIsOn) {
-        // stopScheduledTask(propertyItem.itemID)
-        // addScheduledTask(propertyItem.newValue, propertyItem.itemID, () => { taskTimeCheckHandler(taskID, propertyItem.itemID) })
+    // stopScheduledTask(propertyItem.itemID)
+    // addScheduledTask(propertyItem.newValue, propertyItem.itemID, () => { taskTimeCheckHandler(taskID, propertyItem.itemID) })
     // }
 
     const filter = {
