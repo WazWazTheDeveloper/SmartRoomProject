@@ -4,6 +4,8 @@ import { problemDetails } from "../../models/problemDetails";
 import { response401 } from "../../models/errors/401";
 import { verifyPermissions } from "../../utils/verifyPermissions";
 import * as taskService from "../../services/taskService";
+import axios from "axios";
+import { getRequestUUID } from "../../middleware/requestID";
 
 
 export const createTask = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -26,6 +28,41 @@ export const createTask = asyncHandler(async (req: Request, res: Response, next:
     }
 
     next();
+})
+
+export const getAllTasks = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    type TResponseData = {
+        _id: String
+        isAdmin: boolean
+        permissions: {
+            type: "task"
+            objectId: string | "all"
+            read: boolean
+            write: boolean
+            delete: boolean
+        }[]
+    }
+    const result = await axios.get(`http://${process.env.ACCOUNT_SERVICE as string}/api/v1/user/${req._userID}/permission?permission_type=task`, {
+        headers: {
+            "X-Request-ID": getRequestUUID(),
+            Authorization: req.headers.authorization
+        }
+    })
+    const resultData: TResponseData = result.data
+
+    const devicesID = []
+    let canSeeAll = false;
+
+    for (let i = 0; i < resultData.permissions.length; i++) {
+        const permission = resultData.permissions[i];
+        if (permission.read == true) {
+            if (permission.objectId = "all") {
+                canSeeAll = true;
+            }
+            devicesID.push(permission.objectId)
+        }
+    }
+
 })
 
 export const getTask = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

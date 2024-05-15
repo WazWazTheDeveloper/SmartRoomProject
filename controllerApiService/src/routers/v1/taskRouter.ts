@@ -3,6 +3,7 @@ import * as taskController from "../../controllers/v1/taskController"
 export const taskRouter:express.Router = express.Router()
 
 taskRouter.post('/',taskController.createTask)
+taskRouter.get('/',taskController.getAllTasks)
 
 export const taskIDRouter:express.Router = express.Router({ mergeParams : true })
 
