@@ -41,7 +41,7 @@ export default function Sidebar() {
                                 Devices
                             </p>
                         </SideBarItemHref>
-                        <SideBarItemHref href="/">
+                        <SideBarItemHref href="/task">
                             <p className="inline-block text-lg">
                                 Tasks
                             </p>
