@@ -6,7 +6,7 @@ import { Loop, PowerSettingsNew } from "@mui/icons-material"
 import { Switch } from "@mui/material"
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { useQuery } from "react-query"
+import { useMutation, useQuery } from "react-query"
 
 type TTask = {
     _id: string
@@ -63,6 +63,24 @@ export default function Page({ params }: { params: { id: string } }) {
         enabled: auth.isAuthed
     });
 
+    const updateTaskMutation = useMutation({
+        // mutationKey:[isOn],
+        mutationFn: async (propertyList: any[]) => {
+            const res = await axios.put(`/api/v1/task/${params.id}`, {
+                propertyList: propertyList
+            }, {
+                headers: {
+                    Authorization: `Bearer ${auth.authToken}`
+                }
+            })
+            if (res.status == 401) {
+                auth.refreshToken()
+            }
+
+            return res.data
+        }
+    })
+
 
 
     useEffect(() => {
@@ -78,11 +96,23 @@ export default function Page({ params }: { params: { id: string } }) {
     function onIsOnChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation()
         setIsOn(e.target.checked)
+        updateTaskMutation.mutate([
+            {
+                taskPropertyName: "isOn",
+                newValue: isOn
+            }
+        ])
     }
 
     function onIsRepeatingChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation()
         setIsRepeating(e.target.checked)
+        updateTaskMutation.mutate([
+            {
+                taskPropertyName: "isRepeating",
+                newValue: isRepeating
+            }
+        ])
     }
 
     if (deviceQuery.isLoading || deviceQuery.isError) {
@@ -112,7 +142,57 @@ export default function Page({ params }: { params: { id: string } }) {
                     />
                 </div>
             </div>
-
+            {
+                Array.isArray(deviceQuery.data?.propertyChecks) ?
+                    deviceQuery.data.propertyChecks.map((element: TPropertyCheck, index: number) => {
+                        return (
+                            <></>
+                        )
+                    })
+                    : <></>
+            }
+            {
+                Array.isArray(deviceQuery.data?.timeChecks) ?
+                    deviceQuery.data.timeChecks.map((element: TTimeCheck, index: number) => {
+                        return (
+                            <></>
+                        )
+                    })
+                    : <></>
+            }
+            {
+                Array.isArray(deviceQuery.data?.todoTasks) ?
+                    deviceQuery.data.todoTasks.map((element: TTodoTask, index: number) => {
+                        return (
+                            <></>
+                        )
+                    })
+                    : <></>
+            }
         </>
+    )
+}
+
+function PropertyCheckListItem() {
+    return (
+        <div className="w-full">
+
+        </div>
+    )
+}
+
+function TimeCheckListItem() {
+    return (
+        <div className="w-full">
+
+        </div>
+    )
+}
+
+function TodoListItem() {
+    return (
+        <div className="w-full">
+
+        </div>
     )
 }
