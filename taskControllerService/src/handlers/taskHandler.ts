@@ -82,10 +82,10 @@ function checkEqual(value: any, valueToCompare: any) {
     return value == valueToCompare
 }
 function checkMoreThen(value: any, valueToCompare: any) {
-    return value == valueToCompare
+    return value >= valueToCompare
 }
 function checkLessThen(value: any, valueToCompare: any) {
-    return value == valueToCompare
+    return value <= valueToCompare
 }
 function checkAny() {
     return true
