@@ -1,6 +1,7 @@
 "use client"
 import Loading from "@/components/loading";
 import useAuth from "@/hooks/useAuth";
+import { TTask } from "@/interfaces/task.interface";
 import SwitchButton from "@/ui/switchButton";
 import { Loop } from "@mui/icons-material";
 import { Switch } from "@mui/material";
@@ -8,40 +9,6 @@ import axios from "axios";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { useMutation, useQuery } from "react-query";
-type TTask = {
-    _id: string
-    taskName: string
-    isOn: boolean
-    isRepeating: boolean
-    propertyChecks: TPropertyCheck[]
-    timeChecks: TTimeCheck[]
-    todoTasks: TTodoTask[]
-}
-
-export type TPropertyCheck = {
-    itemID: string
-    deviceID: string
-    dataID: number
-    propertyName: string
-    checkType: number
-    valueToCompare: any
-}
-
-export type TTimeCheck = {
-    itemID: string
-    timingData: string
-    isTrue: boolean
-}
-
-export type TTodoTask = {
-    itemID: string
-    deviceID: string
-    dataID: number
-    propertyName: string
-    newValue: any
-}
-
-
 export default function Page() {
     const auth = useAuth();
     const taskQuery = useQuery({

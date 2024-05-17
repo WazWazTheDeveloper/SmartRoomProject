@@ -5,66 +5,12 @@ import NumberData from "@/components/dataTypes/numberData";
 import SwitchData from "@/components/dataTypes/switchData";
 import Loading from "@/components/loading";
 import useAuth from "@/hooks/useAuth";
+import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDevice, TDeviceDataObject } from "@/interfaces/device.interface";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
-type TResponseType = {
-    _id: string;
-    deviceTargetID: string;
-    deviceName: string;
-    mqttTopicID: string;
-    previousTopicID: string;
-    isAccepted: -1 | 0 | 1;
-    isAdminOnly: boolean;
-    data: TDeviceDataObject[];
-    isConnected: boolean;
-    isConnectedCheck: boolean;
-}
 
-type TDeviceDataObject = TSwitchData | TNumberData | TMultiStateButton;
-
-export type TDeviceData = {
-    dataID: number
-    typeID: number
-    iconName: string
-    dataTitle: string
-    isSensor: boolean
-    mqttTopicID: string
-}
-
-export type TSwitchData = {
-    isOn: boolean
-    onName: string
-    offName: string
-    typeID: 0
-} & TDeviceData
-
-export type TNumberData = {
-    currentValue: number
-    minValue: number
-    maxValue: number
-    jumpValue: number
-    symbol: string
-    typeID: 1
-} & TDeviceData
-
-export type TMultiStateButton = {
-    currentState: number
-    stateList: TStateItem[]
-    typeID: 2
-} & TDeviceData
-
-export type TStateItem = {
-    stateValue: number
-    isIcon: boolean
-    icon: string
-    stateTitle: string
-}
-
-const SWITCH_TYPE = 0
-const NUMBER_TYPE = 1
-const MULTI_STATE_BUTTON_TYPE = 2
 
 
 export default function Page({ params }: { params: { id: string } }) {
@@ -84,7 +30,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 auth.refreshToken()
             }
 
-            return res.data as TResponseType
+            return res.data as TDevice
         },
         enabled: auth.isAuthed
     });
