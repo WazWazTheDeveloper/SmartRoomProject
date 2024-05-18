@@ -4,36 +4,16 @@ import MultiStateButtonData from "@/components/dataTypes/multiStateButtonData";
 import NumberData from "@/components/dataTypes/numberData";
 import SwitchData from "@/components/dataTypes/switchData";
 import Loading from "@/components/loading";
+import useGetDevice from "@/hooks/apis/useGetDevice";
 import useAuth from "@/hooks/useAuth";
-import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDevice, TDeviceDataObject } from "@/interfaces/device.interface";
-import axios from "axios";
+import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDeviceDataObject } from "@/interfaces/device.interface";
 import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
-
-
-
 
 export default function Page({ params }: { params: { id: string } }) {
     const [deviceName, setDeviceName] = useState("")
     const [isOnline, setIsOnline] = useState(false)
     const auth = useAuth();
-    const deviceQuery = useQuery({
-        queryKey: ["devices"],
-        queryFn: async () => {
-            const res = await axios.get(`/api/v1/device/${params.id}`, {
-                headers: {
-                    Authorization: `Bearer ${auth.authToken}`
-                }
-            })
-
-            if (res.status == 401) {
-                auth.refreshToken()
-            }
-
-            return res.data as TDevice
-        },
-        enabled: auth.isAuthed
-    });
+    const deviceQuery = useGetDevice(params.id)
 
     useEffect(() => {
         if (deviceQuery.isLoading) return

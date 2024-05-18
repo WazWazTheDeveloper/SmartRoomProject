@@ -1,42 +1,22 @@
 "use client"
 
 import Loading from '@/components/loading';
-import useAuth from '@/hooks/useAuth';
-import axios from 'axios';
-import { redirect, useRouter } from 'next/navigation';
+import useGetDevices from '@/hooks/apis/useGetDevices';
+import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
-import { useQuery } from 'react-query';
-import { BounceLoader } from 'react-spinners'
 export default function Page() {
-    const auth = useAuth();
-    const deviceQuery = useQuery({
-        queryKey: ["devices"],
-        queryFn: async () => {
-            const res = await axios.get("/api/v1/device/", {
-                headers: {
-                    Authorization: `Bearer ${auth.authToken}`
-                }
-            })
-
-            if (res.status == 401) {
-                auth.refreshToken()
-            }
-
-            return res.data
-        },
-        enabled: auth.isAuthed
-    });
+    const deviceQuery = useGetDevices();
 
     const ele: ReactNode[] = []
     if (deviceQuery.isFetched && !deviceQuery.isError) {
-        console.log(deviceQuery.data)
-        for (let i = 0; i < deviceQuery.data.length; i++) {
-            const element = deviceQuery.data[i];
+        for (let i = 0; i < deviceQuery.data.devices.length; i++) {
+            const element = deviceQuery.data.devices[i];
             ele.push((
-                <ListItem deviceName={`${element.deviceName}`} isOnline={element.isConnected} deviceID={element._id} key={i}/>
+                <ListItem deviceName={`${element.deviceName}`} isOnline={element.isConnected} deviceID={element._id} key={i} />
             ))
         }
     }
+    console.log(deviceQuery.data)
     return (
         <>
             <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2">
