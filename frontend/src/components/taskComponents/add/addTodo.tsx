@@ -6,7 +6,7 @@ type TAddTimeCheck = {
     onDone: () => void
     onClose: () => void
 }
-export function AddTimeCheck(props: TAddTimeCheck) {
+export function AddTodo(props: TAddTimeCheck) {
 
     function onSubmitHandler() {
         

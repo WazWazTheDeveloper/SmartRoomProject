@@ -12,6 +12,7 @@ import { AddTimeCheck } from "@/components/taskComponents/add/addTimeCheck"
 import { PropertyCheckListItem } from "@/components/taskComponents/show/propertyCheckListItem"
 import { TimeCheckListItem } from "@/components/taskComponents/show/timeCheckListItem"
 import { TodoListItem } from "@/components/taskComponents/show/todoListItem"
+import { AddTodo } from "@/components/taskComponents/add/addTodo"
 
 export default function Page({ params }: { params: { id: string } }) {
     const [isOn, setIsOn] = useState(false)
@@ -174,6 +175,10 @@ export default function Page({ params }: { params: { id: string } }) {
                 {isAddTodo ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddTodo} />}
             </div>
             <div className="flex flex-col gap-1">
+                {isAddTodo ? <AddTodo
+                    updateTaskMutation={updateTaskMutation}
+                    onClose={closeAddTimeCheck}
+                    onDone={closeAddTimeCheck} /> : <></>}
                 {
                     Array.isArray(taskQuery.data?.todoTasks) ?
                         taskQuery.data.todoTasks.map((element: TTodoTask, index: number) => {
