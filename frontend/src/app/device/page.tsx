@@ -1,7 +1,7 @@
 "use client"
 
 import Loading from '@/components/loading';
-import useGetDevices from '@/hooks/apis/useGetDevices';
+import useGetDevices from '@/hooks/apis/devices/useGetDevices';
 import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 export default function Page() {

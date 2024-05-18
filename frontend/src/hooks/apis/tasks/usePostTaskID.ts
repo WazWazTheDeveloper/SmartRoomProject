@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useMutation } from "react-query"
-import useAuth from "../useAuth";
+import useAuth from "../../useAuth";
 import { TTaskProperty } from "@/interfaces/taskAPI.interface";
 
 export default function usePostTaskID(taskID: string) {

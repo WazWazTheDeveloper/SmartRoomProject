@@ -1,5 +1,5 @@
 import axios from "axios"
-import useAuth from "../useAuth";
+import useAuth from "../../useAuth";
 import { useQuery } from "react-query";
 import { TDevice } from "@/interfaces/device.interface";
 

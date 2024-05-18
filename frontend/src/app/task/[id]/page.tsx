@@ -1,21 +1,27 @@
 "use client"
 
 import Loading from "@/components/loading"
-import { Delete, Edit, Loop, PowerSettingsNew } from "@mui/icons-material"
+import { Add, Delete, Edit, Loop, PowerSettingsNew } from "@mui/icons-material"
 import { Switch } from "@mui/material"
 import { useEffect, useState } from "react"
-import cronstrue from 'cronstrue'
-import { CHECK_TYPE_EQUAL, CHECK_TYPE_LESS_THEN, CHECK_TYPE_MORE_THEN, TPropertyCheck, TTask, TTimeCheck, TTodoTask } from "@/interfaces/task.interface"
-import usePostTaskID from "@/hooks/apis/usePostTaskID"
-import { AddPropertyCheck } from "@/components/taskComponents/addPropertyCheck"
-import useGetTask from "@/hooks/apis/useGetTask"
-import useGetDevice from "@/hooks/apis/useGetDevice"
+import { TPropertyCheck, TTimeCheck, TTodoTask } from "@/interfaces/task.interface"
+import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID"
+import { AddPropertyCheck } from "@/components/taskComponents/add/addPropertyCheck"
+import useGetTask from "@/hooks/apis/tasks/useGetTask"
+import { AddTimeCheck } from "@/components/taskComponents/add/addTimeCheck"
+import { PropertyCheckListItem } from "@/components/taskComponents/show/propertyCheckListItem"
+import { TimeCheckListItem } from "@/components/taskComponents/show/timeCheckListItem"
+import { TodoListItem } from "@/components/taskComponents/show/todoListItem"
 
 export default function Page({ params }: { params: { id: string } }) {
     const [isOn, setIsOn] = useState(false)
     const [isRepeating, setIsRepeating] = useState(false)
     const updateTaskMutation = usePostTaskID(params.id)
-    const taskQuery = useGetTask(params.id,[updateTaskMutation.data])
+    const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
+
+    const [isAddPropertyCheck, setIsAddPropertyCheck] = useState(false)
+    const [isAddTimeCheck, setIsAddTimeCheck] = useState(true)
+    const [isAddTodo, setIsAddTodo] = useState(false)
 
     useEffect(() => {
         if (taskQuery.isLoading || taskQuery.isError) return
@@ -59,9 +65,34 @@ export default function Page({ params }: { params: { id: string } }) {
         }])
     }
 
+    function openAddPropertyCheck() {
+        setIsAddPropertyCheck(true)
+    }
+
+    function closeAddPropertyCheck() {
+        setIsAddPropertyCheck(false)
+    }
+
+    function openAddTimeCheck() {
+        setIsAddTimeCheck(true)
+    }
+
+    function closeAddTimeCheck() {
+        setIsAddTimeCheck(false)
+    }
+
+    function openAddTodo() {
+        setIsAddTodo(true)
+    }
+
+    function closeAddTodo() {
+        setIsAddTodo(false)
+    }
+
     if (taskQuery.isLoading || taskQuery.isError) {
         <Loading />
     }
+
 
     return (
         <div className="pb-4">
@@ -86,13 +117,17 @@ export default function Page({ params }: { params: { id: string } }) {
                     />
                 </div>
             </div>
-            <AddPropertyCheck updateTaskMutation={updateTaskMutation} />
-            <div className="w-full pl-2">
+            <div className="w-full px-2 flex justify-between items-center">
                 <h2 className="underline font-medium p-0 text-xl">
                     property checks
                 </h2>
+                {isAddPropertyCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddPropertyCheck} />}
             </div>
             <div className="flex flex-col gap-1">
+                {isAddPropertyCheck ? <AddPropertyCheck
+                    updateTaskMutation={updateTaskMutation}
+                    onClose={closeAddPropertyCheck}
+                    onDone={closeAddPropertyCheck} /> : <></>}
                 {
                     Array.isArray(taskQuery.data?.propertyChecks) ?
                         taskQuery.data.propertyChecks.map((element: TPropertyCheck, index: number) => {
@@ -107,12 +142,17 @@ export default function Page({ params }: { params: { id: string } }) {
                         : <></>
                 }
             </div>
-            <div className="w-full pl-2">
+            <div className="w-full px-2 flex justify-between items-center">
                 <h2 className="underline font-medium p-0 text-xl">
                     time checks
                 </h2>
+                {isAddTimeCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddTimeCheck} />}
             </div>
             <div className="flex flex-col gap-1">
+                {isAddTimeCheck ? <AddTimeCheck
+                    updateTaskMutation={updateTaskMutation}
+                    onClose={closeAddTimeCheck}
+                    onDone={closeAddTimeCheck} /> : <></>}
                 {
                     Array.isArray(taskQuery.data?.timeChecks) ?
                         taskQuery.data.timeChecks.map((element: TTimeCheck, index: number) => {
@@ -127,10 +167,11 @@ export default function Page({ params }: { params: { id: string } }) {
                         : <></>
                 }
             </div>
-            <div className="w-full pl-2">
+            <div className="w-full px-2 flex justify-between items-center">
                 <h2 className="underline font-medium p-0 text-xl">
                     todo
                 </h2>
+                {isAddTodo ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddTodo} />}
             </div>
             <div className="flex flex-col gap-1">
                 {
@@ -146,123 +187,6 @@ export default function Page({ params }: { params: { id: string } }) {
                         })
                         : <></>
                 }
-            </div>
-        </div>
-    )
-}
-
-type TPropertyCheckProps = {
-    item: TPropertyCheck
-    onDeleteClick: () => void
-    onEditClick: () => void
-}
-
-function PropertyCheckListItem(props: TPropertyCheckProps) {
-    const [deviceName, setDeviceName] = useState(props.item.deviceID)
-    const [propertyName, setPropertyName] = useState(`no.${props.item.dataID}`)
-    const deviceQuery = useGetDevice(props.item.deviceID)
-
-    useEffect(() => {
-        if (deviceQuery.isLoading) return
-        if (deviceQuery.isError) return
-
-        if (deviceQuery.data?.deviceName) {
-            setDeviceName(deviceQuery.data.deviceName)
-        }
-        if (deviceQuery.data &&
-            deviceQuery.data.data &&
-            deviceQuery.data.data[props.item.dataID].dataTitle &&
-            deviceQuery.data.data[props.item.dataID].dataTitle != "") {
-            setPropertyName(deviceQuery.data?.data[props.item.dataID].dataTitle)
-        }
-    }, [deviceQuery.data])
-
-    let checkType = "null"
-    switch (props.item.checkType) {
-        case CHECK_TYPE_EQUAL: {
-            checkType = 'equal to'
-            break;
-        }
-        case CHECK_TYPE_MORE_THEN: {
-            checkType = 'more then'
-            break;
-        }
-        case CHECK_TYPE_LESS_THEN: {
-            checkType = 'less then'
-            break;
-        }
-        default: {
-            checkType = 'unknown'
-            break;
-        }
-    }
-    return (
-        <div className="w-full flex bg-neutral-300 dark:bg-darkNeutral-300">
-            <div className="w-4/5 pl-2 pt-2 pb-2 flex justify-start items-center flex-wrap">
-                <p className="w-full">{`If ${deviceName} propery ${propertyName} is ${checkType} ${props.item.valueToCompare}`}</p>
-            </div>
-            <div className="w-1/5 flex justify-end gap-1 pr-2 items-center">
-                <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onEditClick} />
-                <Delete className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onDeleteClick} />
-            </div>
-        </div>
-    )
-}
-
-type TTimeCheckProps = {
-    cronText: string
-    onDeleteClick: () => void
-    onEditClick: () => void
-}
-function TimeCheckListItem(props: TTimeCheckProps) {
-    return (
-        <div className="w-full flex bg-neutral-300 dark:bg-darkNeutral-300">
-            <div className="w-4/5 pl-2 pt-2 pb-2 flex justify-start items-center">
-                <p className="w-full text-base">
-                    {cronstrue.toString(props.cronText)}
-                </p>
-            </div>
-            <div className="w-1/5 flex justify-end gap-1 pr-2 items-center">
-                <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onEditClick} />
-                <Delete className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onDeleteClick} />
-            </div>
-        </div>
-    )
-}
-
-type TTodoCheckProps = {
-    item: TTodoTask
-    onDeleteClick: () => void
-    onEditClick: () => void
-}
-function TodoListItem(props: TTodoCheckProps) {
-    const [deviceName, setDeviceName] = useState(props.item.deviceID)
-    const [propertyName, setPropertyName] = useState(`no.${props.item.dataID}`)
-    const deviceQuery = useGetDevice(props.item.deviceID)
-
-    useEffect(() => {
-        if (deviceQuery.isLoading) return
-        if (deviceQuery.isError) return
-
-        if (deviceQuery.data?.deviceName) {
-            setDeviceName(deviceQuery.data.deviceName)
-        }
-        if (deviceQuery.data &&
-            deviceQuery.data.data &&
-            deviceQuery.data.data[props.item.dataID].dataTitle &&
-            deviceQuery.data.data[props.item.dataID].dataTitle != "") {
-            setPropertyName(deviceQuery.data?.data[props.item.dataID].dataTitle)
-        }
-    }, [deviceQuery.data])
-
-    return (
-        <div className="w-full flex bg-neutral-300 dark:bg-darkNeutral-300">
-            <div className="w-4/5 pl-2 pt-2 pb-2 flex justify-start items-center">
-                <p className="w-full">{`Change ${deviceName}'s property ${propertyName} to ${props.item.newValue}`}</p>
-            </div>
-            <div className="w-1/5 flex justify-end gap-1 pr-2 items-center">
-                <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onEditClick} />
-                <Delete className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onDeleteClick} />
             </div>
         </div>
     )

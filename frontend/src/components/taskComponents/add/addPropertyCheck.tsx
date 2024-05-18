@@ -1,27 +1,28 @@
-import useGetDevices from "@/hooks/apis/useGetDevices";
+import useGetDevices from "@/hooks/apis/devices/useGetDevices";
 import useAuth from "@/hooks/useAuth";
 import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDevice, TDeviceDataObject } from "@/interfaces/device.interface";
 import { CHECK_TYPE_EQUAL, CHECK_TYPE_LESS_THEN, CHECK_TYPE_MORE_THEN } from "@/interfaces/task.interface";
 import { Close, Done } from "@mui/icons-material";
-import { useEffect, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { UseMutationResult, useQuery } from "react-query";
 
 type TAddPropertyCheckProps = {
     updateTaskMutation: UseMutationResult<any, unknown, any[], unknown>
+    onDone: () => void
+    onClose: () => void
 }
 export function AddPropertyCheck(props: TAddPropertyCheckProps) {
     const [selectedDevice, setSelectedDevice] = useState(0);
     const [selectedProperty, setSelectedProperty] = useState(0);
-    const [propertyName,setPropertyName] = useState("");
+    const [propertyName, setPropertyName] = useState("");
     const [checkType, setCheckType] = useState(0);
     const [compareTo, setCompareTo] = useState<number | string>("");
-    const auth = useAuth();
     const deviceQuery = useGetDevices()
 
     function onSubmitHandler() {
-        if(!deviceQuery) return
-        if(!deviceQuery.data) return
-        if(!deviceQuery.data.devices[selectedDevice]) return
+        if (!deviceQuery) return
+        if (!deviceQuery.data) return
+        if (!deviceQuery.data.devices[selectedDevice]) return
 
         props.updateTaskMutation.mutate([{
             taskPropertyName: "propertyChecks",
@@ -32,6 +33,8 @@ export function AddPropertyCheck(props: TAddPropertyCheckProps) {
             checkType: checkType,
             valueToCompare: compareTo
         }])
+
+        props.onDone()
     }
 
     return (
@@ -42,7 +45,7 @@ export function AddPropertyCheck(props: TAddPropertyCheckProps) {
                     <select name="device" id="device" className="mr-1"
                         onChange={(e) => { setSelectedDevice(Number(e.target.value)) }}>
                         {Array.isArray(deviceQuery.data?.devices) ?
-                            deviceQuery.data?.devices.map((element: TDevice, index:number) => {
+                            deviceQuery.data?.devices.map((element: TDevice, index: number) => {
                                 return (
                                     <option key={index} value={index}>{`${element.deviceName}`}</option>
                                 )
@@ -52,9 +55,9 @@ export function AddPropertyCheck(props: TAddPropertyCheckProps) {
                     <select name="property" id="property" className="mr-1"
                         onChange={(e) => { setSelectedProperty(Number(e.target.value)) }}>
                         {deviceQuery.data && deviceQuery.data.devices && deviceQuery.data.devices[selectedDevice] ?
-                            deviceQuery.data.devices[selectedDevice].data.map((element:TDeviceDataObject, index:number) => {
+                            deviceQuery.data.devices[selectedDevice].data.map((element: TDeviceDataObject, index: number) => {
                                 return (
-                                    <option key={index} value={index}>{`${element.dataTitle != "" ? element.dataTitle : `no. ${element.dataID}` }`}</option>
+                                    <option key={index} value={index}>{`${element.dataTitle != "" ? element.dataTitle : `no. ${element.dataID}`}`}</option>
                                 )
                             }) : <></>}
                     </select>
@@ -64,14 +67,14 @@ export function AddPropertyCheck(props: TAddPropertyCheckProps) {
                             data={deviceQuery.data.devices[selectedDevice].data[selectedProperty]}
                             setInput={(val: string | number) => { setCompareTo(val); console.log("yeet") }}
                             setTypeCheck={(val: number) => { setCheckType(val); console.log("yeet2") }}
-                            setPropertyName={(val:string)=>{setPropertyName}}
+                            setPropertyName={(val: string) => { setPropertyName }}
                             value={compareTo}
                         /> : <></>}
                 </form>
             </div>
             <div className="w-1/5 flex justify-end gap-1 pr-2 items-center">
-                <Done className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={onSubmitHandler}/>
-                <Close className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' />
+                <Done className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={onSubmitHandler} />
+                <Close className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 h-7 w-7' onClick={props.onClose} />
             </div>
         </div>
     )
@@ -130,8 +133,8 @@ function AddPropertyCheckInput(props: AddPropertyCheckInputProps) {
                         max={props.data.maxValue}
                         min={props.data.minValue}
                         step={props.data.jumpValue}
-                        value={props.value} 
-                        onChange={(e)=>{props.setInput(e.target.value)}}
+                        value={props.value}
+                        onChange={(e) => { props.setInput(e.target.value) }}
                     />
                 </>
             )

@@ -4,7 +4,7 @@ import MultiStateButtonData from "@/components/dataTypes/multiStateButtonData";
 import NumberData from "@/components/dataTypes/numberData";
 import SwitchData from "@/components/dataTypes/switchData";
 import Loading from "@/components/loading";
-import useGetDevice from "@/hooks/apis/useGetDevice";
+import useGetDevice from "@/hooks/apis/devices/useGetDevice";
 import useAuth from "@/hooks/useAuth";
 import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDeviceDataObject } from "@/interfaces/device.interface";
 import { useEffect, useState } from "react";

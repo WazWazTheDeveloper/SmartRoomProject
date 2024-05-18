@@ -1,7 +1,7 @@
 "use client"
 import Loading from "@/components/loading";
-import useGetTasks from "@/hooks/apis/useGetTasks";
-import usePostTaskID from "@/hooks/apis/usePostTaskID";
+import useGetTasks from "@/hooks/apis/tasks/useGetTasks";
+import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID";
 import { TTask } from "@/interfaces/task.interface";
 import { Loop } from "@mui/icons-material";
 import { Switch } from "@mui/material";
