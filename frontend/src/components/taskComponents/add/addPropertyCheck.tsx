@@ -65,8 +65,8 @@ export function AddPropertyCheck(props: TAddPropertyCheckProps) {
                     {deviceQuery.data && deviceQuery.data.devices && deviceQuery.data.devices[selectedDevice] ?
                         <AddPropertyCheckInput
                             data={deviceQuery.data.devices[selectedDevice].data[selectedProperty]}
-                            setInput={(val: string | number) => { setCompareTo(val); console.log("yeet") }}
-                            setTypeCheck={(val: number) => { setCheckType(val); console.log("yeet2") }}
+                            setInput={(val: string | number) => { setCompareTo(val) }}
+                            setTypeCheck={(val: number) => { setCheckType(val) }}
                             setPropertyName={(val: string) => { setPropertyName }}
                             value={compareTo}
                         /> : <></>}

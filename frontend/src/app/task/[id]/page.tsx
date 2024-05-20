@@ -1,7 +1,7 @@
 "use client"
 
 import Loading from "@/components/loading"
-import { Add, Delete, Edit, Loop, PowerSettingsNew } from "@mui/icons-material"
+import { Add, ArrowBack, Loop, PowerSettingsNew, Settings } from "@mui/icons-material"
 import { Switch } from "@mui/material"
 import { useEffect, useState } from "react"
 import { TPropertyCheck, TTimeCheck, TTodoTask } from "@/interfaces/task.interface"
@@ -13,15 +13,16 @@ import { PropertyCheckListItem } from "@/components/taskComponents/show/property
 import { TimeCheckListItem } from "@/components/taskComponents/show/timeCheckListItem"
 import { TodoListItem } from "@/components/taskComponents/show/todoListItem"
 import { AddTodo } from "@/components/taskComponents/add/addTodo"
+import { useRouter } from "next/navigation"
 
 export default function Page({ params }: { params: { id: string } }) {
-    const [isOn, setIsOn] = useState(false)
-    const [isRepeating, setIsRepeating] = useState(false)
+    const router = useRouter()
     const updateTaskMutation = usePostTaskID(params.id)
     const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
-
+    const [isOn, setIsOn] = useState(false)
+    const [isRepeating, setIsRepeating] = useState(false)
     const [isAddPropertyCheck, setIsAddPropertyCheck] = useState(false)
-    const [isAddTimeCheck, setIsAddTimeCheck] = useState(true)
+    const [isAddTimeCheck, setIsAddTimeCheck] = useState(false)
     const [isAddTodo, setIsAddTodo] = useState(false)
 
     useEffect(() => {
@@ -90,6 +91,14 @@ export default function Page({ params }: { params: { id: string } }) {
         setIsAddTodo(false)
     }
 
+    function goToSettings() {
+        router.push(`/task/${params.id}/settings`)
+    }
+
+    function goToTasks() {
+        router.push(`/task/`)
+    }
+
     if (taskQuery.isLoading || taskQuery.isError) {
         <Loading />
     }
@@ -97,8 +106,12 @@ export default function Page({ params }: { params: { id: string } }) {
 
     return (
         <div className="pb-4">
-            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2 box-border sm:w-full sm:text-center">
-                {taskQuery.data?.taskName}
+            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 px-2 pb-1 box-border sm:w-full sm:text-center flex justify-between items-center">
+                <div className="flex justify-start items-center">
+                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2" onClick={goToTasks} />
+                    {taskQuery.data?.taskName}
+                </div>
+                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={goToSettings} />
             </div>
             <div className="flex w-full flex-wrap">
                 < div className='flex justify-start items-center pl-2 pr-2 w-full sm:w-full sm:max-w-[52rem] sm:justify-center' >

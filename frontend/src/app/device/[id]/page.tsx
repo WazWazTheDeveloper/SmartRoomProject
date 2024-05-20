@@ -7,9 +7,12 @@ import Loading from "@/components/loading";
 import useGetDevice from "@/hooks/apis/devices/useGetDevice";
 import useAuth from "@/hooks/useAuth";
 import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDeviceDataObject } from "@/interfaces/device.interface";
+import { ArrowBack, Settings } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Page({ params }: { params: { id: string } }) {
+    const router = useRouter()
     const [deviceName, setDeviceName] = useState("")
     const [isOnline, setIsOnline] = useState(false)
     const auth = useAuth();
@@ -32,10 +35,22 @@ export default function Page({ params }: { params: { id: string } }) {
         return (<Loading />)
     }
 
+    function goToSettings() {
+        router.push(`/device/${params.id}/settings`)
+    }
+
+    function goToTasks() {
+        router.push(`/device/`)
+    }
+
     return (
         <>
-            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2 box-border sm:w-full sm:text-center">
-                {deviceName}
+            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2 box-border sm:w-full sm:text-center flex justify-between items-center">
+                <div className="flex justify-start items-center">
+                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2" onClick={goToTasks} />
+                    {deviceName}
+                </div>
+                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={goToSettings} />
             </div>
             <div className="flex w-full flex-wrap">
                 <div className="w-full flex justify-center">
