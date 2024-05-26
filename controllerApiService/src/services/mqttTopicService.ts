@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import MqttTopicObject from "../models/mqttTopicObject";
-import {COLLECTION_MQTT_TOPICS,bulkWriteCollection,collections,createDocument,getCollection,getDocuments,getDocumentsAggregate,updateDocument,} from "./mongoDBService";
-import {TMqttTopicObjectJSON_DB,TMqttTopicProperty,} from "../interfaces/mqttTopicObject.interface";
+import { COLLECTION_MQTT_TOPICS, bulkWriteCollection, collections, createDocument, getCollection, getDocuments, getDocumentsAggregate, updateDocument, } from "./mongoDBService";
+import { TMqttTopicObjectJSON_DB, TMqttTopicProperty, } from "../interfaces/mqttTopicObject.interface";
 import { TDeviceJSON_DB } from "../interfaces/device.interface";
 import * as mongoDB from "mongodb";
 import SwitchData from "../models/dataTypes/switchData";
@@ -68,7 +68,7 @@ export async function getMqttTopic(_id: string): Promise<MqttTopicResult> {
     //validation
     if (findResultArr.length > 1) {
         let err = `Multipale documents with _id:${_id} in: mqttCollection`;
-        loggerGeneral.error(err , getRequestUUID())
+        loggerGeneral.error(err, getRequestUUID())
         throw new Error(err);
     } else if (findResultArr.length == 0) {
         functionResult = { isSuccessful: false };
@@ -92,7 +92,7 @@ export async function updateMqttTopic(_id: string, propertyList: TMqttTopicPrope
     for (let index = 0; index < propertyList.length; index++) {
         const property = propertyList[index];
         set[property.propertyName] = property.newValue;
-        if(property.propertyName == "path") {
+        if (property.propertyName == "path") {
             set["previousPath"] = "$path";
         }
     }
@@ -199,7 +199,41 @@ export function getTypeOfTopic(topicType: number) {
             return "number"
         case MultiStateButton.TYPE_ID:
             return "number"
-        default :
+        default:
             throw "unknown topicType"
     }
+}
+
+export function getAllTopics() {
+
+}
+
+export async function getTopicsFromIDArray(topicIDArray: string[]) {
+    let functionResult: MqttTopicResult = { isSuccessful: false };
+    let logItem = "";
+
+    //query
+    const fillter = { _id: { $in: topicIDArray } };
+    const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>(
+        COLLECTION_MQTT_TOPICS,
+        fillter
+    );
+
+    // //validation
+    // if (findResultArr.length > 1) {
+    //     let err = `Multipale documents with _id:${_id} in: mqttCollection`;
+    //     loggerGeneral.error(err, getRequestUUID())
+    //     throw new Error(err);
+    // } else if (findResultArr.length == 0) {
+    //     functionResult = { isSuccessful: false };
+    // } else {
+    //     const queryMqttTopic =
+    //         MqttTopicObject.createMqttTopicFromTDeviceJSON_DB(findResultArr[0]);
+    //     functionResult = {
+    //         isSuccessful: true,
+    //         mqttTopicObject: queryMqttTopic,
+    //     };
+    // }
+
+    return functionResult;
 }

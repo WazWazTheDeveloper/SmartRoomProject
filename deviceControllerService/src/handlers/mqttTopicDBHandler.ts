@@ -6,5 +6,5 @@ import * as mongoDB from "mongodb";
  * @param changeEvent - a change event form mongodb
  */
 export async function mqttTopicDBHandler(changeEvent: mongoDB.ChangeStreamDocument) {
-    //update devices when topic path updates
+    //TODO: update devices when topic path updates
 }
