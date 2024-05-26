@@ -3,15 +3,33 @@
 import Loading from "@/components/loading";
 import useGetTask from "@/hooks/apis/tasks/useGetTask";
 import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID";
-import { ArrowBack, Edit } from "@mui/icons-material";
+import { ArrowBack, Done, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Page({ params }: { params: { id: string } }) {
+    const [isEditTaskName, setIsEditTaskName] = useState(false);
+    const [newTaskName, setNewTaskName] = useState("")
     const router = useRouter()
     const updateTaskMutation = usePostTaskID(params.id)
     const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
     function goToTask() {
         router.push(`/task/${params.id}`)
+    }
+
+    function onOpenEditNameHandler() {
+        if (!taskQuery.data?.taskName) return
+
+        setNewTaskName(taskQuery.data?.taskName)
+        setIsEditTaskName(true)
+    }
+
+    function onDoneEditNameHabdler() {
+        updateTaskMutation.mutate([{
+            taskPropertyName: "taskName",
+            newValue: newTaskName
+        }])
+        setIsEditTaskName(false)        
     }
 
     if (taskQuery.isLoading || taskQuery.isError) {
@@ -39,12 +57,24 @@ export default function Page({ params }: { params: { id: string } }) {
                     <h2 className="text-base w-full font-bold">
                         task name:
                     </h2>
-                    <div className="flex justify-between items-center w-full">
-                        <p className="pl-2">{taskQuery.data?.taskName}</p>
-                        <div>
-                            <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300' />
-                        </div>
-                    </div>
+                    {
+                        isEditTaskName ?
+                            <div className="flex justify-between items-center w-full">
+                                <input
+                                    className="pl-2"
+                                    value={newTaskName}
+                                    onChange={(e) => { setNewTaskName(e.target.value) }} />
+                                <div>
+                                    <Done className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300' onClick={onDoneEditNameHabdler} />
+                                </div>
+                            </div> :
+                            <div className="flex justify-between items-center w-full">
+                                <p className="pl-2">{taskQuery.data?.taskName}</p>
+                                <div>
+                                    <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300' onClick={onOpenEditNameHandler} />
+                                </div>
+                            </div>
+                    }
                 </div>
             </div>
         </div>

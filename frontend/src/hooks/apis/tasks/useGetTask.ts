@@ -3,7 +3,7 @@ import useAuth from "../../useAuth";
 import { useQuery } from "react-query";
 import { TTask } from "@/interfaces/task.interface";
 
-export default function useGetTask(taskID: string, extraQueryKeys: any[]) {
+export default function useGetTask(taskID: string, extraQueryKeys: any[] = []) {
     const auth = useAuth();
     const taskQuery = useQuery({
         queryKey: (["tasks"].concat(extraQueryKeys)),
