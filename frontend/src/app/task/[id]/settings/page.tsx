@@ -29,7 +29,9 @@ export default function Page({ params }: { params: { id: string } }) {
             taskPropertyName: "taskName",
             newValue: newTaskName
         }])
-        setIsEditTaskName(false)        
+        setIsEditTaskName(false)
+
+        
     }
 
     if (taskQuery.isLoading || taskQuery.isError) {
