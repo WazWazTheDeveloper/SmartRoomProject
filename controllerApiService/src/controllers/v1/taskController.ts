@@ -54,18 +54,22 @@ export const getAllTasks = asyncHandler(async (req: Request, res: Response, next
     const taskID = []
     let canSeeAll = false;
 
-    for (let i = 0; i < resultData.permissions.length; i++) {
-        const permission = resultData.permissions[i];
-        if (permission.read == true) {
-            if (permission.objectId = "all") {
-                canSeeAll = true;
+    if (resultData.isAdmin) {
+        canSeeAll = true;
+    } else {
+        for (let i = 0; i < resultData.permissions.length; i++) {
+            const permission = resultData.permissions[i];
+            if (permission.read == true) {
+                if (permission.objectId = "all") {
+                    canSeeAll = true;
+                }
+                taskID.push(permission.objectId)
             }
-            taskID.push(permission.objectId)
         }
     }
 
     let taskResult: TaskService.TasksResult;
-    if (resultData.isAdmin || canSeeAll) {
+    if (canSeeAll) {
         taskResult = await TaskService.getAllTasks();
     }
     else {
