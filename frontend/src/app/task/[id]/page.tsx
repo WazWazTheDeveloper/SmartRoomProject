@@ -108,13 +108,13 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="pb-4">
             <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 px-2 pb-1 box-border sm:w-full sm:text-center flex justify-between items-center">
                 <div className="flex justify-start items-center">
-                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2" onClick={goToTasks} />
+                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2 cursor-pointer" onClick={goToTasks} />
                     {taskQuery.data?.taskName}
                 </div>
-                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={goToSettings} />
+                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={goToSettings} />
             </div>
             <div className="flex w-full flex-wrap">
-                < div className='flex justify-start items-center pl-2 pr-2 w-full sm:w-full sm:max-w-[52rem] sm:justify-center' >
+                < div className='flex justify-start items-center pl-2 pr-2 w-full sm:justify-start' >
                     <PowerSettingsNew className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300' sx={{ fontSize: "2rem" }} />
                     <Switch
                         checked={isOn}
@@ -122,7 +122,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         inputProps={{ 'aria-label': 'controlled' }}
                     />
                 </div>
-                < div className='flex justify-start items-center pl-2 pr-2 w-full sm:w-full sm:max-w-[52rem] sm:justify-center' >
+                < div className='flex justify-start items-center pl-2 pr-2 w-full sm:justify-start' >
                     <Loop className='fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300' sx={{ fontSize: "2rem" }} />
                     <Switch
                         checked={isRepeating}
@@ -135,7 +135,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <h2 className="underline font-medium p-0 text-xl">
                     property checks
                 </h2>
-                {isAddPropertyCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddPropertyCheck} />}
+                {isAddPropertyCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={openAddPropertyCheck} />}
             </div>
             <div className="flex flex-col gap-1">
                 {isAddPropertyCheck ? <AddPropertyCheck
@@ -160,7 +160,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <h2 className="underline font-medium p-0 text-xl">
                     time checks
                 </h2>
-                {isAddTimeCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddTimeCheck} />}
+                {isAddTimeCheck ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={openAddTimeCheck} />}
             </div>
             <div className="flex flex-col gap-1">
                 {isAddTimeCheck ? <AddTimeCheck
@@ -185,13 +185,13 @@ export default function Page({ params }: { params: { id: string } }) {
                 <h2 className="underline font-medium p-0 text-xl">
                     todo
                 </h2>
-                {isAddTodo ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={openAddTodo} />}
+                {isAddTodo ? <></> : <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={openAddTodo} />}
             </div>
             <div className="flex flex-col gap-1">
                 {isAddTodo ? <AddTodo
                     updateTaskMutation={updateTaskMutation}
-                    onClose={closeAddTimeCheck}
-                    onDone={closeAddTimeCheck} /> : <></>}
+                    onClose={closeAddTodo}
+                    onDone={closeAddTodo} /> : <></>}
                 {
                     Array.isArray(taskQuery.data?.todoTasks) ?
                         taskQuery.data.todoTasks.map((element: TTodoTask, index: number) => {

@@ -46,15 +46,6 @@ function ListItem(props: TProps) {
                     {props.topicName}
                 </h2>
             </div>
-            {/* <div className="w-1/4 justify-end flex items-center pr-2">
-                <Loop className={"w-6 h-6 fill-neutral-1000 dark:fill-darkNeutral-1000 " + (props.isRepeating ? "fill-green-500 dark:fill-green-500" : "")} />
-                <Switch
-                    checked={isOn}
-                    onChange={onIsOnClickHandler}
-                    onClick={(e) => { e.stopPropagation() }}
-                    inputProps={{ 'aria-label': 'controlled' }}
-                />
-            </div> */}
         </div>
 
     )

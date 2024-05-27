@@ -47,10 +47,10 @@ export default function Page({ params }: { params: { id: string } }) {
         <>
             <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2 box-border sm:w-full sm:text-center flex justify-between items-center">
                 <div className="flex justify-start items-center">
-                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2" onClick={goToTasks} />
+                    <ArrowBack className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 mr-2 cursor-pointer" onClick={goToTasks} />
                     {deviceName}
                 </div>
-                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300" onClick={goToSettings} />
+                <Settings className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={goToSettings} />
             </div>
             <div className="flex w-full flex-wrap">
                 <div className="w-full flex justify-center">
