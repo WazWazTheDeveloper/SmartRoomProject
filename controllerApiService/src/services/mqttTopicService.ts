@@ -262,3 +262,27 @@ export async function getTopicsFromIDArray(topicIDArray: string[]) {
 
     return functionResult;
 }
+
+export async function getTopicByID(topicID:string) {
+    let functionResult: MqttTopicResult = { isSuccessful: false }
+
+    //query
+    const fillter = { _id: topicID }
+    const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>("mqttTopics", fillter)
+
+    //validation
+    if (findResultArr.length > 1) {
+        let err = `Multipale documents with _id:${topicID} at: taskCollection`
+        loggerGeneral.error(err, { uuid: getRequestUUID() })
+        throw new Error(err)
+    }
+    else if (findResultArr.length == 0) {
+        functionResult = { isSuccessful: false }
+    }
+    else {
+        const queryTopic = MqttTopicObject.createMqttTopicFromTMqttTopicObjectJSON_DB(findResultArr[0])
+        functionResult = { isSuccessful: true, mqttTopicObject: queryTopic }
+    }
+
+    return functionResult
+}
