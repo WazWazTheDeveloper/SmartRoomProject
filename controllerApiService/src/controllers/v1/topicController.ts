@@ -11,6 +11,7 @@ export const createTopic = asyncHandler(async (req: Request, res: Response, next
 export const getAllTopics = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     // @ts-ignore we check for req.headers.authorization in middleware
     const userPermissionsResult = await getPermissions(req.headers.authorization, req._userID, "topic")
+    console.log(userPermissionsResult)
     if (!userPermissionsResult.isSuccessful) {
         response500(req, res);
         return
@@ -35,11 +36,16 @@ export const getAllTopics = asyncHandler(async (req: Request, res: Response, nex
 
     let topics;
     if(canSeeAll) {
-        topics = topicService.getAllTopics()
+        topics = await topicService.getAllTopics()
     } else {
-        topics = topicService.getTopicsFromIDArray(topicIDs)
+        topics = await topicService.getTopicsFromIDArray(topicIDs)
     }
 
-    //return
+    if(!topics.isSuccessful) {
+        response500(req,res);
+        return
+    }
 
+    res.status(200).json(topics.mqttTopicObjects)
+    return
 }) 

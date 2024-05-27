@@ -21,7 +21,7 @@ export default class MqttTopicObject implements IMqttTopicObject {
     }
 
     // create device from TDeviceJSON_DB JSON object
-    static createMqttTopicFromTDeviceJSON_DB(topicData: TMqttTopicObjectJSON_DB): MqttTopicObject {
+    static createMqttTopicFromTMqttTopicObjectJSON_DB(topicData: TMqttTopicObjectJSON_DB): MqttTopicObject {
         const newMqttTopic = new MqttTopicObject(
             topicData._id,
             topicData.topicName,

@@ -17,11 +17,11 @@ export type TPermission = {
     delete: boolean
 }
 
-type TResult  = {
-    isSuccessful : false
+type TResult = {
+    isSuccessful: false
 } | {
-    isSuccessful : true
-    data : TResponseData
+    isSuccessful: true
+    data: TResponseData
 }
 
 type TType = "topic" | "device" | "task" | "permissionGroup" | "users"
@@ -33,13 +33,20 @@ export async function getPermissions(authKey: string, userID: string, type: TTyp
                 Authorization: authKey
             }
         })
-        .then(function (response: AxiosResponse<TResponseData>) {
-            if (response.status != 200) return false
+        .then(function (response: AxiosResponse<TResponseData>): TResult {
+            if (response.status != 200) return {
+                isSuccessful: false,
+            }
 
-            return response.data.permissions
+            return {
+                isSuccessful: true,
+                data: response.data
+            }
         }).catch(function (error: any) {
             // handle error
             loggerGeneral.error(`failed to fetch permissions verifacation: ${error}`, { uuid: getRequestUUID() })
-            return false;
+            return {
+                isSuccessful: false,
+            };
         })
 }

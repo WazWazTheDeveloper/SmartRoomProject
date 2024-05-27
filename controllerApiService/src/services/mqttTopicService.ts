@@ -19,6 +19,15 @@ type MqttTopicResult =
         mqttTopicObject: MqttTopicObject;
     };
 
+type MqttTopicsResult =
+    | {
+        isSuccessful: false;
+    }
+    | {
+        isSuccessful: true;
+        mqttTopicObjects: MqttTopicObject[];
+    };
+
 export async function createNewMqttTopic(
     topicName: string,
     topicPath: string,
@@ -74,7 +83,7 @@ export async function getMqttTopic(_id: string): Promise<MqttTopicResult> {
         functionResult = { isSuccessful: false };
     } else {
         const queryMqttTopic =
-            MqttTopicObject.createMqttTopicFromTDeviceJSON_DB(findResultArr[0]);
+            MqttTopicObject.createMqttTopicFromTMqttTopicObjectJSON_DB(findResultArr[0]);
         functionResult = {
             isSuccessful: true,
             mqttTopicObject: queryMqttTopic,
@@ -204,36 +213,52 @@ export function getTypeOfTopic(topicType: number) {
     }
 }
 
-export function getAllTopics() {
+export async function getAllTopics() {
+    let functionResult: MqttTopicsResult = { isSuccessful: false };
+    //query
+    try {
+        const fillter = {};
+        const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>(
+            COLLECTION_MQTT_TOPICS,
+            fillter
+        );
 
+        const queryTopics = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const topic = findResultArr[i];
+            queryTopics.push(MqttTopicObject.createMqttTopicFromTMqttTopicObjectJSON_DB(topic))
+        }
+        functionResult = { isSuccessful: true, mqttTopicObjects: queryTopics };
+    }
+    catch {
+
+    }
+
+    return functionResult;
 }
 
 export async function getTopicsFromIDArray(topicIDArray: string[]) {
-    let functionResult: MqttTopicResult = { isSuccessful: false };
+    let functionResult: MqttTopicsResult = { isSuccessful: false };
     let logItem = "";
 
     //query
-    const fillter = { _id: { $in: topicIDArray } };
-    const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>(
-        COLLECTION_MQTT_TOPICS,
-        fillter
-    );
+    try {
+        const fillter = { _id: { $in: topicIDArray } };
+        const findResultArr = await getDocuments<TMqttTopicObjectJSON_DB>(
+            COLLECTION_MQTT_TOPICS,
+            fillter
+        );
 
-    // //validation
-    // if (findResultArr.length > 1) {
-    //     let err = `Multipale documents with _id:${_id} in: mqttCollection`;
-    //     loggerGeneral.error(err, getRequestUUID())
-    //     throw new Error(err);
-    // } else if (findResultArr.length == 0) {
-    //     functionResult = { isSuccessful: false };
-    // } else {
-    //     const queryMqttTopic =
-    //         MqttTopicObject.createMqttTopicFromTDeviceJSON_DB(findResultArr[0]);
-    //     functionResult = {
-    //         isSuccessful: true,
-    //         mqttTopicObject: queryMqttTopic,
-    //     };
-    // }
+        const queryDevice = []
+        for (let i = 0; i < findResultArr.length; i++) {
+            const topic = findResultArr[i];
+            queryDevice.push(MqttTopicObject.createMqttTopicFromTMqttTopicObjectJSON_DB(topic))
+        }
+        functionResult = { isSuccessful: true, mqttTopicObjects: queryDevice };
+    }
+    catch {
+
+    }
 
     return functionResult;
 }
