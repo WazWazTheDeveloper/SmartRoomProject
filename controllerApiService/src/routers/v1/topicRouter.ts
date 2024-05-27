@@ -10,3 +10,4 @@ export const topicIDRouter:express.Router = express.Router({ mergeParams : true 
 topicRouter.use("/:UUID",topicIDRouter)
 
 topicIDRouter.get('/',topicController.getTopic)
+topicIDRouter.patch('/',topicController.updateTopic)

@@ -117,7 +117,12 @@ export async function updateMqttTopic(_id: string, propertyList: TMqttTopicPrope
         },
     }]
 
-    await bulkWriteCollection(COLLECTION_MQTT_TOPICS, operations)
+    // BUG: need to add check for duplicate paths and throw error acordingly
+    try{
+        await bulkWriteCollection(COLLECTION_MQTT_TOPICS, operations)
+    } catch (e) {
+        throw new Error(e as string)
+    }
 }
 
 export async function getDevicesUsingTopic(topicPath: string) {
