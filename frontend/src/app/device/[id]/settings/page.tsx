@@ -3,8 +3,6 @@
 import Loading from "@/components/loading";
 import useGetDevice from "@/hooks/apis/devices/useGetDevice";
 import usePostDeviceID from "@/hooks/apis/devices/usePostDeviceID";
-import useGetTask from "@/hooks/apis/tasks/useGetTask";
-import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID";
 import { ArrowBack, Done, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

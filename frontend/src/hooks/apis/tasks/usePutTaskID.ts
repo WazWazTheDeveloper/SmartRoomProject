@@ -3,7 +3,7 @@ import { useMutation } from "react-query"
 import useAuth from "../../useAuth";
 import { TTaskProperty } from "@/interfaces/taskAPI.interface";
 
-export default function usePostTaskID(taskID: string) {
+export default function usePutTaskID(taskID: string) {
     const auth = useAuth();
     const updateTaskMutation = useMutation({
         mutationFn: async (propertyList: TTaskProperty[]) => {

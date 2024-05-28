@@ -5,7 +5,7 @@ import { Add, ArrowBack, Loop, PowerSettingsNew, Settings } from "@mui/icons-mat
 import { Switch } from "@mui/material"
 import { useEffect, useState } from "react"
 import { TPropertyCheck, TTimeCheck, TTodoTask } from "@/interfaces/task.interface"
-import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID"
+import usePutTaskID from "@/hooks/apis/tasks/usePutTaskID"
 import { AddPropertyCheck } from "@/components/taskComponents/add/addPropertyCheck"
 import useGetTask from "@/hooks/apis/tasks/useGetTask"
 import { AddTimeCheck } from "@/components/taskComponents/add/addTimeCheck"
@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation"
 
 export default function Page({ params }: { params: { id: string } }) {
     const router = useRouter()
-    const updateTaskMutation = usePostTaskID(params.id)
+    const updateTaskMutation = usePutTaskID(params.id)
     const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
     const [isOn, setIsOn] = useState(false)
     const [isRepeating, setIsRepeating] = useState(false)

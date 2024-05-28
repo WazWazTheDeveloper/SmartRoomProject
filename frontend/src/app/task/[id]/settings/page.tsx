@@ -2,16 +2,16 @@
 
 import Loading from "@/components/loading";
 import useGetTask from "@/hooks/apis/tasks/useGetTask";
-import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID";
+import usePutTaskID from "@/hooks/apis/tasks/usePutTaskID";
 import { ArrowBack, Done, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Page({ params }: { params: { id: string } }) {
     const [isEditTaskName, setIsEditTaskName] = useState(false);
     const [newTaskName, setNewTaskName] = useState("")
     const router = useRouter()
-    const updateTaskMutation = usePostTaskID(params.id)
+    const updateTaskMutation = usePutTaskID(params.id)
     const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
     function goToTask() {
         router.push(`/task/${params.id}`)

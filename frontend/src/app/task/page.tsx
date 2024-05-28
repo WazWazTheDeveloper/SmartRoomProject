@@ -1,19 +1,28 @@
 "use client"
+
 import Loading from "@/components/loading";
 import useGetTasks from "@/hooks/apis/tasks/useGetTasks";
-import usePostTaskID from "@/hooks/apis/tasks/usePostTaskID";
+import usePutTaskID from "@/hooks/apis/tasks/usePutTaskID";
 import { TTask } from "@/interfaces/task.interface";
-import { Loop } from "@mui/icons-material";
+import { Add, Loop } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 export default function Page() {
     const taskQuery = useGetTasks();
 
+
+    function createNewTask() {
+
+    }
+
     return (
         <>
-            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 pl-2">
-                Tasks
+            <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 px-2 pb-1 box-border sm:w-full sm:text-center flex justify-between items-center">
+                <div className="flex justify-start items-center">
+                    Tasks
+                </div>
+                <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={createNewTask} />
             </div>
             {
                 taskQuery.isLoading ?
@@ -45,7 +54,7 @@ type TProps = {
 function ListItem(props: TProps) {
     const [isOn, setIsOn] = useState(props.isOn)
     const router = useRouter()
-    const updateTaskMutation = usePostTaskID(props.taskID);
+    const updateTaskMutation = usePutTaskID(props.taskID);
 
     function redirectToTask() {
         router.push(`/task/${props.taskID}`)
