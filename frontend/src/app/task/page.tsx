@@ -2,6 +2,7 @@
 
 import Loading from "@/components/loading";
 import useGetTasks from "@/hooks/apis/tasks/useGetTasks";
+import usePostTask from "@/hooks/apis/tasks/usePostTask";
 import usePutTaskID from "@/hooks/apis/tasks/usePutTaskID";
 import { TTask } from "@/interfaces/task.interface";
 import { Add, Loop } from "@mui/icons-material";
@@ -9,11 +10,11 @@ import { Switch } from "@mui/material";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 export default function Page() {
-    const taskQuery = useGetTasks();
-
+    const newDeviceMutation = usePostTask();
+    const taskQuery = useGetTasks(newDeviceMutation.data);
 
     function createNewTask() {
-
+        newDeviceMutation.mutate("newTask");
     }
 
     return (

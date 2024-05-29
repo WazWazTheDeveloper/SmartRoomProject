@@ -1,9 +1,11 @@
 'use client'
 
 import Loading from "@/components/loading";
+import useDeleteTaskID from "@/hooks/apis/tasks/useDeleteTaskID";
 import useGetTask from "@/hooks/apis/tasks/useGetTask";
 import usePutTaskID from "@/hooks/apis/tasks/usePutTaskID";
 import { ArrowBack, Done, Edit } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,6 +14,7 @@ export default function Page({ params }: { params: { id: string } }) {
     const [newTaskName, setNewTaskName] = useState("")
     const router = useRouter()
     const updateTaskMutation = usePutTaskID(params.id)
+    const deleteTaskMutation = useDeleteTaskID(params.id)
     const taskQuery = useGetTask(params.id, [updateTaskMutation.data])
     function goToTask() {
         router.push(`/task/${params.id}`)
@@ -30,8 +33,11 @@ export default function Page({ params }: { params: { id: string } }) {
             newValue: newTaskName
         }])
         setIsEditTaskName(false)
+    }
 
-        
+    function deleteTask() {
+        deleteTaskMutation.mutate();
+        router.push(`/task/`)
     }
 
     if (taskQuery.isLoading || taskQuery.isError) {
@@ -77,6 +83,9 @@ export default function Page({ params }: { params: { id: string } }) {
                                 </div>
                             </div>
                     }
+                </div>
+                < div className='flex justify-center items-center pl-2 pr-2 w-full flex-wrap mt-4'>
+                    <Button variant="contained" color="error" onClick={deleteTask}>DELETE TASK</Button>
                 </div>
             </div>
         </div>
