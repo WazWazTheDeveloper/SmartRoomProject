@@ -48,6 +48,11 @@ export default function Sidebar() {
                         </SideBarItemHref>
                     </div>
                     <div className="bg-gray">
+                        <SideBarItemHref href="/settings">
+                            <p className="inline-block text-lg">
+                                Settings
+                            </p>
+                        </SideBarItemHref>
                         {
                             auth.isAuthed ?
                                 <SideBarItemClick onClick={() => { auth.logout() }}>
