@@ -1,5 +1,5 @@
 import { getTime } from "date-fns";
-import { TUser } from "../interfaces/user.interface";
+import { TUser, TUserSettings } from "../interfaces/user.interface";
 import { TPermission } from "../interfaces/permission.interface";
 
 export class User implements TUser {
@@ -12,6 +12,12 @@ export class User implements TUser {
     isActive: boolean
     lastActiveDate: number
     creationDate: number
+    settings: TUserSettings
+
+    static readonly defaultUserSettings: TUserSettings = {
+        isDarkMode: false
+    }
+
 
     constructor(
         _id: string,
@@ -23,7 +29,8 @@ export class User implements TUser {
         isActive: boolean,
         lastActiveDate: number,
         creationDate: number,
-    ){
+        settings: TUserSettings
+    ) {
         this._id = _id;
         this.username = username;
         this.password = password;
@@ -33,11 +40,12 @@ export class User implements TUser {
         this.isActive = isActive;
         this.lastActiveDate = lastActiveDate;
         this.creationDate = creationDate;
+        this.settings = settings;
     }
 
-    static createNewUser(_id:string,username:string, password:string) {
+    static createNewUser(_id: string, username: string, password: string) {
         const curTime = getTime(new Date());
-        const newUser = new User(_id,username,password,[],[],false,true,curTime,curTime);
+        const newUser = new User(_id, username, password, [], [], false, true, curTime, curTime, this.defaultUserSettings);
         return newUser;
     }
 
@@ -51,7 +59,8 @@ export class User implements TUser {
             userDB.isAdmin,
             userDB.isActive,
             userDB.lastActiveDate,
-            userDB.creationDate
+            userDB.creationDate,
+            userDB.settings
         )
 
         return user;

@@ -10,4 +10,9 @@ export type TUser = {
     isActive: boolean
     lastActiveDate: number
     creationDate: number
+    settings: TUserSettings
+}
+
+export type TUserSettings = {
+    isDarkMode: boolean
 }
