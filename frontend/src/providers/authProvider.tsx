@@ -15,24 +15,38 @@ type TLogin = {
     password: string,
 }
 
+type JWTData = {
+    userdata: {
+        username: string
+        userID: string
+    }
+}
+
 export type ContextType = {
-    login: (username : string , password:string) => void;
+    login: (username: string, password: string) => void;
     refreshToken: () => void;
     logout: () => void;
     authToken: string;
     isAuthed: boolean;
     isLoading: boolean;
-    errors: string[]
+    errors: string[];
+    userID:string;
 }
 
 export const AuthContext = createContext<ContextType | null>(null);
 
 export function AuthProvider({ children }: Props) {
     const [authToken, setAuthToken] = useState("")
+    const [userID, setUserID] = useState("")
     const [isAuthed, setIsAuthed] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [errors, serErrors] = useState<string[]>([])
     const currentPage = usePathname();
+
+    function parseJWT(token : string) {
+        //I have no clue why, i copied it from stackoverflow
+        return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()) as JWTData
+    }
 
     const loginMutation = useMutation({
         mutationFn: async (user: TLogin) => {
@@ -41,7 +55,7 @@ export function AuthProvider({ children }: Props) {
                 username: user.password,
                 password: user.username,
             })
-            console.log(res.data)
+            setUserID(parseJWT(res.data.accessToken).userdata.userID)
             setAuthToken(res.data.accessToken)
             setIsAuthed(true)
             setIsLoading(false);
@@ -57,7 +71,7 @@ export function AuthProvider({ children }: Props) {
             const res = await axios.get('/api/v1/auth/refresh', {
                 withCredentials: true,
             })
-            console.log(res.data)
+            setUserID(parseJWT(res.data.accessToken).userdata.userID)
             setAuthToken(res.data.accessToken)
             setIsAuthed(true)
             setIsLoading(false);
@@ -94,7 +108,7 @@ export function AuthProvider({ children }: Props) {
         if (isLoading) return
         if (isAuthed) return
         if (currentPage == "/login") return
-    
+
         redirect("/login")
     }, [isAuthed, isLoading])
 
@@ -102,10 +116,10 @@ export function AuthProvider({ children }: Props) {
         logoutMutation.mutate();
     }
 
-    const login = (username : string , password:string) => {
+    const login = (username: string, password: string) => {
         loginMutation.mutate({
-            username : username,
-            password : password
+            username: username,
+            password: password
         });
     }
 
@@ -120,7 +134,8 @@ export function AuthProvider({ children }: Props) {
         authToken,
         isAuthed,
         isLoading,
-        errors
+        errors,
+        userID
     }
 
     return (
