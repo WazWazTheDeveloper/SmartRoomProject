@@ -14,5 +14,5 @@ export type TUser = {
 }
 
 export type TUserSettings = {
-    isDarkMode: boolean
+    isDarkmode: boolean
 }

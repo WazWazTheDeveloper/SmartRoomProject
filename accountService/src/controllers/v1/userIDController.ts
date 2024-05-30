@@ -201,3 +201,35 @@ export const checkUserPermission = asyncHandler(async (req: Request, res: Respon
         })
     }
 })
+
+export const updateDarkMode = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: req._userID,
+        permission: "read",
+    })
+
+    if (!isAuthorized) {
+        response401(req, res);
+        return
+    }
+
+    const { isDarkmode } = req.body
+
+    if (typeof (isDarkmode) != "boolean") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that isDarkmode is of type boolean.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    const result = await userService.updateUserDarkMode(req._userID,isDarkmode)
+    if(result){
+        res.status(204).send()
+    }else {
+        response500(req, res)
+    }
+})

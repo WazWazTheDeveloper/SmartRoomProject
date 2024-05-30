@@ -15,7 +15,7 @@ export class User implements TUser {
     settings: TUserSettings
 
     static readonly defaultUserSettings: TUserSettings = {
-        isDarkMode: false
+        isDarkmode: false
     }
 
 

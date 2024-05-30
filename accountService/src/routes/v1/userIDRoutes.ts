@@ -6,3 +6,5 @@ userIDRouter.route("/permission").get(userIDController.getUserPermissions)
 userIDRouter.route("/permission").post(userIDController.updateUserPermissions)
 userIDRouter.route("/permission/group").post(userIDController.updateUserPermissionGroups)
 userIDRouter.route("/check-permission").get(userIDController.checkUserPermission)
+
+userIDRouter.route("/darkmode").put(userIDController.updateDarkMode)

@@ -672,3 +672,18 @@ export function isPermissionGroupOptions(permissionOptions: TPermissionGroupOpti
 
     return true
 }
+
+export async function updateUserDarkMode(userID: string, isDarkmode: boolean) {
+    const filter = {
+        _id: userID,
+    }
+    const updateFilter = {
+        $set: { 'settings.isDarkmode': isDarkmode }
+    }
+
+    try {
+        return await database.updateDocument('users', filter, updateFilter)
+    } catch (e) {
+        throw new Error(e as string);
+    }
+}
