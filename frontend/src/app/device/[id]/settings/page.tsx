@@ -1,8 +1,12 @@
 'use client'
 
+    import MultiStateButtonSettings from "@/components/dataTypesSettings/multiStateButtonSettings";
+import NumberSettings from "@/components/dataTypesSettings/numberSettings";
+import SwitchSettings from "@/components/dataTypesSettings/switchSettings";
 import Loading from "@/components/loading";
 import useGetDevice from "@/hooks/apis/devices/useGetDevice";
 import usePostDeviceID from "@/hooks/apis/devices/usePostDeviceID";
+import { MULTI_STATE_BUTTON_TYPE, NUMBER_TYPE, SWITCH_TYPE, TDeviceDataObject } from "@/interfaces/device.interface";
 import { ArrowBack, Done, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -76,7 +80,46 @@ export default function Page({ params }: { params: { id: string } }) {
                             </div>
                     }
                 </div>
+                {
+                    deviceQuerry.data?.data ?
+                        deviceQuerry.data.data.map((element, index) => {
+                            return (
+                                <div key={index} className="w-full mt-2">
+                                    {getSettings(element, params.id, index)}
+                                </div>
+                            )
+                        }) : <></>
+                }
             </div>
         </div>
     )
+}
+
+function getSettings(element: TDeviceDataObject, deviceID: string, index: number) {
+    switch (element.typeID) {
+        case (SWITCH_TYPE): {
+            return <SwitchSettings
+                key={index}
+                dataID={element.dataID}
+                deviceID={deviceID}
+            />
+        }
+        case (NUMBER_TYPE): {
+            return <NumberSettings
+                key={index}
+                dataID={element.dataID}
+                deviceID={deviceID}
+            />
+        }
+        case (MULTI_STATE_BUTTON_TYPE): {
+            return <MultiStateButtonSettings
+                key={index}
+                dataID={element.dataID}
+                deviceID={deviceID}
+            />
+        }
+        default: {
+            return <></>
+        }
+    }
 }
