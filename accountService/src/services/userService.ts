@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../modules/user';
 import * as database from './mongoDBService'
 import bcrypt from 'bcrypt';
-import { TUser } from '../interfaces/user.interface';
+import { TUser, TUserSettings } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
 import { TPermission, TPermissionsOptions } from '../interfaces/permission.interface';
@@ -685,5 +685,44 @@ export async function updateUserDarkMode(userID: string, isDarkmode: boolean) {
         return await database.updateDocument('users', filter, updateFilter)
     } catch (e) {
         throw new Error(e as string);
+    }
+}
+
+type TSettingResult = {
+    isSuccessful: false;
+} | {
+    isSuccessful: true;
+    userSettings: TUserSettings;
+};
+
+export async function getUserSettings(userID: string) {
+    let result: TSettingResult = { isSuccessful: false }
+    const getUserSettingsAgregationPipeline = [
+        {
+            $match: {
+                _id: userID,
+            },
+        },
+        {
+            $project: {
+                settings: 1
+            }
+        }
+    ]
+
+    try {
+        const userSettingsResult = await database.getDocumentsAggregate<TUser>('users', getUserSettingsAgregationPipeline);
+        if (!userSettingsResult[0]) return result
+
+        result = {
+            isSuccessful: true,
+            userSettings: userSettingsResult[0].settings
+        }
+
+        return result
+
+
+    } catch (e) {
+        throw new Error(e as string)
     }
 }

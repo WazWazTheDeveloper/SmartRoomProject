@@ -56,9 +56,9 @@ export const getUserPermissions = asyncHandler(async (req: Request, res: Respons
     }
 
     let result
-    if(permission_type) {
-        result = await userService.getUserPermissionsOfType(UUID,permission_type as string)
-    }else {
+    if (permission_type) {
+        result = await userService.getUserPermissionsOfType(UUID, permission_type as string)
+    } else {
         result = await userService.getUserPermissions(UUID)
     }
 
@@ -206,7 +206,7 @@ export const updateDarkMode = asyncHandler(async (req: Request, res: Response, n
     const isAuthorized = await userService.checkUserPermission(req._userID, {
         type: "users",
         objectId: req._userID,
-        permission: "read",
+        permission: "write",
     })
 
     if (!isAuthorized) {
@@ -226,10 +226,32 @@ export const updateDarkMode = asyncHandler(async (req: Request, res: Response, n
         return
     }
 
-    const result = await userService.updateUserDarkMode(req._userID,isDarkmode)
-    if(result){
+    const result = await userService.updateUserDarkMode(req._userID, isDarkmode)
+    if (result) {
         res.status(204).send()
-    }else {
+    } else {
         response500(req, res)
     }
+})
+
+export const setUserSettings = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: req._userID,
+        permission: "read",
+    })
+
+    if (!isAuthorized) {
+        response401(req, res);
+        return
+    }
+
+    const result = await userService.getUserSettings(req._userID)
+    if (!result.isSuccessful) {
+        response500(req, res);
+        return
+    }
+
+    res.status(200).json(result.userSettings)
+    return
 })
