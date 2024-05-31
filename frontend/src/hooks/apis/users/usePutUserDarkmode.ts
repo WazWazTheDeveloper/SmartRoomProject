@@ -1,7 +1,6 @@
 import axios from "axios"
 import { useMutation } from "react-query"
 import useAuth from "../../useAuth";
-import { TTaskProperty } from "@/interfaces/taskAPI.interface";
 
 type TFnType = {
     userID: string
@@ -11,7 +10,6 @@ export default function usePutUserDarkmode() {
     const auth = useAuth();
     const updateUserDarkmodeMutation = useMutation({
         mutationFn: async ({ userID, isDarkmode }: TFnType) => {
-            console.log(userID)
             const res = await axios.put(`/api/v1/account/user/${userID}/darkmode/`, {
                 isDarkmode: isDarkmode
             }, {

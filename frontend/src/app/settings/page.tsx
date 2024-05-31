@@ -1,23 +1,36 @@
 'use client'
 
+import useGetUserSettings from "@/hooks/apis/users/useGetUserSettings";
 import usePutUserDarkmode from "@/hooks/apis/users/usePutUserDarkmode";
 import useAuth from "@/hooks/useAuth";
 import { DarkMode, LightMode, PowerSettingsNew } from "@mui/icons-material";
 import { Switch } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const auth = useAuth();
     const updateUserDarkmodeMutation = usePutUserDarkmode()
+    const userSettingsQuerry = useGetUserSettings(auth.userID)
+
+    useEffect(() => {
+        if (typeof (userSettingsQuerry.data?.isDarkmode) == "boolean") {
+            setIsDarkMode(userSettingsQuerry.data?.isDarkmode)
+        }
+    }, [userSettingsQuerry.data])
 
     function onIsDarkModeChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation()
         setIsDarkMode(e.target.checked)
+        if (e.target.checked) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
         updateUserDarkmodeMutation.mutate({
-                userID: auth.userID,
-                isDarkmode: e.target.checked
-            })
+            userID: auth.userID,
+            isDarkmode: e.target.checked
+        })
     }
 
     return (

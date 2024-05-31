@@ -2,12 +2,11 @@
 
 import { AuthProvider } from "@/providers/authProvider";
 import { SidebarStateProvider } from "@/providers/sidebarStateProvider";
+import { ThemeProvider } from "@/providers/themeProvider";
 import { useState } from "react"
 import { QueryClient, QueryClientProvider } from "react-query"
 
 export function Providers({ children }: any) {
-    const [authTrigger, setAuthTrigger] = useState(false);
-
     const [queryClient] = useState(() =>
         new QueryClient({
             defaultOptions: {
@@ -35,7 +34,9 @@ export function Providers({ children }: any) {
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
                 <SidebarStateProvider>
-                    {children}
+                    <ThemeProvider>
+                        {children}
+                    </ThemeProvider>
                 </SidebarStateProvider>
             </AuthProvider>
         </QueryClientProvider>
