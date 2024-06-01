@@ -23,6 +23,14 @@ export default function NumberSettings(props: TProps) {
     const [newMaxValue, setNewMaxValue] = useState(100)
     const [currentMaxValue, setCurrentMaxValue] = useState(100)
 
+    const [isEditJumpValue, setIsEditJumpValue] = useState(false)
+    const [newJumpValue, setNewJumpValue] = useState(0)
+    const [currentJumpValue, setCurrentJumpValue] = useState(1)
+
+    const [isEditSymbolValue, setIsEditSymbolValue] = useState(false)
+    const [newSymbolValue, setNewSymbolValue] = useState("")
+    const [currentSymbolValue, setCurrentSymbolValue] = useState("")
+
     const updateDeviceMutation = usePostDeviceID(props.deviceID)
     const deviceQuerry = useGetDevice(props.deviceID, [updateDeviceMutation.data])
 
@@ -35,6 +43,8 @@ export default function NumberSettings(props: TProps) {
                 setCurrentDataTitle(element.dataTitle)
                 setCurrentMinValue(element.minValue)
                 setCurrentMaxValue(element.maxValue)
+                setCurrentJumpValue(element.jumpValue)
+                setCurrentSymbolValue(element.symbol)
             }
         }
     }, [deviceQuerry.data])
@@ -107,6 +117,52 @@ export default function NumberSettings(props: TProps) {
         setIsEditMaxValue(true)
     }
 
+    function onDoneEditJumpValueHandler() {
+        updateDeviceMutation.mutate([{
+            dataPropertyName: "jumpValue",
+            newValue: newJumpValue,
+            dataID: props.dataID,
+            propertyName: "data",
+            typeID: 1
+        }])
+        setIsEditJumpValue(false)
+    }
+
+    function onOpenEditJumpValueHandler() {
+        if (!deviceQuerry.data?.deviceName) return
+
+        for (let index = 0; index < deviceQuerry.data.data.length; index++) {
+            const element = deviceQuerry.data.data[index];
+            if (element.dataID == props.dataID && element.typeID == 1) {
+                setNewJumpValue(element.jumpValue)
+            }
+        }
+        setIsEditJumpValue(true)
+    }
+
+    function onDoneEditSymbolValueHandler() {
+        updateDeviceMutation.mutate([{
+            dataPropertyName: "symbol",
+            newValue: newSymbolValue,
+            dataID: props.dataID,
+            propertyName: "data",
+            typeID: 1
+        }])
+        setIsEditSymbolValue(false)
+    }
+
+    function onOpenEditSymbolValueHandler() {
+        if (!deviceQuerry.data?.deviceName) return
+
+        for (let index = 0; index < deviceQuerry.data.data.length; index++) {
+            const element = deviceQuerry.data.data[index];
+            if (element.dataID == props.dataID && element.typeID == 1) {
+                setNewSymbolValue(element.symbol)
+            }
+        }
+        setIsEditSymbolValue(true)
+    }
+
     return (
         <div className="flex justify-between items-center pl-2 pr-2 w-full sm:justify-center flex-wrap">
             <h2 className="text-base w-full font-bold">
@@ -114,7 +170,7 @@ export default function NumberSettings(props: TProps) {
             </h2>
 
             <div className="pl-2 flex justify-between items-center w-full sm:justify-center flex-wrap">
-            <div className="w-full">
+                <div className="w-full">
                     <h2 className="text-base w-full font-bold">
                         Data title:
                     </h2>
@@ -181,6 +237,53 @@ export default function NumberSettings(props: TProps) {
                                 <p className="pl-2">{currentMaxValue}</p>
                                 <div>
                                     <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 cursor-pointer' onClick={onOpenEditMaxValueHandler} />
+                                </div>
+                            </div>
+                    }
+                </div>
+                <div className="w-full">
+                    <h2 className="text-base w-full font-bold">
+                        Jump value
+                    </h2>
+                    {
+                        isEditJumpValue ?
+                            <div className="flex justify-between items-center w-full">
+                                <input
+                                    className="pl-2"
+                                    value={newJumpValue}
+                                    type="number"
+                                    onChange={(e) => { setNewJumpValue(Number(e.target.value)) }} />
+                                <div>
+                                    <Done className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 cursor-pointer' onClick={onDoneEditJumpValueHandler} />
+                                </div>
+                            </div> :
+                            <div className="flex justify-between items-center w-full">
+                                <p className="pl-2">{currentJumpValue}</p>
+                                <div>
+                                    <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 cursor-pointer' onClick={onOpenEditJumpValueHandler} />
+                                </div>
+                            </div>
+                    }
+                </div>
+                <div className="w-full">
+                    <h2 className="text-base w-full font-bold">
+                        Symbol
+                    </h2>
+                    {
+                        isEditSymbolValue ?
+                            <div className="flex justify-between items-center w-full">
+                                <input
+                                    className="pl-2"
+                                    value={newSymbolValue}
+                                    onChange={(e) => { setNewSymbolValue(e.target.value) }} />
+                                <div>
+                                    <Done className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 cursor-pointer' onClick={onDoneEditSymbolValueHandler} />
+                                </div>
+                            </div> :
+                            <div className="flex justify-between items-center w-full">
+                                <p className="pl-2">{currentSymbolValue}</p>
+                                <div>
+                                    <Edit className='fill-neutral-1000 dark:fill-darkNeutral-1000 border-neutral-300 dark:border-darkNeutral-300 cursor-pointer' onClick={onOpenEditSymbolValueHandler} />
                                 </div>
                             </div>
                     }

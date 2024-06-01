@@ -1,6 +1,6 @@
 import useGetDevice from "@/hooks/apis/devices/useGetDevice"
 import usePostDeviceID from "@/hooks/apis/devices/usePostDeviceID"
-import { Done, Edit } from "@mui/icons-material"
+import { Add, Done, Edit } from "@mui/icons-material"
 import { useEffect, useState } from "react"
 
 type TProps = {
@@ -49,6 +49,9 @@ export default function MultiStateButtonSettings(props: TProps) {
         setIsEditDataTitle(true)
     }
 
+
+    //@ts-ignore
+    let x = deviceQuerry.data?.data ? deviceQuerry.data?.data[3].stateList[0] : ""
     return (
         <div className="flex justify-between items-center pl-2 pr-2 w-full sm:justify-center flex-wrap">
             <h2 className="text-base w-full font-bold">
@@ -78,6 +81,22 @@ export default function MultiStateButtonSettings(props: TProps) {
                                 </div>
                             </div>
                     }
+                </div>
+                <div className="w-full">
+                    <div className="w-full flex justify-between">
+                        <h2 className="text-base font-bold">
+                            State list:
+                        </h2>
+                        <Add className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" />
+                    </div>
+                    <div className="flex justify-between items-center w-full flex-wrap">
+                        <div className="border border-red-50 border-t-solid">
+                            <p className="w-full">{`state value: ${x.stateValue}`}</p>
+                            <p className="w-full">{`state value: ${x.stateValue}`}</p>
+                            <p className="w-full">{`state value: ${x.stateValue}`}</p>
+                            <p className="w-full">{`state value: ${x.stateValue}`}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
