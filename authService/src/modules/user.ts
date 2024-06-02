@@ -7,6 +7,7 @@ export class User implements TUser {
     password: string
     isActive: boolean
     lastActiveDate: number
+    isAdmin: boolean
 
 
     constructor(
@@ -15,12 +16,14 @@ export class User implements TUser {
         password: string,
         isActive: boolean,
         lastActiveDate: number,
-    ){
+        isAdmin: boolean
+    ) {
         this._id = _id;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
         this.lastActiveDate = lastActiveDate;
+        this.isAdmin = isAdmin
     }
 
     static getUserFromDB(userDB: TUser) {
@@ -30,6 +33,7 @@ export class User implements TUser {
             userDB.password,
             userDB.isActive,
             userDB.lastActiveDate,
+            userDB.isAdmin,
         )
 
         return user;

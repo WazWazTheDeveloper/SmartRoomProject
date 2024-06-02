@@ -15,6 +15,7 @@ type JWTData = {
     userdata: {
         username: string
         userID: string
+        isAdmin: boolean
     }
 }
 export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -106,7 +107,8 @@ export const login = asyncHandler(async (req: Request, res: Response, next: Next
     const payload: JWTData = {
         userdata: {
             username: user.username,
-            userID: user._id
+            userID: user._id,
+            isAdmin: user.isAdmin
         }
     }
 
@@ -121,7 +123,8 @@ export const login = asyncHandler(async (req: Request, res: Response, next: Next
     const refreshPayload: JWTData = {
         userdata: {
             username: user.username,
-            userID: user._id
+            userID: user._id,
+            isAdmin: user.isAdmin
         }
     }
 
@@ -143,7 +146,7 @@ export const login = asyncHandler(async (req: Request, res: Response, next: Next
     loggerGeneral.info(`successfully authenticated user: ${username}`, { uuid: getRequestUUID() })
 })
 
-export const refreshToken = asyncHandler(async(req: Request, res: Response, next: NextFunction) => {
+export const refreshToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const cookies = req.cookies;
     // check that cookie exist
     if (!cookies.jwtRefreshTokenToken) {
@@ -220,15 +223,16 @@ export const refreshToken = asyncHandler(async(req: Request, res: Response, next
 
             //update last active
             if (!(await updateLastActive(user._id))) {
-                response500(req,res)
+                response500(req, res)
                 loggerGeneral.error(`failed to refresh token to user: ${paylaod.userdata.username} due to failing to update last active time of user`, { uuid: getRequestUUID() })
                 return
             }
 
-            const jwtData = {
+            const jwtData: JWTData = {
                 userdata: {
                     username: user.username,
-                    userID: user._id
+                    userID: user._id,
+                    isAdmin: user.isAdmin
                 }
             }
             const accessToken = jwt.sign(

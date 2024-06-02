@@ -4,4 +4,5 @@ export type TUser = {
     password: string
     isActive: boolean
     lastActiveDate: number
+    isAdmin: boolean
 }
