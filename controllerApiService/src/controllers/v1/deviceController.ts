@@ -41,7 +41,57 @@ export const updateDevices = asyncHandler(async (req: Request, res: Response, ne
 })
 
 export const getDeviceWithArray = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    type TResponseData = {
+        _id: String
+        isAdmin: boolean
+        permissions: {
+            type: "topic" | "device" | "task" | "permissionGroup" | "users"
+            objectId: string | "all"
+            read: boolean
+            write: boolean
+            delete: boolean
+        }[]
+    }
 
+    const { deviceIDList } = req.body
+    if (!deviceIDList || !Array.isArray(deviceIDList)) {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Bad request. Please ensure that deviceIDList is array of strings",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    const deviceIDWithPermissions: string[] = []
+
+    // im too lazy to make proper api endpoint to check multiple permission at once :)
+    for (let index = 0; index < deviceIDList.length; index++) {
+        const deviceID = deviceIDList[index];
+        if (typeof (deviceID) != "string") {
+            res.status(400).json(problemDetails({
+                type: "about:blank",
+                title: "Bad Request",
+                details: `Bad request. Please ensure that deviceIDList[${index}] is strings`,
+                instance: req.originalUrl,
+            }))
+            return
+        }
+        // @ts-ignore we check for req.headers.authorization in middleware
+        let permissionResult = await verifyPermissions(req.headers.authorization, req._userID, "device", deviceID, "read")
+        if (!permissionResult) continue
+
+        deviceIDWithPermissions.push(deviceID);
+    }
+
+    const devices = await deviceService.getDeviceArray(deviceIDWithPermissions);
+    
+    if (devices.isSuccessful) {
+        res.status(200).json(devices.device)
+    } else {
+        response500(req, res)
+    }
 })
 
 export const getAlldevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
