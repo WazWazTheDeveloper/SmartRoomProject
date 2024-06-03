@@ -2,9 +2,16 @@ import useAuth from "@/hooks/useAuth";
 import axios from "axios";
 import { useQuery } from "react-query";
 
-type TType = {
-    isDarkmode : boolean
+export type TUserSettings = {
+    isDarkmode: boolean
+    favoriteDevices: TFavoriteDevoce[]
 }
+
+type TFavoriteDevoce = {
+    deviceID: string
+    place: number
+}
+
 export default function useGetUserSettings(userID: string, extraQueryKeys: any[] = []) {
     const auth = useAuth();
     const darkmodeQuerry = useQuery({
@@ -20,7 +27,7 @@ export default function useGetUserSettings(userID: string, extraQueryKeys: any[]
                 auth.refreshToken()
             }
 
-            return res.data as TType
+            return res.data as TUserSettings
         },
         enabled: auth.isAuthed
     });

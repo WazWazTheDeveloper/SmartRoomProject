@@ -19,6 +19,7 @@ type JWTData = {
     userdata: {
         username: string
         userID: string
+        isAdmin: boolean
     }
 }
 
@@ -30,7 +31,8 @@ export type ContextType = {
     isAuthed: boolean;
     isLoading: boolean;
     errors: string[];
-    userID:string;
+    userID: string;
+    isAdmin: boolean;
 }
 
 export const AuthContext = createContext<ContextType | null>(null);
@@ -38,12 +40,13 @@ export const AuthContext = createContext<ContextType | null>(null);
 export function AuthProvider({ children }: Props) {
     const [authToken, setAuthToken] = useState("")
     const [userID, setUserID] = useState("")
+    const [isAdmin, setIsAdmin] = useState(false)
     const [isAuthed, setIsAuthed] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [errors, serErrors] = useState<string[]>([])
     const currentPage = usePathname();
 
-    function parseJWT(token : string) {
+    function parseJWT(token: string) {
         //I have no clue why, i copied it from stackoverflow
         return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()) as JWTData
     }
@@ -56,6 +59,7 @@ export function AuthProvider({ children }: Props) {
                 password: user.username,
             })
             setUserID(parseJWT(res.data.accessToken).userdata.userID)
+            setIsAdmin(parseJWT(res.data.accessToken).userdata.isAdmin)
             setAuthToken(res.data.accessToken)
             setIsAuthed(true)
             setIsLoading(false);
@@ -71,7 +75,9 @@ export function AuthProvider({ children }: Props) {
             const res = await axios.get('/api/v1/auth/refresh', {
                 withCredentials: true,
             })
+            console.log(parseJWT(res.data.accessToken).userdata)
             setUserID(parseJWT(res.data.accessToken).userdata.userID)
+            setIsAdmin(parseJWT(res.data.accessToken).userdata.isAdmin)
             setAuthToken(res.data.accessToken)
             setIsAuthed(true)
             setIsLoading(false);
@@ -135,7 +141,8 @@ export function AuthProvider({ children }: Props) {
         isAuthed,
         isLoading,
         errors,
-        userID
+        userID,
+        isAdmin
     }
 
     return (
