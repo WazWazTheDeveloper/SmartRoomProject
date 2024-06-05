@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../modules/user';
 import * as database from './mongoDBService'
 import bcrypt from 'bcrypt';
-import { TUser, TUserSettings } from '../interfaces/user.interface';
+import { TFavoriteDevice, TUser, TUserSettings } from '../interfaces/user.interface';
 import { loggerGeneral } from './loggerService';
 import { getRequestUUID } from '../middleware/requestID';
 import { TPermission, TPermissionsOptions } from '../interfaces/permission.interface';
@@ -725,4 +725,40 @@ export async function getUserSettings(userID: string) {
     } catch (e) {
         throw new Error(e as string)
     }
+}
+
+export function updateUserFavoriteDevices(userID: string, newFavoriteDevices: TFavoriteDevice[]) {
+    const isValidTFavoriteDevices = checkValidTFavoriteDevice(newFavoriteDevices);
+    if(!isValidTFavoriteDevices) {
+        throw new Error("invalid newFacoriteDevice type")
+    }
+    
+    for (let i = 0; i < newFavoriteDevices.length; i++) {
+        let hasI = false
+        for (let j = 0; j < newFavoriteDevices.length; j++) {
+            const place = newFavoriteDevices[j].place
+            if (place == i) {
+                hasI = true
+            }
+        }
+        if (!hasI) {
+            throw new Error(`Missing favorite device with place ${i}`)
+        }
+    }
+
+
+    try{
+        
+    }catch(e) {
+        
+    }
+}
+
+function checkValidTFavoriteDevice(newFavoriteDevices: TFavoriteDevice[]) {
+    for (let index = 0; index < newFavoriteDevices.length; index++) {
+        const element = newFavoriteDevices[index];
+        if(typeof(element.deviceID) != "string") return false;
+        if(typeof(element.place) != "string") return false;
+    }
+    return true
 }

@@ -15,10 +15,10 @@ export type TUser = {
 
 export type TUserSettings = {
     isDarkmode: boolean
-    favoriteDevices: TFavoriteDevoce[]
+    favoriteDevices: TFavoriteDevice[]
 }
 
-type TFavoriteDevoce = {
+export type TFavoriteDevice = {
     deviceID: string
     place: number
 }
