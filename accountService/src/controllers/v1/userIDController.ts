@@ -257,7 +257,25 @@ export const setUserSettings = asyncHandler(async (req: Request, res: Response, 
 })
 
 export const getUserFavoriteDevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: req._userID,
+        permission: "read",
+    })
 
+    if (!isAuthorized) {
+        response401(req, res);
+        return
+    }
+
+    const result = await userService.getUserSettings(req._userID)
+    if (!result.isSuccessful) {
+        response500(req, res);
+        return
+    }
+
+    res.status(200).json(result.userSettings.favoriteDevices)
+    return
 })
 
 export const updateUserFavoriteDevices = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -273,6 +291,18 @@ export const updateUserFavoriteDevices = asyncHandler(async (req: Request, res: 
         return
     }
 
+    const { favoriteDevices } = req.body
+
+    if (!(Array.isArray(favoriteDevices) && userService.checkValidTFavoriteDevice(favoriteDevices))) {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that favoriteDevices is array of type TFavoriteDevice.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
     const isAuthorized = await userService.checkUserPermission(req._userID, {
         type: "users",
         objectId: UUID,
@@ -283,6 +313,91 @@ export const updateUserFavoriteDevices = asyncHandler(async (req: Request, res: 
         response401(req, res);
         return
     }
-    
 
+    try {
+        let result = await userService.updateUserFavoriteDevices(UUID, favoriteDevices)
+        if (result) {
+            res.status(204).send()
+        }
+    } catch (e) {
+        response500(req, res)
+    }
+})
+
+export const addUserFavoriteDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { UUID } = req.params
+
+    if (typeof (UUID) != "string") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that 'UUID' is string.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    const { newFavoriteDeviceID } = req.body
+
+    if (typeof (newFavoriteDeviceID) != "string") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that newFavoriteDevices of type string.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    try {
+        const result = await userService.addUserFavoriteDevice(UUID, newFavoriteDeviceID)
+        if (result) {
+            res.status(204).send
+            return
+        } else {
+            response500(req, res)
+        }
+    } catch (e) {
+        response500(req, res)
+        return
+    }
+})
+
+export const deleteUserFavoriteDevice = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { UUID } = req.params
+
+    if (typeof (UUID) != "string") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that 'UUID' is string.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    const { favoriteDevicePlace } = req.body
+
+    if (typeof (favoriteDevicePlace) != "number") {
+        res.status(400).json(problemDetails({
+            type: "about:blank",
+            title: "Bad Request",
+            details: "Invalid data provided. Please ensure that favoriteDevicePlace is of type number.",
+            instance: req.originalUrl,
+        }))
+        return
+    }
+
+    try {
+        const result = await userService.deleteUserFavoriteDevice(UUID, favoriteDevicePlace)
+        if (result) {
+            res.status(204).send
+            return
+        } else {
+            response500(req, res)
+        }
+    } catch (e) {
+        response500(req, res)
+        return
+    }
 })

@@ -727,12 +727,12 @@ export async function getUserSettings(userID: string) {
     }
 }
 
-export function updateUserFavoriteDevices(userID: string, newFavoriteDevices: TFavoriteDevice[]) {
+export async function updateUserFavoriteDevices(userID: string, newFavoriteDevices: TFavoriteDevice[]) {
     const isValidTFavoriteDevices = checkValidTFavoriteDevice(newFavoriteDevices);
-    if(!isValidTFavoriteDevices) {
+    if (!isValidTFavoriteDevices) {
         throw new Error("invalid newFacoriteDevice type")
     }
-    
+
     for (let i = 0; i < newFavoriteDevices.length; i++) {
         let hasI = false
         for (let j = 0; j < newFavoriteDevices.length; j++) {
@@ -747,18 +747,80 @@ export function updateUserFavoriteDevices(userID: string, newFavoriteDevices: TF
     }
 
 
-    try{
-        
-    }catch(e) {
-        
+    try {
+        const filter = {
+            _id: userID,
+        }
+        const updateFilter = {
+            $set: { 'settings.favoriteDevices': newFavoriteDevices }
+        }
+        return await database.updateDocument('users', filter, updateFilter)
+    } catch (e) {
+        throw new Error(e as string)
     }
 }
 
-function checkValidTFavoriteDevice(newFavoriteDevices: TFavoriteDevice[]) {
+export function checkValidTFavoriteDevice(newFavoriteDevices: TFavoriteDevice[]) {
     for (let index = 0; index < newFavoriteDevices.length; index++) {
         const element = newFavoriteDevices[index];
-        if(typeof(element.deviceID) != "string") return false;
-        if(typeof(element.place) != "string") return false;
+        if (typeof (element.deviceID) != "string") return false;
+        if (typeof (element.place) != "string") return false;
     }
     return true
+}
+
+export async function addUserFavoriteDevice(userID: string, newFavoriteDeviceID: string) {
+    // TODO: check if device exit
+
+    const getUserFavoriteDevicesArrayLenthAgregation = [
+        {
+            $match:
+            {
+                _id: userID
+            }
+        },
+        {
+            $unwind:
+            {
+                path: "$settings.favoriteDevices"
+            }
+        },
+        {
+            $count:
+                "count"
+        }
+    ]
+    type TCount = {
+        count: number
+    }
+    const userFavoriteLenthResult: TCount[] = await database.getDocumentsAggregate<TCount>('users', getUserFavoriteDevicesArrayLenthAgregation);
+    if (userFavoriteLenthResult.length == 0) {
+        throw new Error("no user found")
+    }
+    const newFacoriteDeviceItem: TFavoriteDevice = {
+        deviceID: newFavoriteDeviceID,
+        place: userFavoriteLenthResult[0].count
+    }
+
+    const updateOne = [{
+        updateOne: {
+            filter: { _id: userID },
+            update: {
+                $push: {
+                    "settings.favoriteDevices": newFacoriteDeviceItem
+                }
+            }
+        }
+    }]
+
+    try {
+        const result = await database.bulkWriteCollection('users', updateOne)
+        return result
+    } catch(e) {
+        throw new Error(e as string)
+    }
+}
+
+export async function deleteUserFavoriteDevice(userID: string, newFavoriteDeviceID: number) {
+    return false;
 }
