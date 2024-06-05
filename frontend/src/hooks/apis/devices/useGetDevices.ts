@@ -22,8 +22,6 @@ export default function useGetDevices(extraQueryKeys: any[] = []) {
             return {
                 devices: res.data as TDevice[]
             }
-
-            return res.data
         },
         enabled: auth.isAuthed
     });

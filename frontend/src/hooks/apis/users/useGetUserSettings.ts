@@ -4,10 +4,10 @@ import { useQuery } from "react-query";
 
 export type TUserSettings = {
     isDarkmode: boolean
-    favoriteDevices: TFavoriteDevoce[]
+    favoriteDevices: TFavoriteDevice[]
 }
 
-type TFavoriteDevoce = {
+type TFavoriteDevice = {
     deviceID: string
     place: number
 }
