@@ -5,6 +5,7 @@ import * as  permissionsOptions from "../../modules/permissionOptions"
 import { response500 } from "../../modules/errors/500"
 import asyncHandler from "express-async-handler"
 import { response401 } from "../../modules/errors/401"
+import { loggerRequest } from "../../services/loggerService"
 
 export const getUserPermissions = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { UUID } = req.params
@@ -320,6 +321,7 @@ export const updateUserFavoriteDevices = asyncHandler(async (req: Request, res: 
             res.status(204).send()
         }
     } catch (e) {
+        loggerRequest.error(e)
         response500(req, res)
     }
 })
@@ -376,7 +378,7 @@ export const deleteUserFavoriteDevice = asyncHandler(async (req: Request, res: R
         return
     }
 
-    const { favoriteDevicePlace } = req.body
+    const { favoriteDeviceID, favoriteDevicePlace } = req.body
 
     if (typeof (favoriteDevicePlace) != "number") {
         res.status(400).json(problemDetails({
@@ -389,12 +391,13 @@ export const deleteUserFavoriteDevice = asyncHandler(async (req: Request, res: R
     }
 
     try {
-        const result = await userService.deleteUserFavoriteDevice(UUID, favoriteDevicePlace)
+        const result = await userService.deleteUserFavoriteDevice(UUID, favoriteDeviceID, favoriteDevicePlace)
         if (result) {
-            res.status(204).send
+            res.status(204).send()
             return
         } else {
             response500(req, res)
+            return
         }
     } catch (e) {
         response500(req, res)

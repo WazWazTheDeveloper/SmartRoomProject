@@ -219,7 +219,6 @@ export async function checkUserPermission(userID: string, permissionToCheck: Per
         const userIsAdmin = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getIsAdminAgregationPipeline);
 
         if (userIsAdmin.length > 0 && userIsAdmin[0].isAdmin === true) return true;
-        console.log(userIsAdmin)
         const userPermissions = await database.getDocumentsAggregate<TUserPermissionsSearchResult>('users', getPermissionFromUserAgregationPipeline);
         let isFound = false
 
@@ -764,7 +763,7 @@ export function checkValidTFavoriteDevice(newFavoriteDevices: TFavoriteDevice[])
     for (let index = 0; index < newFavoriteDevices.length; index++) {
         const element = newFavoriteDevices[index];
         if (typeof (element.deviceID) != "string") return false;
-        if (typeof (element.place) != "string") return false;
+        if (typeof (element.place) != "number") return false;
     }
     return true
 }
@@ -816,11 +815,82 @@ export async function addUserFavoriteDevice(userID: string, newFavoriteDeviceID:
     try {
         const result = await database.bulkWriteCollection('users', updateOne)
         return result
-    } catch(e) {
+    } catch (e) {
+        loggerGeneral.error(`addUserFavoriteDevice: ${e}`, { uuid: getRequestUUID() })
         throw new Error(e as string)
     }
 }
 
-export async function deleteUserFavoriteDevice(userID: string, newFavoriteDeviceID: number) {
-    return false;
+export async function deleteUserFavoriteDevice(userID: string, favoriteDeviceID: string, devicePlace: number) {
+    const getUserFavoriteDevicesArrayLenthAgregation = [
+        {
+            $match:
+            {
+                _id: userID
+            }
+        },
+        {
+            $unwind:
+            {
+                path: "$settings.favoriteDevices"
+            }
+        },
+        {
+            $count:
+                "count"
+        }
+    ]
+    type TCount = {
+        count: number
+    }
+    const userFavoriteLengthResult: TCount[] = await database.getDocumentsAggregate<TCount>('users', getUserFavoriteDevicesArrayLenthAgregation);
+    if (userFavoriteLengthResult.length == 0) {
+        throw new Error("no user found")
+    }
+
+    const updateList = []
+
+    updateList.push({
+        updateOne: {
+            filter: { _id: userID },
+            update: {
+                $pull: {
+                    "settings.favoriteDevices": {
+                        deviceID: favoriteDeviceID,
+                        place: devicePlace
+                    }
+                }
+            }
+        }
+    })
+
+    for (let i = devicePlace + 1; i < userFavoriteLengthResult[0].count; i++) {
+        updateList.push({
+            updateOne: {
+                filter: {
+                    _id: userID,
+                    "settings.favoriteDevices.place": i
+                },
+                update: {
+                    $set : {
+                        "settings.favoriteDevices.$.place": i-1
+                    }
+                }
+            }
+        })
+    }
+
+    try {
+        const result = await database.bulkWriteCollection('users', updateList)
+        if (result) {
+            return true
+        }
+        else {
+            loggerGeneral.error(`failed to update user permission groups to user: ${userID}`, { uuid: getRequestUUID() })
+            return false
+        }
+    } catch (e) {
+        loggerGeneral.error(`deleteUserFavoriteDevice: ${e}`, { uuid: getRequestUUID() })
+        throw new Error(e as string)
+    }
 }
