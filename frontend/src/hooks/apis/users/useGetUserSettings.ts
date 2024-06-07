@@ -1,16 +1,7 @@
 import useAuth from "@/hooks/useAuth";
+import { TUserSettings } from "@/interfaces/userAPI.interface";
 import axios from "axios";
 import { useQuery } from "react-query";
-
-export type TUserSettings = {
-    isDarkmode: boolean
-    favoriteDevices: TFavoriteDevice[]
-}
-
-type TFavoriteDevice = {
-    deviceID: string
-    place: number
-}
 
 export default function useGetUserSettings(userID: string, extraQueryKeys: any[] = []) {
     const auth = useAuth();

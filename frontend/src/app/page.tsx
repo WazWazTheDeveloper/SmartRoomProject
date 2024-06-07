@@ -2,14 +2,18 @@
 
 import useGetDevices from "@/hooks/apis/devices/useGetDevices";
 import usePostDevice from "@/hooks/apis/devices/usePostDevice";
+import useDeleteFavoriteDevice, { TUseDeleteFavoriteDevice } from "@/hooks/apis/users/settings/favoriteDevices/useDeleteFavoriteDevice";
+import usePatchFavoriteDevice from "@/hooks/apis/users/settings/favoriteDevices/usePatchFavoriteDevice";
+import usePostFavoriteDevice from "@/hooks/apis/users/settings/favoriteDevices/usePostFavoriteDevices";
 import useGetUserSettings from "@/hooks/apis/users/useGetUserSettings";
-import usePatchFavoriteDevice from "@/hooks/apis/users/usePatchFavoriteDevice";
 import useAuth from "@/hooks/useAuth";
 import { TDevice } from "@/interfaces/device.interface";
+import { TFavoriteDevice } from "@/interfaces/userAPI.interface";
 import { Add, ArrowDownward, ArrowUpward, Delete, Done, Edit, Key } from "@mui/icons-material";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { MouseEvent, MouseEventHandler, useEffect, useState } from "react";
+import { UseMutationResult } from "react-query";
 
 axios.defaults.withCredentials = true
 
@@ -27,16 +31,19 @@ export default function Home() {
 
 function FavoriteDeviceSection() {
   const [deviceIDList, setDeviceIDList] = useState<string[]>([])
+  const [favoriteDeviceSettingsList, setFavoriteDeviceSettingsList] = useState<TFavoriteDevice[]>([])
   const [isEditFavoriteDevices, setIsEditFavoriteDevices] = useState(false)
 
   const [isAddFavoriteDevices, setIsAddFavoriteDevices] = useState(false)
   const [newFavoriteDeviceID, setNewFavoriteDeviceID] = useState("")
 
   const auth = useAuth();
-  const userDevicesListQuerry = useGetDevices()
   const addUserFavoriteDeviceMutation = usePatchFavoriteDevice()
-  const userSettingsQuerry = useGetUserSettings(auth.userID, [addUserFavoriteDeviceMutation.data])
-  const deviceListQuerry = usePostDevice(deviceIDList,[deviceIDList])
+  const updateFavoriteDeviceMutation = usePostFavoriteDevice()
+  const deleteFavoriteDeviceMutation = useDeleteFavoriteDevice()
+  const userDevicesListQuerry = useGetDevices([addUserFavoriteDeviceMutation.data,deleteFavoriteDeviceMutation.data])
+  const userSettingsQuerry = useGetUserSettings(auth.userID, [addUserFavoriteDeviceMutation.data, updateFavoriteDeviceMutation.data, deleteFavoriteDeviceMutation.data])
+  const deviceListQuerry = usePostDevice(deviceIDList, [deviceIDList])
 
   useEffect(() => {
     if (!userSettingsQuerry.data?.favoriteDevices) return
@@ -46,13 +53,24 @@ function FavoriteDeviceSection() {
       newDeviceIDList.push(element.deviceID)
     }
     setDeviceIDList(newDeviceIDList)
+    setFavoriteDeviceSettingsList(userSettingsQuerry.data.favoriteDevices)
   }, [userSettingsQuerry.data])
+
+  useEffect(() => {
+    if (!(userDevicesListQuerry.data?.devices && Array.isArray(userDevicesListQuerry.data.devices))) return
+
+
+  }, [userDevicesListQuerry.data])
 
   function onEditFavoriteDevicesClickHandler() {
     setIsEditFavoriteDevices(true)
   }
 
   function onDoneFavoriteDevicesClickHandler() {
+    updateFavoriteDeviceMutation.mutate({
+      userID: auth.userID,
+      newFavoriteDeviceList: favoriteDeviceSettingsList
+    })
     setIsEditFavoriteDevices(false)
   }
 
@@ -71,21 +89,44 @@ function FavoriteDeviceSection() {
     setIsAddFavoriteDevices(false)
   }
 
+  function moveDeviceUp(currentPlace: number) {
+    if (currentPlace == 0) return
+
+    const tempSettins = [...favoriteDeviceSettingsList]
+    tempSettins[currentPlace].place = currentPlace - 1
+    tempSettins[currentPlace - 1].place = currentPlace
+
+    const temp = tempSettins[currentPlace]
+    tempSettins[currentPlace] = tempSettins[currentPlace - 1]
+    tempSettins[currentPlace - 1] = temp
+
+    setFavoriteDeviceSettingsList(tempSettins)
+  }
+
+  function moveDeviceDown(currentPlace: number) {
+    if (currentPlace == favoriteDeviceSettingsList.length - 1) return
+
+    const tempSettins = [...favoriteDeviceSettingsList]
+
+    tempSettins[currentPlace].place = currentPlace + 1
+    tempSettins[currentPlace + 1].place = currentPlace
+
+    const temp = tempSettins[currentPlace]
+    tempSettins[currentPlace] = tempSettins[currentPlace + 1]
+    tempSettins[currentPlace + 1] = temp
+
+    setFavoriteDeviceSettingsList(tempSettins)
+  }
+
   function getFavoriteDevicesList() {
-    if (!userSettingsQuerry.data?.favoriteDevices) return [<></>]
     if (!deviceListQuerry.data) return [<></>]
     const deviceElementArr = []
-    console.log(userSettingsQuerry.data?.favoriteDevices.length)
-    console.log(deviceListQuerry.data.length)
-    for (let i = 0; i < userSettingsQuerry.data?.favoriteDevices.length; i++) {
-      const settings = userSettingsQuerry.data?.favoriteDevices[i];
+    for (let i = 0; i < favoriteDeviceSettingsList.length; i++) {
+      const settings = favoriteDeviceSettingsList[i];
       let isAdded = false
       for (let j = 0; j < deviceListQuerry.data.length; j++) {
         const device = deviceListQuerry.data[j];
-        console.log(settings.deviceID)
-        console.log(device._id)
         if (settings.deviceID == device._id) {
-          console.log("te")
           deviceElementArr.push(
             <div className="w-full" key={`${i},${j}`}>
               <FavoriteDeviceListItem
@@ -93,7 +134,11 @@ function FavoriteDeviceSection() {
                 deviceName={device.deviceName}
                 isOnline={device.isConnected}
                 isEditMode={isEditFavoriteDevices}
-                isClickable={true} />
+                isClickable={true}
+                moveDeviceUp={() => { moveDeviceUp(settings.place) }}
+                moveDeviceDown={() => { moveDeviceDown(settings.place) }}
+                deleteFavoriteDevice={deleteFavoriteDeviceMutation}
+                place={settings.place} />
             </div>
           )
           isAdded = true
@@ -107,7 +152,11 @@ function FavoriteDeviceSection() {
               deviceName={"error"}
               isOnline={false}
               isEditMode={isEditFavoriteDevices}
-              isClickable={false} />
+              isClickable={false}
+              moveDeviceUp={() => { moveDeviceUp(settings.place) }}
+              moveDeviceDown={() => { moveDeviceDown(settings.place) }}
+              deleteFavoriteDevice={deleteFavoriteDeviceMutation}
+              place={settings.place} />
           </div>
         )
       }
@@ -163,10 +212,24 @@ type TProps = {
   deviceID: string
   isEditMode: boolean
   isClickable: boolean
+  moveDeviceUp: Function
+  moveDeviceDown: Function
+  place: number
+  deleteFavoriteDevice: UseMutationResult<any, unknown, TUseDeleteFavoriteDevice, unknown>
 }
-function FavoriteDeviceListItem({ deviceName, isOnline, deviceID, isClickable, isEditMode }: TProps) {
+function FavoriteDeviceListItem({ deviceName, isOnline, deviceID, isClickable, isEditMode, moveDeviceUp, moveDeviceDown, deleteFavoriteDevice, place }: TProps) {
   const onlineCSS = isOnline ? "bg-green-500" : "bg-red-500"
   const router = useRouter()
+  const auth = useAuth();
+
+  function deleteFavoriteDeviceHandler(event: any) {
+    event.stopPropagation();
+    deleteFavoriteDevice.mutate({
+      userID: auth.userID,
+      favoriteDevicePlace: place,
+      favoriteDeviceID: deviceID
+    })
+  }
   function redirectToDevice() {
     if (!isClickable) return
     router.push(`/device/${deviceID}`)
@@ -181,9 +244,9 @@ function FavoriteDeviceListItem({ deviceName, isOnline, deviceID, isClickable, i
           </h2>
         </div>
         {isEditMode ? <div>
-          <ArrowUpward className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" />
-          <ArrowDownward className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" />
-          <Delete className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" />
+          <ArrowUpward className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); moveDeviceUp() }} />
+          <ArrowDownward className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); moveDeviceDown() }} />
+          <Delete className="w-7 h-7 fill-neutral-1000 dark:fill-darkNeutral-1000 dark:border-darkNeutral-300 border-neutral-300 cursor-pointer" onClick={deleteFavoriteDeviceHandler} />
         </div> : <></>}
       </div>
     </div>

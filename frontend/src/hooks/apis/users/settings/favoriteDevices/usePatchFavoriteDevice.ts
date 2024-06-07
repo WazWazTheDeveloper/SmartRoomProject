@@ -1,6 +1,6 @@
+import useAuth from "@/hooks/useAuth"
 import axios from "axios"
 import { useMutation } from "react-query"
-import useAuth from "../../useAuth";
 
 type TFnType = {
     userID: string
