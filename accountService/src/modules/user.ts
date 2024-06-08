@@ -16,7 +16,7 @@ export class User implements TUser {
 
     static readonly defaultUserSettings: TUserSettings = {
         isDarkmode: false,
-        favoriteDevices:[]
+        favoriteDevices: []
     }
 
 
@@ -44,9 +44,18 @@ export class User implements TUser {
         this.settings = settings;
     }
 
-    static createNewUser(_id: string, username: string, password: string) {
+    static createNewUser(_id: string, username: string, password: string, isAdmin: boolean = false) {
         const curTime = getTime(new Date());
-        const newUser = new User(_id, username, password, [], [], false, true, curTime, curTime, this.defaultUserSettings);
+        const defaultPermissions: TPermission[] = [
+            {
+                type: "users",
+                objectId: _id,
+                read: true,
+                delete: false,
+                write: true
+            }
+        ]
+        const newUser = new User(_id, username, password, defaultPermissions, [], isAdmin, true, curTime, curTime, this.defaultUserSettings);
         return newUser;
     }
 

@@ -339,6 +339,17 @@ export const addUserFavoriteDevice = asyncHandler(async (req: Request, res: Resp
         return
     }
 
+    const isAuthorized = await userService.checkUserPermission(req._userID, {
+        type: "users",
+        objectId: UUID,
+        permission: "read",
+    })
+
+    if (!isAuthorized) {
+        response401(req, res);
+        return
+    }
+
     const { newFavoriteDeviceID } = req.body
 
     if (typeof (newFavoriteDeviceID) != "string") {
@@ -354,12 +365,13 @@ export const addUserFavoriteDevice = asyncHandler(async (req: Request, res: Resp
     try {
         const result = await userService.addUserFavoriteDevice(UUID, newFavoriteDeviceID)
         if (result) {
-            res.status(204).send
+            res.status(204).send()
             return
         } else {
             response500(req, res)
         }
     } catch (e) {
+        loggerRequest.error(e)
         response500(req, res)
         return
     }

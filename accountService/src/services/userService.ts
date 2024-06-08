@@ -23,7 +23,7 @@ type UserResult = {
  * @param password password of the user to be created
  * @returns UserResult promiss
  */
-export async function createNewUser(username: string, password: string): Promise<UserResult> {
+export async function createNewUser(username: string, password: string, isAdmin : boolean = false): Promise<UserResult> {
     let userResult: UserResult = {
         isSuccessful: false,
         reason: 'unknown'
@@ -57,7 +57,7 @@ export async function createNewUser(username: string, password: string): Promise
     let hashedPassword: string = await bcrypt.hash(password, saltRounds);
 
     const _id = uuidv4();
-    const user = User.createNewUser(_id, username, hashedPassword);
+    const user = User.createNewUser(_id, username, hashedPassword,isAdmin);
 
     try {
         const isSuccessful = await database.createDocument('users', user);
@@ -789,16 +789,43 @@ export async function addUserFavoriteDevice(userID: string, newFavoriteDeviceID:
                 "count"
         }
     ]
+
+    const getUser = [
+        {
+            $match:
+            {
+                _id: userID
+            }
+        },
+        {
+            $unwind:
+            {
+                path: "$settings.favoriteDevices"
+            }
+        },
+        {
+            $count:
+                "count"
+        }
+    ]
     type TCount = {
         count: number
     }
+    const user = await database.getDocuments<User>('users',{_id: userID})
     const userFavoriteLenthResult: TCount[] = await database.getDocumentsAggregate<TCount>('users', getUserFavoriteDevicesArrayLenthAgregation);
-    if (userFavoriteLenthResult.length == 0) {
+    if (user.length == 0) {
         throw new Error("no user found")
     }
+    console.log(userFavoriteLenthResult)
+
+    let count = 0
+    if(userFavoriteLenthResult.length != 0) {
+        count = userFavoriteLenthResult[0].count
+    }
+
     const newFacoriteDeviceItem: TFavoriteDevice = {
         deviceID: newFavoriteDeviceID,
-        place: userFavoriteLenthResult[0].count
+        place: count
     }
 
     const updateOne = [{
