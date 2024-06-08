@@ -8,7 +8,7 @@ export default function Page() {
     const deviceQuery = useGetDevices();
 
     const ele: ReactNode[] = []
-    if (deviceQuery.isFetched && !deviceQuery.isError) {
+    if (deviceQuery.isFetched && !deviceQuery.isError && deviceQuery.data) {
         for (let i = 0; i < deviceQuery.data.devices.length; i++) {
             const element = deviceQuery.data.devices[i];
             ele.push((

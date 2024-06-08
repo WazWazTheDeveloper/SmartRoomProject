@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /authService
+COPY ./ /authService
+RUN npm install
+CMD [ "node" ,"app.js" ]

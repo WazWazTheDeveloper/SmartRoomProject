@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /frontend
+COPY ./ /frontend
+RUN npm install
+CMD [ "npx" ,"next","start" ]

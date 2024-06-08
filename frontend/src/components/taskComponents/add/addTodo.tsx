@@ -17,6 +17,7 @@ export function AddTodo(props: TAddTimeCheck) {
     const deviceQuery = useGetDevices()
 
     function onSubmitHandler() {
+        if(!deviceQuery.data) return
         props.updateTaskMutation.mutate([{
             taskPropertyName: "todoTasks",
             operation: "add",

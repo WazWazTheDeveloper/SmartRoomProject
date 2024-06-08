@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /taskControllerService
+COPY ./ /taskControllerService
+RUN npm install
+CMD [ "node" ,"app.js" ]

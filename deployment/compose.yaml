@@ -1,0 +1,270 @@
+services:
+  controller-api-service:
+    container_name: 'controller-api-service'
+    build: /controllerApiService
+    tty: true
+    ports:
+      - 5007:5000
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - ACCOUNT_SERVICE=account-service:5002
+      - SERVER_PORT=5000
+      - DATABASE_NAME=devices
+      - DATABASE_COLLECTION_DEVICE=devices
+      - DATABASE_COLLECTION_MQTT_TOPICS=mqttTopics
+      - DATABASE_COLLECTION_TASKS=tasks
+      - ACCESS_TOKEN_SECRET=ed201e53f61b12adc28af2ab2cbd6997ff8857f6e03e8293cb75bd1bc89c4fc3df8352eb97386af8c03c507943b958d82f611b62052160334cfb716c78670341
+    networks:
+      - mongoCluster
+      - mqttCluster
+      - reverseProxy
+
+  device-controller-service:
+    container_name: 'device-controller-service'
+    build: /deviceControllerService
+    tty: true
+    ports:
+      - 5005:5000
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - MQTT_USERNAME=backend_server
+      - MQTT_PASSWORD=backend_server
+      - MQTT_TOPIC_INIT_DEVICE=initDevice
+      - MQTT_TOPIC_GET_DATA=getData
+      - MQTT_TOPIC_CHECK_CONNECTION_RESPONSE=checkConnectionResponse
+      - MQTT_TOPIC_CHECK_CONNECTION_REQUEST=checkConnectionRequest
+      - DATABASE_NAME=devices
+      - DATABASE_COLLECTION_DEVICE=devices
+      - DATABASE_COLLECTION_MQTT_TOPICS=mqttTopics
+    networks:
+      - mongoCluster
+      - mqttCluster
+
+  task-controller-service:
+    container_name: 'task-controller-service'
+    build: /taskControllerService
+    tty: true
+    ports:
+      - 5006:5000
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - SERVER_PORT=5000
+      - DATABASE_NAME=devices
+      - DATABASE_COLLECTION_DEVICE=devices
+      - DATABASE_COLLECTION_MQTT_TOPICS=mqttTopics
+      - DATABASE_COLLECTION_TASKS=tasks
+    networks:
+      - mongoCluster
+      - mqttCluster
+
+  auth-service:
+    container_name: 'auth-service'
+    build: /authService
+    tty: true
+    ports:
+      - 5001:5001
+    environment:
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - SERVER_PORT=5001
+      - DATABASE_NAME=accounts
+      - DATABASE_COLLECTION_USERS=users
+      - ACCESS_TOKEN_SECRET=ed201e53f61b12adc28af2ab2cbd6997ff8857f6e03e8293cb75bd1bc89c4fc3df8352eb97386af8c03c507943b958d82f611b62052160334cfb716c78670341
+      - REFRESH_TOKEN_SECRET=9a836cca4b445cd0c889c7250e8fd05f8f1ba67351b45a08832ad544cdccd58ad88dc03f5d3c0eb028f52bd755e3822b661d0c50fbec9d52309363ce604c0254
+    networks:
+      - mongoCluster
+      - reverseProxy
+
+  account-service:
+    container_name: 'account-service'
+    build: /accountService
+    tty: true
+    ports:
+      - 5002:5002
+    environment:
+      - NODE_ENV=production
+      - MONGODB_IP=mongo1:27017,mongo1:27018,mongo1:27019
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - SERVER_PORT=5002
+      - DATABASE_NAME=accounts
+      - DATABASE_COLLECTION_USERS=users
+      - DATABASE_COLLECTION_PERMISSION_GROUPS=permissiongroups
+      - ACCESS_TOKEN_SECRET=ed201e53f61b12adc28af2ab2cbd6997ff8857f6e03e8293cb75bd1bc89c4fc3df8352eb97386af8c03c507943b958d82f611b62052160334cfb716c78670341
+    networks:
+      - mongoCluster
+      - reverseProxy
+
+  emqx:
+    image: emqx:5.3.1
+    container_name: emqx
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083
+    environment:
+      - "EMQX_NODE_NAME=emqx@node1.emqx.io"
+      - "EMQX_CLUSTER__DISCOVERY_STRATEGY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.io]"
+    # volumes:
+    #   - $PWD/emqx1_data:/opt/emqx/data
+    networks:
+      - mqttCluster
+      - mongoCluster
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongo1:27017,mongo3:27017,mongo2:27017/
+    networks:
+      mongoCluster:
+
+  mongo1:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--port",
+        "27017",
+        "--bind_ip",
+        "localhost,mongo1"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - "mongo1_data:/data/db"
+      - "mongo1_config:/etc"
+    networks:
+      mongoCluster:
+
+  mongo2:
+    image: mongo
+    restart: always
+    ports:
+      - 27018:27017
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--port",
+        "27017",
+        "--bind_ip",
+        "localhost,mongo2"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - "mongo2_data:/data/db"
+      - "mongo2_config:/etc"
+    networks:
+      mongoCluster:
+
+  mongo3:
+    image: mongo
+    restart: always
+    ports:
+      - 27019:27017
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--port",
+        "27017",
+        "--bind_ip",
+        "localhost,mongo3"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+
+    volumes:
+      - "mongo3_data:/data/db"
+      - "mongo3_config:/etc"
+    networks:
+      mongoCluster:
+
+  nginx:
+    image: nginx
+    volumes:
+      - type: bind
+        source: ./proxy/selfsigned.key
+        target: /etc/nginx/selfsigned.key
+        read_only: true
+      - type: bind
+        source: ./proxy/selfsigned.crt
+        target: /etc/nginx/selfsigned.crt
+        read_only: true
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      - 80:80
+      - 443:443
+    depends_on: 
+      - auth-service
+      - account-service
+      - frontend
+    networks:
+      - reverseProxy
+
+  frontend:
+    container_name: 'frontend'
+    build: /frontend
+    tty: true
+    environment:
+      - WATCHPACK_POLLING=true
+    networks:
+      - reverseProxy
+
+networks:
+  default:
+  mongoCluster:
+    driver: bridge
+  mqttCluster:
+    driver: bridge
+  reverseProxy:
+    driver: bridge
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+  mongo1_config:
+  mongo2_config:
+  mongo3_config:

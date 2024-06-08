@@ -45,3 +45,7 @@ backend/data/**/*.json
 *\.vscode
 *.crt
 *.key
+*/build/*
+deployment/**/*.js
+deployment/**/*.json
+deployment/**/*.env

@@ -1,0 +1,5 @@
+FROM node
+WORKDIR /controllerApiService
+COPY ./ /controllerApiService
+RUN npm install
+CMD [ "node" ,"app.js" ]

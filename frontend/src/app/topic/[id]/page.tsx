@@ -57,6 +57,21 @@ export default function Page({ params }: { params: { id: string } }) {
         setIsEditTopidPath(false)
     }
 
+    function getTypeOfTopic(topicType: number) {
+        switch (topicType) {
+            case -1:
+                return "any"
+            case SWITCH_TYPE:
+                return "boolean"
+            case NUMBER_TYPE:
+                return "number"
+            case MULTI_STATE_BUTTON_TYPE:
+                return "number"
+            default:
+                throw "unknown topicType"
+        }
+    }
+
     return (
         <>
             <div className="text-xl bg-neutral-200 dark:bg-darkNeutral-200 border-b border-solid border-neutral-500 px-2 pb-1 box-border sm:w-full sm:text-center flex justify-between items-center">
@@ -80,7 +95,7 @@ export default function Page({ params }: { params: { id: string } }) {
                         </h2>
                         <div className="flex justify-between items-center">
                             {topicQuery.data?.topicType ?
-                                <p className="pl-2">{getTypeOfTopic(topicQuery.data?.topicType)}</p> : <></>
+                                <p className="pl-2">{getTypeOfTopic(topicQuery.data.topicType)}</p> : <></>
                             }
                         </div>
                     </div>
@@ -134,19 +149,4 @@ export default function Page({ params }: { params: { id: string } }) {
             </div>
         </>
     )
-}
-
-export function getTypeOfTopic(topicType: number) {
-    switch (topicType) {
-        case -1:
-            return "any"
-        case SWITCH_TYPE:
-            return "boolean"
-        case NUMBER_TYPE:
-            return "number"
-        case MULTI_STATE_BUTTON_TYPE:
-            return "number"
-        default:
-            throw "unknown topicType"
-    }
 }
