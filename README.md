@@ -7,7 +7,7 @@ The goal that were achived in the project:
 -   Ability to control various device types with different types of controls from a web UI
 -   Giving different user ability to control different devices based on permissions
 
-## Running the hub and the web UI
+## Setup
 
 Clone the project
 
@@ -19,19 +19,44 @@ $ git clone https://github.com/WazWazTheDeveloper/SmartRoomProject
 
 > this will only work on windows machine as the paths in compose.yaml are not formated correctly for linux
 
-open `compose.yaml` and enter your local ip in the 27th line
+run `build.bat`
 
+create folder named certs inside `/deployment` and run the following command:
 ```
-27: - BACKEND_URL=ENTER YOUR IP HERE
-```
-
-then run
-
-```
-$ docker compose up
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/selfsigned.key -out /etc/ssl/certs/selfsigned.crt
 ```
 
-and you will be able to see the web UI at `http://localhost:3000/`
+then run the following inside `/deployment`
+
+```
+$ docker compose up -d
+```
+
+after compose finished running run:
+```
+$ docker run -v deployment_mongo1_config:/db1 -v deployment_mongo2_config:/db2 -v deployment_mongo3_config:/db3 --name helper busybox true
+$ openssl rand -base64 756 > mongo-keyfile
+$ chown 999 -R mongo-keyfile
+$ chmod 600 mongo-keyfile
+$ docker cp mongo-keyfile helper:/db1
+$ docker cp mongo-keyfile helper:/db2
+$ docker cp mongo-keyfile helper:/db3
+```
+and finally run to initiate the database
+
+```
+$ docker exec -it deployment-mongo1-1 mongosh -u admin -p admin 
+$ rs.initiate({
+    _id: "rs0",
+    members: [
+        { _id: 0, host: "mongo1", priority: 1},
+        { _id: 1, host: "mongo2", priority: 0.5},
+        { _id: 2, host: "mongo3", priority: 0.5}
+    ]
+})
+```
+
+and you will be able to see the web UI at `https://localhost/`
 
 <!-- **From sources** -->
 
@@ -54,19 +79,14 @@ and upload the firmware to the esp
 
 ## Quickstart
 
-open the web UI: `http://localhost:3000/login`
+open the web UI: `https://localhos:`
 
 enter `admin` in the username and password field
+>currently there is no way to add more users or change the admin password from web ui
 
-then click on the settings icon
+Open the menu and dlick the devices tab
 
-![SettingsIcon](/old/client-examples/LedStrip/settings%20icons.png)
-
-and then on the `devices` tab
-
-you should be able to see a device named `LedStripExpamle` and have the ability accept, deny and delete it
-
-once you accpet the device you will be able to see and interact with it in main tab(the first icon in the sidebar)
+you should be able to see a device named `LedStripExpamle` and have the ability controll it
 
 <!-- ## Creating a device -->
 
@@ -76,13 +96,16 @@ once you accpet the device you will be able to see and interact with it in main 
 
 Folders:
 
--   `controller` - The central component of the hub responsible for processing all logical operations.
--   `frontend` - The web ui server
--   `esp8266-client` - Codebase for ESP devices.
--   `authService` - Service responsible for managing user authentication.
--   `accountService` - Service for Managing user accounts and permissions.
--   `mongo` - Contains configuration code for database
--   `proxy` - Contains configuration code for reverence proxy
+-   `accountService` -  Contains user accounts service
+-   `authService` - Contains user authentication service.
+-   `client-examples` - Contains Code examples for devices.
+-   `controllerApiService` - Contains controller API service.
+-   `deployment` - Contains deployment files.
+-   `deviceControllerService` - Contains the device logic service.
+-   `esp8266_client` - Contains Codebase for ESP devices.
+-   `frontend` - Contains frontend code.
+-   `proxy` - Contains configuration settings for the reverse proxy.
+-   `taskControllerService` - Contains the task logic service.
 
 Files:
 
@@ -124,7 +147,7 @@ esp8266_client/Src
 -   [Node](https://nodejs.org) - Runtime environment
 -   [MongoDB](https://www.mongodb.com/) - Database
 -   [Express](https://expressjs.com/) - Backend framework
--   [Mqtt](https://github.com/mqttjs/MQTT.js) - Communication protocol used to Communicate with the devices
+-   [MQTT](https://github.com/mqttjs/MQTT.js) - Communication protocol used to Communicate with the devices
 -   [JWT](https://github.com/auth0/node-jsonwebtoken) - Creating and authenticating session tokens
 -   [Node-cron](https://github.com/node-cron/node-cron) - Scheduling tasks and automating recurring processes within the application.
 -   [Winston](https://github.com/winstonjs/winston) - Logging
