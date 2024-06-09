@@ -49,3 +49,4 @@ backend/data/**/*.json
 deployment/**/*.js
 deployment/**/*.json
 deployment/**/*.env
+old/*
