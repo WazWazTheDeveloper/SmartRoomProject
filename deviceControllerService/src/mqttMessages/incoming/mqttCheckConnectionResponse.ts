@@ -17,7 +17,6 @@ export async function checkConnection(
     // if (topic == "server") return;
     if (!message) return;
     // if (message.operation != "checkConnection") return;
-    console.log("adasdasdasdasdasdasdasd")
     const updateList: DeviceService.TUpdateDeviceProperties[] = [
         {
             _id: message,
