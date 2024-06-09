@@ -1,5 +1,0 @@
-FROM node
-WORKDIR /controller
-COPY package*.json /controller
-RUN npm install
-CMD [ "npm" ,"start" ]
