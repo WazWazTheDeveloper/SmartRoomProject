@@ -167,7 +167,6 @@ services:
     volumes:
       - "mongo1_data:/data/db"
       - "mongo1_config:/etc"
-      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       mongoCluster:
 
@@ -217,7 +216,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-
     volumes:
       - "mongo3_data:/data/db"
       - "mongo3_config:/etc"
@@ -234,6 +232,10 @@ services:
       - type: bind
         source: ./certs/selfsigned.crt
         target: /etc/nginx/selfsigned.crt
+        read_only: true
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
         read_only: true
     ports:
       - 80:80
